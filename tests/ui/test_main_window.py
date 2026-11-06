@@ -197,3 +197,12 @@ def test_pausa_fica_na_mesma_linha_de_carinho_e_bronca_so_com_icone(env, qapp):
     assert tab.pause.y() == tab.care.y() == tab.scold.y()  # mesma linha
     assert tab.pause.height() == tab.care.height()
     assert tab.pause.x() > tab.scold.x()  # e depois dos outros dois
+
+
+def test_com_uma_aba_so_a_barra_de_abas_fica_escondida(env, qapp):
+    window, *_ = env
+    window.show()
+    qapp.processEvents()
+    tabs = window.centralWidget()
+    assert tabs.count() == 1 and not tabs.tabBar().isVisible()
+    assert window.windowTitle() == "Pulso"

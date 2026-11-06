@@ -139,7 +139,10 @@ class MainWindow(QMainWindow):
 
         self.pet_tab = PetTab()
         tabs = QTabWidget()
-        tabs.addTab(self.pet_tab, "Pet")  # "Cérebro" e "Saúde" entram nas etapas 5 e 6
+        tabs.addTab(self.pet_tab, "Pet")  # "Cérebro" e "Saúde" entram nas etapas 5 e 7
+        # Com uma aba só, a barra repete o título da janela e gasta espaço: fica escondida.
+        # (Quando houver mais abas, basta `tabs.tabBar().setVisible(True)`.)
+        tabs.tabBar().setVisible(tabs.count() > 1)
         self.setCentralWidget(tabs)
 
         self.pet_tab.care.clicked.connect(lambda: self._owner_click(+1))
@@ -163,9 +166,9 @@ class MainWindow(QMainWindow):
         """
         tabs = self.centralWidget()
         width = self.minimumSizeHint().width()
-        height = (
-            self.pet_tab.layout().totalHeightForWidth(width) + tabs.tabBar().sizeHint().height()
-        )
+        tab_bar = tabs.tabBar()
+        tab_bar_height = 0 if tab_bar.isHidden() else tab_bar.sizeHint().height()
+        height = self.pet_tab.layout().totalHeightForWidth(width) + tab_bar_height
         self.setMinimumSize(width, height)
         self.resize(width, height)
 
