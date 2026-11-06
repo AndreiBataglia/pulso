@@ -75,6 +75,6 @@ def run(fake_sensors: bool = False) -> int:
         QMessageBox.warning(None, "Pulso", text)
 
     controller, first_run = build_controller(sensor, clock, brain_path(), warn)
-    window = MainWindow(controller, clock, first_run=first_run)
+    window = MainWindow(controller, clock, first_run=first_run, palette=DARK if dark else LIGHT)
     window.show()
     return app.exec()

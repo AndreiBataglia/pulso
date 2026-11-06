@@ -199,10 +199,11 @@ def test_pausa_fica_na_mesma_linha_de_carinho_e_bronca_so_com_icone(env, qapp):
     assert tab.pause.x() > tab.scold.x()  # e depois dos outros dois
 
 
-def test_com_uma_aba_so_a_barra_de_abas_fica_escondida(env, qapp):
+def test_barra_de_abas_aparece_com_o_cerebro_e_o_titulo_continua_pulso(env, qapp):
     window, *_ = env
     window.show()
     qapp.processEvents()
-    tabs = window.centralWidget()
-    assert tabs.count() == 1 and not tabs.tabBar().isVisible()
+    tabs = window.tabs
+    assert [tabs.tabText(i) for i in range(tabs.count())] == ["Pet", "Cérebro"]
+    assert tabs.tabBar().isVisible()
     assert window.windowTitle() == "Pulso"
