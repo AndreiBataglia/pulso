@@ -22,9 +22,9 @@ class SpyEngine(NumpyEngine):
         super().__init__(seed=1)
         self.rewards: list[float] = []
 
-    def reward(self, value: float) -> None:
+    def reward(self, value: float) -> float:
         self.rewards.append(value)
-        super().reward(value)
+        return super().reward(value)
 
 
 @pytest.fixture
@@ -116,3 +116,31 @@ def test_leitura_invalida_nao_derruba_o_laco(tmp_path):
     )
     assert controller.tick() is not None  # leitura "desconhecida", sem exceção
     assert controller.tick() is not None
+
+
+def test_dopamina_registra_o_valor_e_de_quem_veio(parts):
+    controller, _, engine, clock, _ = parts
+    controller.owner_reward(+1)
+    clock.advance(10)
+    controller.owner_reward(-1)
+    eventos = list(controller.dopamine_events)
+    assert [e.source for e in eventos] == ["dono", "dono"]
+    assert eventos[0].value == pytest.approx(1.0) and eventos[1].value < 0
+    assert eventos[1].time - eventos[0].time == pytest.approx(10)
+
+
+def test_clique_ignorado_nao_vira_evento_de_dopamina(parts):
+    controller, _, _, clock, _ = parts
+    controller.owner_reward(+1)
+    clock.advance(1)
+    controller.owner_reward(+1)  # repetido: ignorado
+    assert len(controller.dopamine_events) == 1
+
+
+def test_o_custo_do_passo_e_medido_e_o_snapshot_sai_do_motor(parts):
+    controller, *_ = parts
+    assert controller.step_cost_ms == 0.0
+    controller.tick()
+    assert 0.0 < controller.step_cost_ms < 20.0  # orçamento do TRD §5.1
+    assert controller.snapshot().spikes.shape[1] == 100  # 100 ms de rede por volta
+    assert controller.mood_counts().shape == (5,)

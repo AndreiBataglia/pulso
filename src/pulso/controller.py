@@ -9,11 +9,15 @@ O laço de 1 s (plano da etapa 4): ler o sensor → `engine.step(encode(frame), 
 """
 
 import logging
+import time
+from collections import deque
 from dataclasses import dataclass
+
+import numpy as np
 
 from pulso.brain.decoding import MoodDecoder
 from pulso.brain.encoding import encode
-from pulso.brain.engine import Engine
+from pulso.brain.engine import BrainSnapshot, Engine
 from pulso.brain.rewards import RewardRules
 from pulso.clock import Clock
 from pulso.loop import SensorLoop
@@ -23,6 +27,16 @@ from pulso.storage.brain_store import AutoSaver
 log = logging.getLogger(__name__)
 
 STEP_MS = 100  # tempo simulado da rede por volta do laço (1 passo = 1 ms; ver numpy_engine)
+DOPAMINE_LOG_SIZE = 200  # quantas entregas de dopamina ficam na lembrança dos gráficos
+
+
+@dataclass(frozen=True)
+class DopamineEvent:
+    """Uma entrega de dopamina, para o gráfico: quando (relógio real), quanto e de quem."""
+
+    time: float
+    value: float  # d = r − r̄
+    source: str  # "dono" (Carinho/Bronca) ou "regra" (recompensa automática)
 
 
 @dataclass(frozen=True)
@@ -49,6 +63,9 @@ class PetController:
         self._decoder = decoder
         self._rules = rules
         self._saver = saver
+        self._clock = clock
+        self.dopamine_events: deque[DopamineEvent] = deque(maxlen=DOPAMINE_LOG_SIZE)
+        self.step_cost_ms = 0.0  # custo medido de 1 volta (100 passos de rede), em ms reais
 
     @property
     def paused(self) -> bool:
@@ -64,12 +81,14 @@ class PetController:
         if frame is None:
             return None
         before = self._decoder.mood
+        started = time.perf_counter()
         counts = self._engine.step(encode(frame), STEP_MS).counts
+        self.step_cost_ms = (time.perf_counter() - started) * 1000.0
         self._decoder.update(counts)
         mood = self._decoder.mood
         reward = self._rules.evaluate(frame, mood)
         if reward > 0:
-            self._engine.reward(reward)
+            self._deliver(reward, "regra")
         self._saver.tick()
         return TickResult(mood, before is not None and mood != before, reward)
 
@@ -81,8 +100,22 @@ class PetController:
         value = self._rules.owner(sign)
         if value == 0.0:
             return False
-        self._engine.reward(value)
+        self._deliver(value, "dono")
         return True
+
+    def _deliver(self, value: float, source: str) -> None:
+        dopamine = self._engine.reward(value)
+        self.dopamine_events.append(DopamineEvent(self._clock.now(), dopamine, source))
+
+    # ---- para a aba Cérebro (só leitura) ------------------------------------------------------
+
+    def snapshot(self) -> BrainSnapshot:
+        """Fotografia da rede para os gráficos (copias; não mexe na rede)."""
+        return self._engine.snapshot()
+
+    def mood_counts(self) -> np.ndarray:
+        """Pulsos de cada humor na última janela de decisão (a que o decodificador usou)."""
+        return self._decoder.counts()
 
     def pause(self) -> None:
         """Pausa de privacidade: para o sensor e guarda o que a rede aprendeu."""
