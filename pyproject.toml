@@ -15,6 +15,7 @@ dependencies = [
     "numpy>=1.26",
     "platformdirs>=4",
     "psutil>=5.9",
+    "PySide6>=6.7",
 ]
 
 [project.optional-dependencies]
@@ -31,6 +32,7 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]  # os testes de interface reaproveitam ajudantes de tests/test_controller.py
 markers = ["slow: testes de aprendizado (cerca de 1 minuto); pule com -m 'not slow'"]
 
 [tool.ruff]

@@ -2,7 +2,9 @@
 
 [![CI](https://github.com/AndreiBataglia/pulso/actions/workflows/ci.yml/badge.svg)](https://github.com/AndreiBataglia/pulso/actions/workflows/ci.yml)
 
-**Status: em construção (etapa 3 concluída: sensores, rede de pulso e aprendizado; falta a interface).**
+**Status: em construção (etapa 4 concluída: sensores, rede que aprende e o pet na janela; faltam o painel do cérebro e os hábitos).**
+
+![Os seis rostos do Pulso: animado, contente, entediado, sonolento, preocupado e dormindo](docs/img/humores.png)
 
 ## English
 

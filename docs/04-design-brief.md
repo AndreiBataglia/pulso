@@ -9,7 +9,7 @@
 - **O pet é o protagonista** na aba T01; os controles ficam embaixo dele, pequenos.
 - **Discreto:** nada de som por padrão, nada de pular na frente do trabalho. Os avisos vão para a notificação do
   Windows e para o balão do pet.
-- **Transparente:** o dono sempre sabe se está sendo observado (indicador 👁/😴 visível em T01 e no ícone da
+- **Transparente:** o dono sempre sabe se o pet está dormindo (olhos fechados + selo "😴 Observação pausada" em T01 e no ícone da
   bandeja).
 - **Didático:** cada gráfico do cérebro tem um ❓ que explica o que ele mostra em uma ou duas frases.
 
@@ -30,7 +30,7 @@ O tema acompanha o Windows (claro ou escuro).
 | Superfície | `#FFFFFF` | `#20232A` | Cartões, balão de fala |
 | Texto principal | `#1F2328` | `#E6EDF3` | |
 | Texto secundário | `#59636E` | `#9198A1` | Legendas, rodapés |
-| Primária | `#0F8A7E` | `#3CC6B5` | Botões principais, dopamina positiva |
+| Primária | `#0D7F74` | `#3CC6B5` | Botões principais, dopamina positiva |
 | Sucesso / Aviso / Erro | `#1A7F37` / `#9A6700` / `#CF222E` | `#3FB950` / `#D29922` / `#F85149` | Mensagens; erro também = dopamina negativa |
 
 **Cor do pet por humor** (cor dos olhos e da boca, desenhados sobre o fundo escuro do rosto):
@@ -44,7 +44,8 @@ O tema acompanha o Windows (claro ou escuro).
 | Preocupado | `#F28C8C` rosado | Sobrancelhas inclinadas, gota de suor |
 | Dormindo (pausa) | `#8A8F98` cinza | Olhos fechados, "zzz", sem animação |
 
-- **Contraste:** o texto deve ter pelo menos 4.5:1 (WCAG AA), conferido com uma ferramenta na etapa 4.
+- **Contraste:** o texto deve ter pelo menos 4.5:1 (WCAG AA), conferido na etapa 4 por `tests/ui/test_theme.py`
+  (a primária clara foi escurecida de `#0F8A7E` para `#0D7F74`: o texto branco do botão dava só 4,24:1).
 - **Cor nunca sozinha:** humor e estado têm sempre forma ou texto junto.
 
 ## 4. Tipografia
@@ -66,7 +67,17 @@ O tema acompanha o Windows (claro ou escuro).
   - secundário (contorno): os demais;
   - perigo (vermelho): só "Recomeçar cérebro", sempre com confirmação.
 - **Balão de fala:** superfície com uma ponta virada para o pet; pode trazer até 2 botões (Bebi / Depois).
-- **Selo de estado:** pílula "👁 Observando" (primária) ou "😴 Observação pausada" (cinza), sempre visível em T01.
+- **Barra de abas:** escondida enquanto houver uma única aba (o título da janela já diz "Pulso"); aparece com a aba Cérebro.
+- **Selo de estado:** pílula "😴 Observação pausada" (cinza), **só aparece enquanto pausado**. Observando é o normal e não
+  ganha aviso fixo (decisão do dono, 2026-11-06); o rosto sempre explica o humor numa legenda sob ele.
+- **Botão de pausa:** só ícone (⏸ pausar / ▶ retomar, desenhados, sem emoji), na mesma linha e com a mesma altura de
+  Carinho e Bronca, com dica ao passar o mouse.
+- **Tamanho da janela:** abre sempre no menor tamanho possível (e não encolhe além dele). A legenda do humor fica
+  **acima** do rosto, e a legenda e o balão reservam 2 e 3 linhas para o rosto nunca ser coberto.
+- **Nervoso (etapa 6, a desenhar):** quando as recusas/omissões de hábito acumulam, o rosto fica nervoso e **não sai
+  desse humor** até o dono admitir que fez a pausa ou bebeu água; a legenda diz o motivo, sem culpa nem bronca (§8).
+- **Reação do rosto:** Carinho deixa o rosto contente por ~2,5 s e Bronca o deixa arrependido; depois volta ao humor.
+  Toda expressão tem legenda dizendo o que significa (ex.: "Preocupado: acho que você precisa de uma pausa").
 - **Gráficos (pyqtgraph):**
   - fundo igual à superfície e eixos no texto secundário;
   - camadas no raster: entrada = cinza, oculta excitatória = azul, inibitória = vermelho,
@@ -79,7 +90,7 @@ O tema acompanha o Windows (claro ou escuro).
   (ex.: "z", gota, 💧). Sem corpo. Não usa arquivos de imagem no MVP.
 - **Ícone da bandeja:** o rosto do pet em 16/32 px, com três variações (normal, pausado com olhos fechados,
   descanso com 🍅).
-- Emojis nos botões (💚 💢 💧 🍅 👁), sempre acompanhados de texto.
+- Emojis nos botões (💚 💢 💧 🍅; **nunca 👁**, decisão do dono), sempre acompanhados de texto.
 
 ### 7.1 Direção visual (inspirada no LOOI)
 **Decisão do dono (2026-11-06):** só o **fundo escuro com olhos, boca e alguns pequenos emojis quando
@@ -110,8 +121,8 @@ As mensagens do sistema (erros, ajustes) são neutras e dizem como resolver:
 ┌──────────────────────────────────────────┐
 │  Pet   Cérebro   Saúde                 ⚙ │
 ├──────────────────────────────────────────┤
-│              👁 Observando               │
-│                                          │
+│       (😴 Observação pausada, só se pausado)     │
+│  Contente: está tudo tranquilo (legenda) │
 │                 ╭─────╮                  │
 │                ( ◕ ‿ ◕ )                 │
 │                 ╰─────╯                  │
@@ -119,10 +130,9 @@ As mensagens do sistema (erros, ajustes) são neutras e dizem como resolver:
 │        │ Que bom que você voltou! │      │
 │        ╰──────────────────────────╯      │
 │                                          │
-│      [ 💚 Carinho ]  [ 💢 Bronca ]       │
+│   [ 💚 Carinho ]  [ 💢 Bronca ]  [ ⏸ ]   │
 ├──────────────────────────────────────────┤
 │  🍅 18:42  [ Pausar ]     💧 4 copos hoje │
-│            [ 👁 Pausar observação ]       │
 └──────────────────────────────────────────┘
 ```
 

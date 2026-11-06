@@ -121,6 +121,10 @@ Uso: um usuário por instalação, roda em segundo plano o dia todo, **100% loca
 - **Descrição:** a cada X minutos (padrão 45) o pet pede água. O dono responde "Bebi 💧" ou "Depois".
 - **Critérios de aceite:**
   - [ ] "Bebi" soma um copo no dia; "Depois" adia 10 min.
+  - [ ] **Decidido pelo dono (2026-11-06) — pendência cumulativa:** o Pulso registra se o dono **fez**, **adiou**,
+        **recusou** ou **ignorou** o lembrete. Recusar e ignorar **acumulam**; só "fiz" (Bebi / Fiz a pausa) zera. Quanto
+        maior a pendência, mais **nervoso** o pet fica, e **ele não muda desse humor até o dono admitir** que fez a pausa
+        ou bebeu água. Os intervalos de água/descanso são revistos com o uso real (ver etapa 6 do plano).
   - [ ] Durante o ócio (dono longe do PC), o lembrete espera a volta.
 - **Prioridade:** Alta
 

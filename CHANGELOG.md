@@ -16,3 +16,11 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/).
   `Engine.reward`, regras de recompensa (dono e automáticas, com filtro de cliques repetidos),
   `cerebro.npz` com versão e gravação atômica, `AutoSaver` e semente guardada (etapa 3).
   Custo medido: 2,7 ms por segundo real. Limitação conhecida: 1 de 6 sementes não aprende o cenário de teste.
+- O pet aparece: janela PySide6 com o rosto desenhado em QPainter (5 humores e "dormindo", transições suaves,
+  piscar e olhar de lado), balão de fala, botões Carinho, Bronca e Pausa (só ícone), janela no tamanho mínimo, selo
+  de pausa (só aparece pausado), legenda do humor, reação ao carinho/bronca, boas-vindas no primeiro uso, tema claro/escuro do Windows e `PetController`
+  (o laço de 1 s sem Qt). `pulso` abre a janela (`--fake-sensors` usa o roteiro falso) (etapa 4).
+
+### Alterado
+- Primária clara escurecida de `#0F8A7E` para `#0D7F74`: o texto branco do botão dava 4,24:1 (mínimo 4,5:1).
+- `pulso` sem argumentos agora abre o app (antes imprimia a ajuda).
