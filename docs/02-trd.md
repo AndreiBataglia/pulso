@@ -115,7 +115,7 @@ projeto_tamagotchi/
 ```
 - **Padrões de código:** identificadores em **inglês** (alcance no GitHub); **comentários, docstrings e
   documentação em português**. Código de alto nível e bem comentado, explicando o porquê de cada equação. Ruff
-  como *lint* e formatador (linha de 120).
+  como *lint* e formatador (linha de 100, como no `pyproject.toml`).
 - **Regras de arquitetura:**
   - `brain/`, `habits/`, `sensors/base.py` e `storage/` **não importam Qt**, para que possam ser testados sem
     interface.
@@ -126,7 +126,7 @@ projeto_tamagotchi/
 ### 5.1 O cérebro (desenho do MVP)
 | Camada | Neurônios | Tipo | Observação |
 |--------|-----------|------|------------|
-| Entrada | ~60 | Geradores de Poisson (não são LIF) | Cada sensor normalizado em [0, 1] vira taxa de 0–100 Hz. Categoria e faixa de hora usam grupos *one-hot* (um grupo por valor) |
+| Entrada | 63 | Geradores de Poisson (não são LIF) | Cada sensor normalizado em [0, 1] vira taxa de 0–100 Hz. Categoria e faixa de hora usam grupos *one-hot* (um grupo por valor) |
 | Oculta | 100 | LIF (80 excitatórios + 20 inibitórios) | Conexões esparsas (~20%) |
 | Saída | 50 | LIF, 5 grupos de 10 (um por humor) | Inibição lateral entre os grupos (o mais forte "cala" os outros) |
 
@@ -145,7 +145,7 @@ projeto_tamagotchi/
 - **Decodificação:** a cada 10 s o grupo com mais pulsos vence. Uma **histerese** (o novo humor precisa vencer
   com margem) evita trocas nervosas.
 - **Custo estimado:** ~150 LIF × 100 passos por segundo, com multiplicação matriz-vetor 210×150: bem abaixo
-  de 5 ms por segundo. **Medido na etapa 2; se passar de 20 ms, a simulação vai para uma thread separada.**
+  de 5 ms por segundo. **Medido na etapa 2: 1,6 ms por segundo real, então não precisa de thread; um teste falha se passar de 20 ms.**
 
 ### 5.2 O contrato trocável (`Engine`)
 ```python
@@ -160,6 +160,8 @@ class Engine(Protocol):
     def state_dict(self) -> dict[str, np.ndarray]: ...  # o que salvar
     def load_state_dict(self, state: dict[str, np.ndarray]) -> None: ...
 ```
+- **O contrato cresce por etapas:** na etapa 2 tem `step`, `state_dict` e `load_state_dict`; `reward` entra na
+  etapa 3 e `snapshot` na 5. O teste de contrato acompanha cada acréscimo.
 - O codificador, o decodificador e as regras **ficam fora** do motor: trocar o motor não mexe neles.
 - Um teste de contrato (`tests/brain/test_engine_contract.py`) roda **qualquer** `Engine` contra os mesmos
   cenários. Um motor novo só é aceito se passar nele.
@@ -236,3 +238,4 @@ class Engine(Protocol):
 | Data | Mudança |
 |------|---------|
 | 2026-11-05 | Versão inicial |
+| 2026-11-06 | Etapa 2: 63 entradas, contrato `Engine` por etapas, custo medido, linha de 100 colunas |
