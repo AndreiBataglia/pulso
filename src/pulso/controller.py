@@ -6,6 +6,10 @@ A interface só chama este objeto (uma vez por segundo `tick`, e os botões). As
 O laço de 1 s (plano da etapa 4): ler o sensor → `engine.step(encode(frame), 100)` →
 `decoder.update(counts)` → `rules.evaluate(frame, humor)` (se > 0, `engine.reward`) →
 `saver.tick()`.
+
+Os hábitos (pomodoro e água) andam em paralelo, por `tick_habits()`, que roda **também com a
+observação pausada**: o pomodoro é independente da pausa de privacidade. O que a pausa corta é o
+sensor e o aprendizado (a rede não recebe recompensa de hábito enquanto o pet "dorme").
 """
 
 import logging
@@ -20,6 +24,8 @@ from pulso.brain.encoding import encode
 from pulso.brain.engine import BrainSnapshot, Engine
 from pulso.brain.rewards import RewardRules
 from pulso.clock import Clock
+from pulso.habits.coach import HabitCoach, HabitTick
+from pulso.habits.kinds import Presence
 from pulso.loop import SensorLoop
 from pulso.sensors.base import Sensor
 from pulso.storage.brain_store import AutoSaver
@@ -57,6 +63,7 @@ class PetController:
         decoder: MoodDecoder,
         rules: RewardRules,
         saver: AutoSaver,
+        habits: HabitCoach,
     ) -> None:
         self._loop = SensorLoop(sensor, clock)
         self._engine = engine
@@ -64,6 +71,8 @@ class PetController:
         self._rules = rules
         self._saver = saver
         self._clock = clock
+        self.habits = habits
+        self._presence = Presence.UNKNOWN  # só um rótulo (presente/longe/?), nada do sensor
         self.dopamine_events: deque[DopamineEvent] = deque(maxlen=DOPAMINE_LOG_SIZE)
         self.step_cost_ms = 0.0  # custo medido de 1 volta (100 passos de rede), em ms reais
 
@@ -75,9 +84,16 @@ class PetController:
     def mood(self) -> str | None:
         return self._decoder.mood
 
+    @property
+    def shown_mood(self) -> str | None:
+        """O humor que o rosto mostra: "nervoso" enquanto houver pendência de hábito, que vence o
+        humor da rede até o dono dizer que fez; senão, o humor da rede."""
+        return "nervoso" if self.habits.nervous else self._decoder.mood
+
     def tick(self) -> TickResult | None:
         """Uma volta de 1 s. Pausado → `None`: não lê o sensor, não simula, não aprende."""
         frame = self._loop.tick()
+        self._presence = self._presence_of(frame)
         if frame is None:
             return None
         before = self._decoder.mood
@@ -102,6 +118,35 @@ class PetController:
             return False
         self._deliver(value, "dono")
         return True
+
+    def _presence_of(self, frame) -> Presence:
+        if frame is None or not frame.valid:
+            return Presence.UNKNOWN
+        away = frame.idle_seconds >= self.habits.cfg.away_idle_s
+        return Presence.AWAY if away else Presence.PRESENT
+
+    # ---- hábitos -----------------------------------------------------------------------------
+
+    def tick_habits(self) -> HabitTick:
+        """Anda o pomodoro e a água (também pausado) e recompensa o que foi gravado."""
+        tick = self.habits.tick(self._presence)
+        self._reward_habits(tick.recorded)
+        return tick
+
+    def answer_habit(self, action: str) -> str | None:
+        """Resposta do dono a um lembrete (`habits.coach.ANSWERS`). Devolve o que foi gravado."""
+        kind = self.habits.answer(action)
+        if kind is not None:
+            self._reward_habits((kind,))
+        return kind
+
+    def _reward_habits(self, recorded) -> None:
+        if self.paused:  # o pet "dorme": o evento fica anotado, mas a rede não aprende nada
+            return
+        for kind in recorded:
+            value = self._rules.habit(kind)
+            if value != 0.0:
+                self._deliver(value, "regra")  # hábito é regra, não rede: mesma cor na aba Cérebro
 
     def _deliver(self, value: float, source: str) -> None:
         dopamine = self._engine.reward(value)

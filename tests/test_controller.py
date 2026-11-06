@@ -8,11 +8,18 @@ from pulso.brain.numpy_engine import NumpyEngine
 from pulso.brain.rewards import RewardRules
 from pulso.clock import FakeClock
 from pulso.controller import PetController
+from pulso.habits.coach import HabitCoach
 from pulso.sensors.base import SensorFrame
 from pulso.sensors.fake import ScriptedSensor
 from pulso.storage.brain_store import AutoSaver
+from pulso.storage.db import HabitStore, open_db
 
 FRAME = SensorFrame(40.0, 50.0, 10.0, 0.0, "codigo", 2)
+
+
+def make_habits(clock):
+    """Hábitos com banco na memória: os testes nunca tocam no `pulso.db` real do dono."""
+    return HabitCoach(clock, HabitStore(open_db(":memory:")))
 
 
 class SpyEngine(NumpyEngine):
@@ -35,8 +42,9 @@ def parts(tmp_path):
     path = tmp_path / "cerebro.npz"
     saver = AutoSaver(engine, path, seed=1, clock=clock)
     controller = PetController(
-        sensor, clock, engine, MoodDecoder(engine.groups), RewardRules(clock), saver
-    )
+        sensor, clock, engine, MoodDecoder(engine.groups), RewardRules(clock), saver,
+        make_habits(clock),
+    )  # fmt: skip
     return controller, sensor, engine, clock, path
 
 
@@ -112,8 +120,9 @@ def test_leitura_invalida_nao_derruba_o_laco(tmp_path):
     sensor = ScriptedSensor([RuntimeError("falhou"), FRAME])
     saver = AutoSaver(engine, tmp_path / "c.npz", 1, clock)
     controller = PetController(
-        sensor, clock, engine, MoodDecoder(engine.groups), RewardRules(clock), saver
-    )
+        sensor, clock, engine, MoodDecoder(engine.groups), RewardRules(clock), saver,
+        make_habits(clock),
+    )  # fmt: skip
     assert controller.tick() is not None  # leitura "desconhecida", sem exceção
     assert controller.tick() is not None
 

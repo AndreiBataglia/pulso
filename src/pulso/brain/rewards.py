@@ -7,7 +7,8 @@ Duas fontes, que somam:
   `rules_weight`, menor que o do dono: o dono sempre pesa mais):
   - ócio longo e o pet está **sonolento** → +;
   - o dono **volta** do ócio e o pet está **animado** → +;
-  - mais de 90 min **sem pausa** e o pet está **preocupado** → +.
+  - mais de 90 min **sem pausa** e o pet está **preocupado** → +;
+  - **hábitos:** beber água / fazer a pausa → +; recusar → −; ignorar o lembrete → − (menor).
 
 Cada regra tem um intervalo mínimo entre disparos (`cooldown_s`), senão ela "gritaria" a cada
 segundo em que a condição continua valendo. Cliques repetidos do dono em poucos segundos também são
@@ -19,7 +20,19 @@ O tempo vem de um `Clock` injetado (nunca `time.time()`), então os testes contr
 from dataclasses import dataclass
 
 from pulso.clock import Clock
+from pulso.habits import kinds
 from pulso.sensors.base import SensorFrame
+
+# Hábitos (F07/F08): atendido +, dispensado −. "Depois" e os avisos valem 0. Quem ignora o pet
+# desagrada menos do que quem o recusa de cara, por isso −0,5 contra −1.
+HABIT_VALUES = {
+    kinds.WATER_DRUNK: 1.0,
+    kinds.BREAK_DONE: 1.0,
+    kinds.WATER_DECLINED: -1.0,
+    kinds.BREAK_DECLINED: -1.0,
+    kinds.WATER_IGNORED: -0.5,
+    kinds.BREAK_IGNORED: -0.5,
+}
 
 
 @dataclass(frozen=True)
@@ -53,6 +66,11 @@ class RewardRules:
             return 0.0
         self._last_click = now
         return (1.0 if sign > 0 else -1.0) * self.cfg.owner_weight
+
+    def habit(self, kind: str) -> float:
+        """Recompensa de um evento de hábito (0.0 para os que não contam). Pesa como as demais
+        regras (`rules_weight`): o dono, com carinho e bronca, ainda manda mais."""
+        return HABIT_VALUES.get(kind, 0.0) * self.cfg.rules_weight
 
     # ---- regras automáticas ------------------------------------------------------------------
 
