@@ -29,6 +29,16 @@ MIGRATIONS = (
     );
     CREATE INDEX idx_habit_event_ts ON habit_event (ts);
     """,
+    # v2: placar dos jogos (jokenpô e par ou ímpar), do ponto de vista do pet
+    """
+    CREATE TABLE game_result (
+        id     INTEGER PRIMARY KEY AUTOINCREMENT,
+        ts     TEXT NOT NULL,
+        game   TEXT NOT NULL CHECK (game IN ('rps', 'evenodd')),
+        result TEXT NOT NULL CHECK (result IN ('won', 'lost', 'draw'))
+    );
+    CREATE INDEX idx_game_result_ts ON game_result (ts);
+    """,
 )
 SCHEMA_VERSION = len(MIGRATIONS)
 
@@ -125,5 +135,34 @@ class HabitStore:
         counts = dict(rows)
         return counts.get(declined, 0) * refuse_points + counts.get(ignored, 0) * ignore_points
 
+    @property
+    def connection(self) -> sqlite3.Connection:
+        """A conexão, para o placar dos jogos (`GameStore`) dividir o mesmo arquivo."""
+        return self._conn
+
     def close(self) -> None:
         self._conn.close()
+
+
+class GameStore:
+    """Placar dos jogos: uma linha por rodada, só o resultado (nada de sensor)."""
+
+    def __init__(self, conn: sqlite3.Connection, now=datetime.now) -> None:
+        self._conn = conn
+        self._now = now
+
+    def record(self, game: str, result: str) -> None:
+        stamp = self._now().isoformat(timespec="seconds")
+        self._conn.execute(
+            "INSERT INTO game_result (ts, game, result) VALUES (?, ?, ?)", (stamp, game, result)
+        )
+
+    def totals_today(self) -> dict[str, int]:
+        """Vitórias, derrotas e empates **do pet** hoje (hora local): `{"won", "lost", "draw"}`."""
+        start = self._now().replace(hour=0, minute=0, second=0, microsecond=0)
+        rows = self._conn.execute(
+            "SELECT result, COUNT(*) FROM game_result WHERE ts >= ? GROUP BY result",
+            (start.isoformat(timespec="seconds"),),
+        ).fetchall()
+        counts = dict(rows)
+        return {key: int(counts.get(key, 0)) for key in ("won", "lost", "draw")}

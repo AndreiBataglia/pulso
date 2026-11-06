@@ -205,6 +205,6 @@ def test_barra_de_abas_aparece_com_o_cerebro_e_o_titulo_continua_pulso(env, qapp
     window.show()
     qapp.processEvents()
     tabs = window.tabs
-    assert [tabs.tabText(i) for i in range(tabs.count())] == ["Pet", "Cérebro"]
+    assert [tabs.tabText(i) for i in range(tabs.count())] == ["Pet", "Jogo", "Cérebro"]
     assert tabs.tabBar().isVisible()
     assert window.windowTitle() == "Pulso"

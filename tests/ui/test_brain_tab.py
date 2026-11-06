@@ -232,7 +232,7 @@ def test_a_janela_cresce_ao_abrir_o_cerebro_e_volta_ao_tamanho_do_pet(parts, qap
     assert window.minimumSize() == window._pet_minimum  # e o pet segue abrindo compacto
 
 
-def test_ctrl_1_e_ctrl_2_trocam_de_aba(parts, qapp):
+def test_ctrl_1_2_3_trocam_de_aba(parts, qapp):
     from PySide6.QtCore import Qt
     from PySide6.QtTest import QTest
 
@@ -240,6 +240,8 @@ def test_ctrl_1_e_ctrl_2_trocam_de_aba(parts, qapp):
     window.show()
     qapp.processEvents()
     QTest.keyClick(window, Qt.Key.Key_2, Qt.KeyboardModifier.ControlModifier)
+    assert window.tabs.currentWidget() is window.game_tab
+    QTest.keyClick(window, Qt.Key.Key_3, Qt.KeyboardModifier.ControlModifier)
     assert window.tabs.currentWidget() is window.brain_tab
     QTest.keyClick(window, Qt.Key.Key_1, Qt.KeyboardModifier.ControlModifier)
     assert window.tabs.currentWidget() is window.pet_tab

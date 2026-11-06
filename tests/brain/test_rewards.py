@@ -127,3 +127,21 @@ def test_invalid_reading_gives_no_reward(rules):
 def test_rules_are_scaled_by_their_weight(clock):
     rules = RewardRules(clock, RewardConfig(rules_weight=0.5))
     assert rules.evaluate(frame(idle=600), "sonolento") == 0.5
+
+
+def test_regras_automaticas_desligadas_nao_recompensam_nada():
+    clock = FakeClock()
+    rules = RewardRules(clock, RewardConfig(auto_enabled=False))
+    assert rules.evaluate(frame(idle=400.0), "sonolento") == 0.0
+    rules.set_auto(True)
+    clock.advance(20)
+    assert rules.evaluate(frame(idle=400.0), "sonolento") > 0
+
+
+def test_habito_pesa_como_o_dono_e_vale_com_as_regras_desligadas():
+    from pulso.habits import kinds
+
+    rules = RewardRules(FakeClock(), RewardConfig(auto_enabled=False))
+    assert rules.habit(kinds.WATER_DRUNK) == 1.0
+    assert rules.habit(kinds.BREAK_DECLINED) == -1.0
+    assert rules.habit(kinds.WATER_IGNORED) == -0.5

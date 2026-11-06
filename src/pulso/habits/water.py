@@ -19,6 +19,12 @@ class Water:
         self._reminder.arm(self._cfg.water_interval_min * 60)
         self._enabled = True
 
+    def set_config(self, cfg: HabitConfig) -> None:
+        """Novos tempos (Ajustes). O intervalo novo vale já, se não há balão na tela."""
+        self._cfg = cfg
+        if self._enabled and not self.asking:
+            self._rearm(cfg.water_interval_min)
+
     def set_enabled(self, on: bool) -> None:
         """Liga ou desliga o lembrete (preferência do dono). Ligar recomeça um intervalo inteiro."""
         self._enabled = on

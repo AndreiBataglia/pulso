@@ -88,6 +88,12 @@ def stylesheet(p: Palette) -> str:
         border-radius: 8px; padding: 8px 16px; }}
     QPushButton:hover {{ border-color: {p.primary}; }}
     QPushButton:focus {{ border: 2px solid {p.primary}; }}
+    QPushButton#mini {{ padding: 4px 10px; border-radius: 6px; }}
+    QCheckBox::indicator {{ width: 16px; height: 16px; border-radius: 4px;
+        border: 1px solid {p.text_secondary}; background: {p.surface}; }}
+    QCheckBox::indicator:checked {{ background: {p.primary}; border-color: {p.primary}; }}
+    QToolButton#settings {{ border: 0; padding: 2px 8px; font-size: 18px; }}
+    QToolButton#settings:hover {{ color: {p.primary}; }}
     QPushButton#care {{ background: {p.primary}; color: {p.on_primary};
         border-color: {p.primary}; }}
     """

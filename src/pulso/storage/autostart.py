@@ -12,11 +12,16 @@ RUN_KEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
 VALUE_NAME = "Pulso"
 
 
-def default_command() -> str:
-    """O comando que o Windows roda no login: o mesmo Python de agora, sem console."""
+def windowless_python() -> Path:
+    """O `pythonw.exe` ao lado do Python de agora (sem console preto); se não houver, o próprio."""
     python = Path(sys.executable)
     windowless = python.with_name("pythonw.exe")
-    return f'"{windowless if windowless.exists() else python}" -m pulso'
+    return windowless if windowless.exists() else python
+
+
+def default_command() -> str:
+    """O comando que o Windows roda no login: o mesmo Python de agora, sem console."""
+    return f'"{windowless_python()}" -m pulso'
 
 
 class Autostart:

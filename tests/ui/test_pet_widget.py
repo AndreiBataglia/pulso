@@ -80,3 +80,39 @@ def test_nervoso_e_preocupado_com_olhos_mais_arregalados_e_tremor(pet):
         pet.advance(0.033)
     assert pet._look["shake"] == pytest.approx(1.0, abs=0.01)
     assert pet._look["brow"] == pytest.approx(1.0, abs=0.01)  # a sobrancelha de preocupado
+
+
+def test_bebendo_dura_15_segundos_e_volta_ao_humor(pet):
+    pet.show()
+    pet.set_mood("contente")
+    pet.drink()
+    assert pet.shown == "bebendo" and pet.activity == "bebendo"
+    for _ in range(100):  # 10 s: ainda bebendo, o copo desenhado sem erro
+        pet.advance(0.1)
+    assert pet.shown == "bebendo" and not pet.grab().isNull()
+    for _ in range(60):  # passou dos 15 s
+        pet.advance(0.1)
+    assert pet.shown == "contente" and pet.activity is None
+
+
+def test_descansando_mostra_a_contagem_e_a_pausa_de_privacidade_vence(pet):
+    pet.show()
+    pet.rest("09:59")
+    assert pet.shown == "descansando"
+    for _ in range(20):
+        pet.advance(0.1)
+    assert not pet.grab().isNull()
+    pet.rest(None)  # o descanso acabou
+    assert pet.shown == "neutro"
+    pet.rest("05:00")
+    pet.set_mood(SLEEPING)  # pausa de privacidade: o pet dorme, mesmo no descanso
+    assert pet.shown == SLEEPING
+
+
+def test_beber_no_meio_do_descanso_volta_ao_descanso(pet):
+    pet.rest("08:00")
+    pet.drink()
+    assert pet.shown == "bebendo"
+    for _ in range(160):
+        pet.advance(0.1)
+    assert pet.shown == "descansando"

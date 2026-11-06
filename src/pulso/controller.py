@@ -108,6 +108,10 @@ class PetController:
         self._saver.tick()
         return TickResult(mood, before is not None and mood != before, reward)
 
+    def set_auto_rules(self, on: bool) -> None:
+        """Liga ou desliga as recompensas automáticas por processo/ócio (Ajustes)."""
+        self._rules.set_auto(on)
+
     def owner_reward(self, sign: int) -> bool:
         """Carinho (`sign` > 0) ou bronca (`sign` < 0). Devolve False se o clique foi ignorado
         (repetido em poucos segundos) ou se o pet está pausado."""

@@ -40,6 +40,12 @@ class HabitCoach:
         self.water = Water(clock, self.cfg)
         self._pending: dict[str, int] | None = None  # cache; zera a cada evento gravado
 
+    def apply_config(self, cfg: HabitConfig) -> None:
+        """Troca os tempos sem reiniciar (a tela de Ajustes)."""
+        self.cfg = cfg
+        self.pomodoro.set_config(cfg)
+        self.water.set_config(cfg)
+
     # ---- relógio -----------------------------------------------------------------------------
 
     def tick(self, presence: Presence) -> HabitTick:

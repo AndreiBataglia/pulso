@@ -11,7 +11,7 @@ import random
 from collections.abc import Callable
 from dataclasses import replace
 
-from PySide6.QtCore import QRectF, QSize, Qt, QTimer
+from PySide6.QtCore import QEvent, QRectF, QSize, Qt, QTimer
 from PySide6.QtGui import (
     QCloseEvent,
     QColor,
@@ -29,6 +29,7 @@ from PySide6.QtWidgets import (
     QMainWindow,
     QPushButton,
     QTabWidget,
+    QToolButton,
     QVBoxLayout,
     QWidget,
 )
@@ -38,10 +39,13 @@ from pulso.controller import PetController
 from pulso.habits import kinds
 from pulso.habits.pomodoro import Phase
 from pulso.storage.autostart import Autostart
-from pulso.storage.config import Settings
+from pulso.storage.config import Settings, habit_config
+from pulso.storage.db import GameStore
 from pulso.ui import phrases
 from pulso.ui.brain_tab import BRAIN_MINIMUM, BRAIN_PREFERRED, BrainTab
+from pulso.ui.game_tab import GameTab
 from pulso.ui.pet_widget import PetWidget
+from pulso.ui.settings_dialog import SettingsDialog
 from pulso.ui.theme import LIGHT, Palette
 from pulso.ui.tray import Tray
 
@@ -79,11 +83,15 @@ def _lines_height(label: QLabel, lines: int) -> int:
     return label.fontMetrics().lineSpacing() * lines + 28
 
 
+_TOGGLE_ICON = {"Iniciar": "▶", "Continuar": "▶", "Pausar": "⏸"}
+
+
 class PetTab(QWidget):
     """T01 do Design Brief: selo, rosto, balão de fala e os botões."""
 
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, palette: Palette = LIGHT, parent: QWidget | None = None) -> None:
         super().__init__(parent)
+        self._icon_color = QColor(palette.text)  # o texto do tema, não o do sistema (modo escuro)
         self.badge = QLabel()
         self.badge.setObjectName("badge")
         self.pet = PetWidget()
@@ -106,13 +114,30 @@ class PetTab(QWidget):
         # Hábitos: "Bebi" e "Fiz a pausa" ficam sempre à mão (o Pulso não vê o copo); "Depois" e
         # "Hoje não" só aparecem enquanto um lembrete espera resposta.
         self.drink = QPushButton("💧 Bebi")
-        self.rested = QPushButton("☕ Fiz a pausa")
+        self.rested = QPushButton("☕ Pausa")
         self.later = QPushButton("Depois")
         self.decline = QPushButton("Hoje não")
         self.pomodoro_label = QLabel()
         self.pomodoro_label.setObjectName("caption")
         self.pomodoro_toggle = QPushButton()
-        self.pomodoro_skip = QPushButton("Pular")
+        self.pomodoro_skip = QPushButton("⏭")
+        self.pomodoro_skip.setToolTip("Pula a fase atual do pomodoro.")
+        self.pomodoro_skip.setAccessibleName("Pular fase")
+        self.care.setToolTip("Um carinho: o Pulso aprende que você gostou do jeito dele.")
+        self.scold.setToolTip("Uma bronca: o Pulso aprende que você não gostou.")
+        self.later.setToolTip("Depois: me lembra de novo em alguns minutos.")
+        self.decline.setToolTip("Hoje não: deixa passar (conta como recusa).")
+        self.drink.setToolTip("Bebi água: zera o lembrete de água.")
+        self.rested.setToolTip("Fiz a pausa: descansei longe da tela.")
+        for mini in (
+            self.drink,
+            self.rested,
+            self.later,
+            self.decline,
+            self.pomodoro_toggle,
+            self.pomodoro_skip,
+        ):
+            mini.setObjectName("mini")  # botões secundários: menores que Carinho/Bronca
 
         row = QHBoxLayout()
         row.setSpacing(8)
@@ -157,7 +182,7 @@ class PetTab(QWidget):
         layout.addWidget(self.ask_row)
         layout.addLayout(pomodoro)
         self.show_asking(None)
-        self.show_pomodoro("🍅 Pomodoro parado", "🍅 Iniciar", skippable=False)
+        self.show_pomodoro("🍅 Parado", "Iniciar", skippable=False)
         self.show_paused(False)
 
     def show_asking(self, asking: str | None) -> None:
@@ -170,7 +195,9 @@ class PetTab(QWidget):
 
     def show_pomodoro(self, text: str, toggle: str, skippable: bool) -> None:
         self.pomodoro_label.setText(text)
-        self.pomodoro_toggle.setText(toggle)
+        self.pomodoro_toggle.setText(_TOGGLE_ICON[toggle])
+        self.pomodoro_toggle.setToolTip(toggle)
+        self.pomodoro_toggle.setAccessibleName(toggle)
         self.pomodoro_skip.setEnabled(skippable)
 
     def show_paused(self, paused: bool) -> None:
@@ -181,7 +208,7 @@ class PetTab(QWidget):
         self.badge.style().unpolish(self.badge)  # faz o Qt reler o estilo da propriedade
         self.badge.style().polish(self.badge)
         label = "Retomar observação" if paused else "Pausar observação"
-        self.pause.setIcon(pause_icon(paused, self.palette().windowText().color()))
+        self.pause.setIcon(pause_icon(paused, self._icon_color))
         self.pause.setToolTip(
             "Volta a observar o computador." if paused
             else "Pausa a observação (privacidade): o Pulso para de ler o computador."
@@ -204,6 +231,7 @@ class MainWindow(QMainWindow):
         settings: Settings | None = None,
         save_settings: Callable[[Settings], None] = lambda settings: None,
         autostart: Autostart | None = None,
+        scores: GameStore | None = None,
     ) -> None:
         super().__init__()
         self.setWindowTitle("Pulso")
@@ -220,15 +248,24 @@ class MainWindow(QMainWindow):
         self._rng = rng or random.Random()
         self._hold_until = clock.now() + WELCOME_HOLD_S if first_run else 0.0
 
-        self.pet_tab = PetTab()
+        self.pet_tab = PetTab(palette)
+        self.game_tab = GameTab(scores, rng)
         self.brain_tab = BrainTab(controller, clock, palette)
         self.tabs = tabs = QTabWidget()
         tabs.addTab(self.pet_tab, "Pet")  # "Saúde" entra na etapa 7
+        tabs.addTab(self.game_tab, "Jogo")
         tabs.addTab(self.brain_tab, "Cérebro")
+        self.settings_button = QToolButton()  # canto da barra de abas: os Ajustes
+        self.settings_button.setText("⚙")
+        self.settings_button.setObjectName("settings")
+        self.settings_button.setToolTip("Ajustes: tempos do pomodoro e da água.")
+        self.settings_button.setAccessibleName("Ajustes")
+        self.settings_button.clicked.connect(self.open_settings)
+        tabs.setCornerWidget(self.settings_button, Qt.Corner.TopRightCorner)
         # Com uma aba só, a barra repetiria o título da janela: fica escondida nesse caso.
         tabs.tabBar().setVisible(tabs.count() > 1)
         self.setCentralWidget(tabs)
-        for number, index in ((1, 0), (2, 1)):  # Ctrl+1 / Ctrl+2 (Design Brief §10)
+        for number, index in ((1, 0), (2, 1), (3, 2)):  # Ctrl+1/2/3 (Design Brief §10)
             shortcut = QShortcut(QKeySequence(f"Ctrl+{number}"), self)
             shortcut.activated.connect(lambda i=index: tabs.setCurrentIndex(i))
         self._pet_minimum = QSize()
@@ -249,6 +286,20 @@ class MainWindow(QMainWindow):
         tab.decline.clicked.connect(lambda: self.answer_habit(self._ask_action("decline")))
         tab.pomodoro_toggle.clicked.connect(self.toggle_pomodoro)
 
+        self._hint_of: str | None = None  # a fala que a dica do botão cobriu
+        self._hint: str | None = None
+        for button in (
+            tab.care,
+            tab.scold,
+            tab.pause,
+            tab.drink,
+            tab.rested,
+            tab.later,
+            tab.decline,
+            tab.pomodoro_toggle,
+            tab.pomodoro_skip,
+        ):
+            button.installEventFilter(self)  # a dica vira fala do pet, não balão do Windows
         self._say(phrases.WELCOME if first_run else phrases.GREETING, force=True)
         self._show_mood(controller.shown_mood)
         self._refresh_habits()
@@ -337,6 +388,8 @@ class MainWindow(QMainWindow):
     def answer_habit(self, action: str) -> None:
         """O dono respondeu a um lembrete (ou tocou em "Bebi"/"Fiz a pausa")."""
         kind = self._controller.answer_habit(action)
+        if kind == kinds.WATER_DRUNK:
+            self.pet_tab.pet.drink()  # o pet bebe junto, com o copo esvaziando
         text = self._REPLIES.get(kind)
         if text is not None and not self._controller.habits.nervous:
             self._say(text, force=True)
@@ -364,11 +417,13 @@ class MainWindow(QMainWindow):
             text = f"🍅 Foco {left}{paused}"
         elif pomodoro.phase is Phase.BREAK:
             kind = "longo" if pomodoro.long_break else "curto"
-            text = f"🍅 Descanso {kind} {left}{paused}"
+            text = f"🍅 Descanso{' longo' if kind == 'longo' else ''} {left}{paused}"
         elif pomodoro.phase is Phase.ASKING:
             text = "🍅 Hora de descansar"
         else:
-            text, toggle = "🍅 Pomodoro parado", "🍅 Iniciar"
+            text, toggle = "🍅 Parado", "Iniciar"
+        resting = pomodoro.phase is Phase.BREAK and not pomodoro.paused
+        self.pet_tab.pet.rest(left if resting else None)  # descansa e mostra a contagem
         self.pet_tab.show_pomodoro(text, toggle, skippable=pomodoro.running)
         self.pet_tab.pomodoro_toggle.setEnabled(pomodoro.phase is not Phase.ASKING)
         self.pet_tab.show_asking(habits.asking)
@@ -422,6 +477,7 @@ class MainWindow(QMainWindow):
     def _show_mood(self, mood: str | None) -> None:
         """Põe o humor no rosto e escreve embaixo o que ele significa."""
         self.pet_tab.pet.set_mood(mood)
+        self.game_tab.face.set_mood(mood)  # o rosto da aba Jogo acompanha o humor
         if mood == phrases.SLEEPING:
             meaning = phrases.MEANING_SLEEPING
         elif mood == "nervoso":
@@ -432,6 +488,24 @@ class MainWindow(QMainWindow):
         self.pet_tab.pet.setToolTip(f"{meaning}\n{phrases.MEANING_HINT}")
 
     # ---- fala --------------------------------------------------------------------------------
+
+    def eventFilter(self, obj, event) -> bool:  # noqa: N802 (nome do Qt)
+        """Passar o mouse num botão faz o pet dizer o que ele faz; sair devolve a fala de antes."""
+        kind = event.type()
+        if kind == QEvent.Type.ToolTip and isinstance(obj, QPushButton):
+            return True  # a dica é a fala do pet, sem o balão padrão do Windows
+        if kind == QEvent.Type.Enter and isinstance(obj, QPushButton) and obj.toolTip():
+            speech = self.pet_tab.speech
+            if self._hint is None or speech.text() != self._hint:
+                self._hint_of = speech.text()
+            self._hint = obj.toolTip()
+            speech.setText(self._hint)
+        elif kind == QEvent.Type.Leave and self._hint is not None:
+            speech = self.pet_tab.speech
+            if speech.text() == self._hint and self._hint_of is not None:
+                speech.setText(self._hint_of)  # só desfaz se ninguém falou nesse meio-tempo
+            self._hint = self._hint_of = None
+        return super().eventFilter(obj, event)
 
     def _say(self, text: str, force: bool = False) -> None:
         """Mostra uma fala. Sem `force`, respeita a retenção da fala de boas-vindas."""
@@ -463,6 +537,7 @@ class MainWindow(QMainWindow):
             self._act_autostart = tray.add_action(
                 "Iniciar com o Windows", self.set_autostart, True, self._autostart.enabled()
             )
+        tray.add_action("Ajustes…", self.open_settings)
         tray.menu.addSeparator()
         self._act_pause = tray.add_action("Pausar observação", self.toggle_pause)
         pomodoro = tray.add_submenu("Pomodoro")
@@ -492,6 +567,21 @@ class MainWindow(QMainWindow):
         self._act_skip.setEnabled(pomodoro.running)
         if self._act_autostart is not None:  # o registro do Windows é a fonte da verdade
             self._act_autostart.setChecked(self._autostart.enabled())
+
+    def open_settings(self) -> None:
+        """Abre a tela de Ajustes; ao salvar, grava e aplica na hora."""
+        self.bring_to_front()
+        dialog = SettingsDialog(self._settings, self)
+        if dialog.exec():
+            self.apply_settings(dialog.settings())
+
+    def apply_settings(self, settings: Settings) -> None:
+        """Guarda os Ajustes e aplica sem reiniciar: tempos dos hábitos e regras automáticas."""
+        self._settings = settings
+        self._save_settings(settings)
+        self._controller.habits.apply_config(habit_config(settings))
+        self._controller.set_auto_rules(settings.auto_rules)
+        self._refresh_habits()
 
     def set_always_on_top(self, on: bool) -> None:
         """Liga ou desliga "sempre à frente" e guarda a escolha."""

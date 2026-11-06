@@ -125,11 +125,11 @@ def test_pomodoro_iniciar_pausar_continuar_e_pular(env):
     tab = window.pet_tab
     assert not tab.pomodoro_skip.isEnabled()
     tab.pomodoro_toggle.click()
-    assert "Foco 50:00" in tab.pomodoro_label.text() and tab.pomodoro_toggle.text() == "Pausar"
+    assert "Foco 50:00" in tab.pomodoro_label.text() and tab.pomodoro_toggle.toolTip() == "Pausar"
     _tick(window, clock, 10 * MIN)
     assert "Foco 40:00" in tab.pomodoro_label.text()
     tab.pomodoro_toggle.click()
-    assert "(pausado)" in tab.pomodoro_label.text() and tab.pomodoro_toggle.text() == "Continuar"
+    assert "(pausado)" in tab.pomodoro_label.text() and tab.pomodoro_toggle.toolTip() == "Continuar"
     _tick(window, clock, 20 * MIN)
     assert "Foco 40:00" in tab.pomodoro_label.text()  # congelado
     tab.pomodoro_toggle.click()
@@ -144,7 +144,7 @@ def test_fim_do_foco_avisa_o_windows_e_fiz_a_pausa_inicia_o_descanso(env):
     _tick(window, clock, 50 * MIN)
     assert phrases.ASK_BREAK in notifier.messages
     window.pet_tab.rested.click()
-    assert "Descanso curto 10:00" in window.pet_tab.pomodoro_label.text()
+    assert "Descanso 10:00" in window.pet_tab.pomodoro_label.text()
     _tick(window, clock, 10 * MIN)
     assert notifier.messages[-1] == phrases.BACK_TO_WORK
 
@@ -160,4 +160,38 @@ def test_pomodoro_e_pausa_de_privacidade_sao_independentes(env):
     window.pet_tab.rested.click()  # responder também não religa a observação
     assert controller.paused
     window.toggle_pause()  # e retomar a observação não mexe no pomodoro
-    assert "Descanso curto" in window.pet_tab.pomodoro_label.text()
+    assert "Descanso" in window.pet_tab.pomodoro_label.text()
+
+
+def test_passar_o_mouse_no_botao_faz_o_pet_dizer_o_que_ele_faz(env):
+    from PySide6.QtCore import QEvent
+    from PySide6.QtWidgets import QApplication
+
+    window, *_ = env
+    tab = window.pet_tab
+    before = tab.speech.text()
+    QApplication.sendEvent(tab.drink, QEvent(QEvent.Type.Enter))
+    assert tab.speech.text() == tab.drink.toolTip() != before
+    QApplication.sendEvent(tab.drink, QEvent(QEvent.Type.Leave))
+    assert tab.speech.text() == before  # a fala de antes volta
+    QApplication.sendEvent(tab.care, QEvent(QEvent.Type.Enter))
+    tab.speech.setText("outra fala")  # alguém falou enquanto o mouse estava lá
+    QApplication.sendEvent(tab.care, QEvent(QEvent.Type.Leave))
+    assert tab.speech.text() == "outra fala"
+
+
+def test_aceitar_a_pausa_poe_o_pet_para_descansar_e_bebi_o_faz_beber(env):
+    window, _, clock, _ = env
+    pet = window.pet_tab.pet
+    window.pet_tab.pomodoro_toggle.click()
+    _tick(window, clock, 50 * MIN)
+    assert pet.activity is None  # perguntando: ainda não descansa
+    window.pet_tab.rested.click()
+    assert pet.shown == "descansando" and pet._countdown == "10:00"
+    _tick(window, clock, 60)
+    assert pet._countdown == "09:00"
+    window.pet_tab.drink.click()
+    assert pet.shown == "bebendo"
+    _tick(window, clock, 10 * MIN)  # o descanso acabou: volta a focar
+    pet.advance(20.0)
+    assert pet.activity is None

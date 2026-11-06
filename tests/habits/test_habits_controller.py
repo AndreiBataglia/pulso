@@ -17,10 +17,10 @@ def _reaches_water_prompt(controller, clock):
     return controller.tick_habits()
 
 
-def test_bebi_recompensa_positivo_com_peso_de_regra(parts):  # noqa: F811
+def test_bebi_recompensa_positivo_com_peso_do_dono(parts):  # noqa: F811
     controller, _, engine, _, _ = parts
     assert controller.answer_habit("drink") == kinds.WATER_DRUNK
-    assert engine.rewards == [pytest.approx(0.3)]
+    assert engine.rewards == [pytest.approx(1.0)]
     assert controller.dopamine_events[-1].source == "regra"
 
 
@@ -32,15 +32,15 @@ def test_recusei_e_ignorei_punem_e_depois_nao_vale_nada(parts):  # noqa: F811
     clock.advance(10 * MIN)
     controller.tick()
     controller.tick_habits()  # o lembrete volta
-    controller.answer_habit("water_decline")  # −1 × 0,3
-    assert engine.rewards == [pytest.approx(-0.3)]
+    controller.answer_habit("water_decline")  # −1 × 1,0
+    assert engine.rewards == [pytest.approx(-1.0)]
     clock.advance(60 * MIN)
     controller.tick()
     controller.tick_habits()
     clock.advance(5 * MIN)
     controller.tick()
-    controller.tick_habits()  # ignorei: −0,5 × 0,3
-    assert engine.rewards == [pytest.approx(-0.3), pytest.approx(-0.15)]
+    controller.tick_habits()  # ignorei: −0,5 × 1,0
+    assert engine.rewards == [pytest.approx(-1.0), pytest.approx(-0.5)]
 
 
 def test_pausado_o_evento_e_anotado_mas_a_rede_nao_aprende(parts):  # noqa: F811

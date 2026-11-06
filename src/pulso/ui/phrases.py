@@ -61,3 +61,10 @@ def mood_phrase(mood: str, rng: random.Random | None = None) -> str:
     """Uma frase do humor (sorteada, para o pet não repetir sempre a mesma)."""
     options = MOOD_PHRASES[mood]
     return (rng or random).choice(options)
+
+
+# ---- jogos ----------------------------------------------------------------------------------
+GAME_WON = "Ganhei! 😎 Quer a revanche?"
+GAME_LOST = "Argh, você ganhou... 😤 Mais uma, agora vai!"
+GAME_DRAW = "Empatou! 🤝 Joga de novo?"
+GAME_INTRO = "Escolha um jogo e jogue! Eu jogo limpo."

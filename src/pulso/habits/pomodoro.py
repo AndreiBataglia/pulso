@@ -51,6 +51,10 @@ class Pomodoro:
         """O pet está perguntando se o dono quer descansar?"""
         return self.phase is Phase.ASKING
 
+    def set_config(self, cfg: HabitConfig) -> None:
+        """Novos tempos (Ajustes): valem a partir da próxima fase (a que está rodando termina)."""
+        self._cfg = cfg
+
     @property
     def running(self) -> bool:
         return self.phase is not Phase.STOPPED

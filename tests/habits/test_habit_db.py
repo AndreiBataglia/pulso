@@ -20,7 +20,7 @@ def store():
 def test_banco_novo_nasce_na_versao_1(tmp_path):
     conn = open_db(tmp_path / "sub" / "pulso.db")  # cria a pasta
     row = conn.execute("SELECT value FROM meta WHERE key='schema_version'").fetchone()
-    assert SCHEMA_VERSION == 1 and row[0] == "1"
+    assert SCHEMA_VERSION == 2 and row[0] == "2"
     conn.close()
 
 
