@@ -19,18 +19,21 @@ MOOD_MEANINGS = {
     "contente": "Contente: está tudo tranquilo, gostei do seu ritmo.",
     "entediado": "Entediado: está quieto por aqui, sem novidade.",
     "sonolento": "Sonolento: o computador está parado, me deu sono.",
-    "preocupado": "Preocupado: acho que você precisa de uma pausa.",
+    "preocupado": "Preocupado: a rede está inquieta, mas ainda não sei dizer por quê.",
 }
 MEANING_NEW = "Acordando: ainda estou te conhecendo."
 MEANING_SLEEPING = "Dormindo: a observação está pausada, não estou lendo nada."
-MEANING_HINT = "O humor vem da rede de pulsos, que aprende com os seus carinhos e broncas."
+MEANING_HINT = "O humor vem da rede de pulsos, que aprende com o seu carinho e as suas respostas."
 
 MOOD_PHRASES: dict[str, tuple[str, ...]] = {
     "animado": ("Bora! Tô cheio de energia!", "Que dia bom pra fazer coisas!"),
     "contente": ("Tô bem, e você?", "Tudo tranquilo por aqui."),
     "entediado": ("Hmm... tá quietinho por aqui.", "Será que acontece algo logo?"),
     "sonolento": ("Que soninho...", "Ai, ai... bocejando aqui."),
-    "preocupado": ("Faz tempo que você não descansa, né?", "Um alongadinho ia bem..."),
+    "preocupado": (
+        "Tô meio inquieto, sem saber por quê...",
+        "Algo me deixou com a pulga atrás da orelha.",
+    ),
 }
 
 

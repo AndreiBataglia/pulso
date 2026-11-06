@@ -56,7 +56,7 @@ O foco é **criar rotina sem ser chato**. O pet pergunta, você responde; ele nu
 O pet aprende com o que **você** responde (carinho e as respostas aos lembretes), não com palpites. As regras que
 tiravam conclusões do programa em uso ficam desligadas por padrão (dá para ligá-las em Ajustes).
 
-![Os seis rostos do Pulso: animado, contente, entediado, sonolento, preocupado e dormindo](docs/img/humores.png)
+![Os seis rostos do Pulso: animado, contente, entediado, sonolento, preocupado e nervoso (e dormindo, quando a observação está pausada)](docs/img/humores.png)
 
 A aba **Cérebro** mostra a rede por dentro: raster de pulsos, potenciais, dopamina, humor e mapa de pesos.
 
@@ -102,6 +102,31 @@ meeting, casual mode). The network learns from your own answers; the process-bas
 A microphone in use by another program pauses focus without penalty. Timers, mode and the away tolerance are
 configurable in Settings, the pet lives in the tray, and a small rock-paper-scissors / odds-and-evens game
 changes only its face, never the network.
+
+## Atualizações
+
+> Resumo por versão. O detalhe está no [`CHANGELOG.md`](CHANGELOG.md) e, com os conceitos explicados, em [`docs/diario/`](docs/diario/).
+
+### Etapa 7 · O momento certo *(em andamento, PR #10)*
+- **Foco por presença:** o ciclo abre sozinho quando você mexe no PC (sem botão *Iniciar*), com anel de andamento no rosto.
+- **Pausar agora · Prorrogar 5 min · Hoje não**, e o placar do dia no rodapé (pausas, prorrogações, copos, focos).
+- **"O que foi?"** na volta de uma ausência: pausa, refeição, necessidade ou foco sem mexer.
+- **Reunião:** microfone em uso por outro programa pausa o foco, sem penalizar. Nada de som ou imagem é capturado.
+- **Modos Profissional e Casual**, pela pílula da janela ou pelo menu da bandeja.
+- **Janela nova** (direção D do design): um painel por fase, aba **Pulso** (antes "Pet") e **sem o botão Bronca**.
+- **Ajustes** ganharam modo e "parado por mais de (min)". O banco migrou para o esquema v3 (categoria e resumo das pausas).
+- Saiu o pomodoro antigo. *Vem a seguir:* humor por regras explicáveis e a rede decidindo *quando* lembrar.
+
+### v0.6.0 · Hábitos, bandeja, ajustes e jogo
+- Pomodoro e lembrete de água com notificação do Windows; recusar ou ignorar soma pendência e deixa o pet nervoso.
+- Bandeja do Windows (o X esconde o pet), iniciar com o Windows, sempre à frente e atalho no Menu Iniciar.
+- Aba **Ajustes** com os tempos; aba **Jogo** (jokenpô e par ou ímpar, só muda o rosto).
+- O pet aprende só com as suas respostas; as regras por processo ficam desligadas por padrão.
+
+### v0.5.0 e antes · A base
+- **v0.5.0:** aba **Cérebro** com raster, potenciais, dopamina, humor e mapa de pesos.
+- **v0.4.0:** o pet aparece na janela (rosto em QPainter, balão, carinho).
+- **v0.3.0:** aprendizado R-STDP com dopamina; **v0.2.0:** rede de pulso LIF em numpy; sensores de nível B e CI desde o início.
 
 ## Privacidade
 
