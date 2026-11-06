@@ -150,6 +150,11 @@
       verdade; **Sempre à frente** (padrão: ligado), **Lembrete de água** e **Iniciar com o Windows** ligáveis no menu
       (`storage/config.py` guarda os dois primeiros em `config.toml`; o início com o Windows é a chave `Run` do usuário,
       `storage/autostart.py`); pomodoro iniciar/pausar/pular também pelo menu da bandeja.
+- [x] (2026-11-06, a pedido do dono) **Recompensa e rotina:** as regras por processo/ócio ficam **desligadas por padrão**
+      (`RewardConfig.auto_enabled`); hábito passa a pesar como o dono (`habit_weight` 1,0, antes 0,3). Tela de **Ajustes**
+      (⚙ na barra de abas e "Ajustes…" na bandeja) com foco, descansos, intervalo da água e o interruptor das regras;
+      aplica sem reiniciar. **Aba Jogo:** jokenpô e par ou ímpar (`game.py`), rosto **bravo** novo, placar em
+      `game_result` (migração v2). O pet também descansa (com contagem no rosto) ao aceitar a pausa e bebe ao "Bebi".
 - [ ] **Falta (dono):** uso real do J04 (a notificação do Windows aparecer de fato, os tempos 50/10/60 no dia a dia), o
       "Iniciar com o Windows" de verdade (reiniciar e ver o pet abrir) e o fim de sessão do Windows com o pet aberto.
 - **Pronto quando:** os critérios de F07 e F08 passam e a J04 funciona de ponta a ponta.
@@ -173,6 +178,8 @@
 - [ ] README final: capturas e GIF, instalação, "como funciona o cérebro" (diagrama), privacidade, roteiro
       (F12+) e link para o diário.
 - [ ] Rodar 1 semana no uso real e registrar no diário se a meta de aprendizado do PRD §4 foi atingida.
+- [ ] Instalador: executável (PyInstaller) na *release*, com o atalho do Menu Iniciar e o "iniciar com o Windows" já
+      resolvidos (decidido em 2026-11-06: fica para o projeto consolidado; até lá vale `pip install -e` + `pulso --criar-atalho`).
 - [ ] Tag `v1.0.0` e *release* no GitHub com notas.
 
 ## Riscos e pontos de atenção

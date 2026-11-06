@@ -90,6 +90,37 @@ Foi adiantado da etapa 7:
   `pulso.db`. **Não verificado:** reiniciar o Windows para ver o pet abrir sozinho; o fim de sessão com o pet aberto; se o
   ícone aparece logo no login (a bandeja pode ainda não existir; o Qt a adiciona quando ela surge).
 
+- **Atalho no Menu Iniciar:** `pulso --criar-atalho` grava `Pulso.lnk` em `%APPDATA%\...\Start Menu\Programs` (sem
+  administrador) e o ícone `pulso.ico` na pasta de dados. O `.lnk` é um arquivo binário do Windows, então o PowerShell
+  o cria via `WScript.Shell`, com os valores passados por variáveis de ambiente (sem tropeçar em aspas). Aponta para
+  o `pythonw.exe` do mesmo ambiente, como o "Iniciar com o Windows". Os testes criam o `.lnk` numa pasta temporária.
+- **Botões e balões:** botões secundários menores e pomodoro em ícones; a dica de cada botão vira fala do pet ao passar o
+  mouse (`eventFilter`), sem o balão padrão do Windows. O ícone de pausa em branco era a cor de texto do sistema (modo
+  escuro) sobre o fundo claro do tema: agora usa a cor do tema.
+
+- **Atividades do pet (descansar e beber):** `PetWidget.rest(contagem)` e `PetWidget.drink()` põem uma aparência por
+  cima do humor da rede ("descansando" e "bebendo", em `LOOKS`). A pausa de privacidade (dormindo) vence a atividade, e
+  uma reação ao carinho/bronca vence as duas. O descanso dura enquanto a fase BREAK do pomodoro (a janela chama `rest`
+  a cada segundo com o tempo que falta); beber dura 15 s, medidos no relógio de animação do widget (`advance`), e depois
+  volta ao descanso, se ele ainda estiver rolando. Não foi feita a "cutucada" se o dono mexe no PC durante a pausa: pediria
+  levar a ociosidade do sensor até a janela, e fica para quando o F12 mexer nisso.
+
+- **Recompensa por hábito, não por processo (decisão do dono):** as três regras por processo/ócio (ócio → sonolento,
+  volta → animado, 90 min sem pausa → preocupado) eram palpites sobre o humor que o dono nunca confirmava. Ficam
+  **desligadas por padrão** (`auto_enabled`), ligáveis em Ajustes. Bebi, fiz a pausa e hoje não pesam agora como carinho
+  e bronca (`habit_weight` 1,0). Ressalva honesta, anotada para o F12: a recompensa de hábito reforça o humor que a
+  rede mostrava naquele segundo, o que ainda não ensina *quando* lembrar; isso só passa a valer quando a rede
+  decidir o momento do lembrete.
+- **Ajustes (tempos):** `Settings` ganhou `focus_min`, `break_min`, `long_break_min` e `water_interval_min`, com
+  intervalos válidos (`RANGES`). `HabitCoach.apply_config` troca os tempos sem reiniciar: o pomodoro usa o novo a partir
+  da próxima fase e a água se rearma na hora (se não há balão). Conceito: um dado imutável (`HabitConfig`) é
+  *trocado inteiro* em vez de editado, o que evita estados pela metade.
+- **Jogo (jokenpô e par ou ímpar):** `game.py` é regra pura, com o sorteio injetado (`random.Random`) para os testes
+  controlarem a jogada do pet. O pet joga limpo: sorteia sem espiar. O resultado só muda o rosto (contente/**bravo**, um
+  look novo com sobrancelha para baixo e tremor) e o placar (`game_result`), e **não entra na rede**: ganhar ou perder
+  é sorte, e viraria ruído no que ela aprende. A aba Jogo tem um `PetWidget` próprio, porque a aba Pet fica escondida
+  enquanto se joga.
+
 ## Decisões e observações
 - **Pendência por hábito.** O plano dizia "só o 'fiz' zera" sem dizer qual. Escolhi **um por hábito** (água × pausa):
   bom para a legenda ("ficaram lembretes de **água** sem resposta") e justo com quem só falha em um dos dois.

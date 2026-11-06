@@ -35,7 +35,10 @@ python -m venv .venv
 pip install -e ".[dev]"
 pulso --version
 pytest
+pulso --criar-atalho   # cria o atalho "Pulso" no Menu Iniciar (para abrir de novo depois de sair)
 ```
+
+Para sair de vez: botão direito no ícone da bandeja → **Sair do Pulso**. O X da janela só manda para a bandeja.
 
 ## Documentação
 

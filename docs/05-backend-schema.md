@@ -73,10 +73,27 @@ erDiagram
   depois do último "fiz" **do mesmo hábito**; água e pausa são separadas). `break_streak_end` só é gravado na etapa 7.
 - `CHECK (kind IN (...))` garante os valores permitidos.
 
+### game_result (migração v2)
+**Para quê:** o placar dos jogos (jokenpô e par ou ímpar), do ponto de vista do pet.
+
+| Coluna | Tipo | Observação |
+|---|---|---|
+| `id` | INTEGER PK | |
+| `ts` | TEXT | ISO local |
+| `game` | TEXT | `CHECK` em `rps`, `evenodd` |
+| `result` | TEXT | `CHECK` em `won`, `lost`, `draw` |
+
+Só o resultado: nada de sensor. O placar do dia é um `GROUP BY result` desde a meia-noite local.
+
 ### meta
 **Para quê:** chave e valor do próprio banco, como `schema_version`.
 
 ## 5. `config.toml` (padrões)
+> **Hoje (etapa 6)** o arquivo guarda, em `[window]` e `[habits]`: `always_on_top`, `water_enabled`, `auto_rules`
+> (padrão `false`), `focus_min` (50), `break_min` (10), `long_break_min` (20) e `water_interval_min` (60), editáveis em
+> **Ajustes**. Tempo fora do intervalo (`storage/config.py`, `RANGES`) ou de tipo errado volta ao padrão. O bloco
+> abaixo é o desenho completo previsto.
+
 ```toml
 [pomodoro]
 focus_min = 50              # decidido em 2026-11-06 (antes 25/5/15); revisar com o uso real
@@ -127,7 +144,7 @@ always_on_top = true        # o pet fica sobre as outras janelas (decidido pelo 
 
 ## 7. Migrações, backup e dados iniciais
 - **Primeiro uso:** cria a pasta, o `config.toml` com os padrões, um `pulso.db` vazio
-  (`schema_version = 1`) e uma rede nova a partir da semente.
+  (`schema_version = 2`) e uma rede nova a partir da semente.
 - **Migrações:** `storage/db.py` aplica scripts em ordem pelo `schema_version`. O `.npz` usa `format_version`:
   uma mudança no formato exige uma função de conversão ou um "recomeçar com backup".
 - **Backup:** basta copiar a pasta `%LOCALAPPDATA%\Pulso\`.

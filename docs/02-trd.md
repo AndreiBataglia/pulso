@@ -190,6 +190,7 @@ class Engine(Protocol):
 - **Não há segredos:** sem chaves, sem login, sem rede.
 - `config.toml` na pasta de dados (`%LOCALAPPDATA%\Pulso\`) guarda: intervalos do pomodoro e da água, tabela de
   categorias extra, atalho de pausa, pesos das recompensas, tamanho da rede e iniciar com o Windows.
+- Hoje a tela de Ajustes edita foco, descansos, intervalo da água e as regras automáticas (`SettingsDialog`).
 - Os valores padrão ficam em `storage/config.py`. Um arquivo ausente ou inválido volta ao padrão, com aviso
   no log.
 - Variável `PULSO_DATA_DIR` para trocar a pasta de dados (usada nos testes e em demonstrações).

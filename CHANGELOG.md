@@ -6,6 +6,11 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/).
 ## [Não lançado]
 
 ### Adicionado
+- **Aba Jogo:** jokenpô e par ou ímpar com o pet (ganhou: contente; perdeu: bravo), placar do dia em `game_result` (migração v2).
+- **Ajustes** (⚙ e menu da bandeja): tempos do pomodoro e da água e interruptor das regras automáticas, aplicados na hora.
+- Pet com atividades: ao aceitar a pausa ele descansa (olhos fechados, respirando) com a contagem regressiva no rosto; ao clicar em "Bebi" ele bebe por 15 s com um copo esvaziando.
+- `pulso --criar-atalho`: atalho "Pulso" no Menu Iniciar (sem console, com o rostinho como ícone) para reabrir o app depois de sair.
+- Janela do pet: botões secundários menores, pomodoro em ícones (▶ ⏸ ⏭) e dicas dos botões faladas pelo pet ao passar o mouse; ícone de pausa visível no modo escuro do Windows.
 - Fundação do projeto: `pyproject.toml`, layout `src/pulso/`, comando `pulso --version`, testes e CI (etapa 0).
 - Sensores de nível B (CPU, RAM, hora, ociosidade, categoria do programa em primeiro plano e trocas por minuto),
   relógio injetável, laço mínimo com pausa de privacidade e `pulso --print-sensors` (etapa 1).
@@ -34,6 +39,8 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/).
   Windows" pela chave `Run` do usuário.
 
 ### Alterado
+- Recompensas só por resposta do dono: as regras por processo/ócio ficam desligadas por padrão (ligáveis em Ajustes) e os hábitos (bebi, fiz a pausa, hoje não) pesam como carinho e bronca.
+- A barra de abas ganhou "Jogo" e o botão ⚙ (Pet · Jogo · Cérebro; Ctrl+1/2/3).
 - A barra de abas aparece (Pet · Cérebro); a janela cresce ao abrir o Cérebro e volta ao tamanho do pet.
 - `Engine.reward` passa a devolver a dopamina entregue (`value − r̄`).
 - Primária clara escurecida de `#0F8A7E` para `#0D7F74`: o texto branco do botão dava 4,24:1 (mínimo 4,5:1).

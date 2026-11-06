@@ -8,7 +8,9 @@
 **de forma discreta** como o computador está sendo usado (carga da máquina, tipo de programa em uso, tempo
 ocioso) e reage com estados de humor. O "cérebro" dele é uma **rede neural de pulso** (SNN — *spiking neural
 network*, rede em que os neurônios se comunicam por pulsos elétricos curtos, como os do cérebro) que aprende
-por **reforço**: carinho e bronca do usuário, mais algumas regras automáticas, funcionam como "dopamina".
+por **reforço**: carinho e bronca do usuário e as respostas aos hábitos (bebi, fiz a pausa, hoje não) funcionam
+como "dopamina". As regras automáticas por processo/ócio (palpites sobre o humor) ficam **desligadas por padrão**
+(decidido em 2026-11-06) e podem ser ligadas em Ajustes.
 Ele também cuida de hábitos saudáveis: **pomodoro** (blocos de foco com descanso) e **lembrete de beber água**.
 É um projeto **público no GitHub** (licença MIT), construído em etapas documentadas para servir de material de
 aprendizado.
@@ -155,6 +157,9 @@ Uso: um usuário por instalação, roda em segundo plano o dia todo, **100% loca
 - **Prioridade:** Alta
 
 ### 5.2 Depois do MVP
+- F15 (feito, 2026-11-06) — **Jogo do dia a dia:** jokenpô e par ou ímpar com o pet (aba Jogo). Ganhou, ele fica contente;
+  perdeu, fica bravo. Só mexe no rosto e no placar do dia, nunca na rede (o resultado é sorte e viraria ruído).
+- F16 (feito, 2026-11-06) — **Ajustes:** tempos do pomodoro e da água e o interruptor das regras automáticas.
 - F12 — A SNN aprende **quando e como** lembrar (adiar se o dono está focado), em vez de intervalos fixos.
 - F13 — Nível C de observação: ritmo de digitação e cliques (contagem, nunca as teclas).
 - F14 — Outros lembretes de hábito: descanso dos olhos 20-20-20, postura, alongamento.
