@@ -46,6 +46,38 @@ IN_TRAY = "Continuo aqui na bandeja. Clique no meu ícone para me abrir; para sa
 RELAXED = "Ufa, agora estou mais tranquilo. Obrigado!"
 
 
+# Ciclo do foco por presença (etapa 7): o Pulso narra o que percebeu, sem cobrar.
+MEETING_ON = "Microfone em uso: pausei o foco. Quando a reunião acabar, eu continuo de onde parou."
+MEETING_OFF = "A reunião acabou. Voltei a contar o foco."
+BREAK_STARTED = "Levanta, estica, olha longe. Se passar do tempo, eu te conto quanto."
+LONG_BREAK_STARTED = "Descanso longo! Vale água, alongar e sair um pouco da frente da tela."
+AWAY_NOTICED = "Você ficou parado. Parei de contar o foco no seu último gesto."
+CASUAL_ON = "Modo casual: não conto foco nem te chamo para pausa. Só lembro da água."
+PROFESSIONAL_ON = "Modo profissional: conto o seu foco e te chamo para a pausa."
+AWAY_REPLIES = {
+    "pause": RESTED,
+    "meal": "Bom apetite! Conto como descanso longo, sem cobrança.",
+    "need": "Tudo bem. O foco continua de onde estava.",
+    "focus": "Entendi: esse tempo conta como foco.",
+}
+
+
+def break_summary(planned_s: int | None, excess_s: int | None) -> str:
+    """O resumo da pausa que acabou (o excesso só é contado, nunca cobrado)."""
+    if not excess_s:
+        return RESTED
+    planned = round((planned_s or 0) / 60)
+    return f"Descansou {planned} min + {max(round(excess_s / 60), 1)} além. Tudo certo!"
+
+
+def away_question(minutes: int) -> str:
+    return f"Você ficou {max(minutes, 1)} min fora. O que foi?"
+
+
+def remind_break(focus_min: int, break_min: int) -> str:
+    return f"{focus_min} min de foco. Bora pausar {break_min}?"
+
+
 def nervous_meaning(reason: str | None) -> str:
     """O que o rosto nervoso quer dizer, dizendo o motivo (aparece sob o rosto)."""
     what = reason or "hábito"

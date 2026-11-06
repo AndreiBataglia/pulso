@@ -122,6 +122,40 @@ class FocusCycle:
         """Quanto já passou do descanso (só em `BREAK_OVER`)."""
         return self._excess
 
+    @property
+    def worked_s(self) -> float:
+        """Segundos de foco acumulados neste foco."""
+        return self._worked
+
+    @property
+    def planned_break_s(self) -> float:
+        """Duração prevista do descanso atual (ou do próximo, se ainda não começou)."""
+        minutes = self._cfg.long_break_min if self.long_break else self._cfg.break_min
+        return minutes * 60
+
+    @property
+    def focus_number(self) -> int:
+        """Qual foco do conjunto é este ("2 de 4"). O que já bateu a meta mantém o seu número."""
+        number = self._cycles if self._focus_counted else self._cycles + 1
+        return min(max(number, 1), self._cfg.cycles_before_long)
+
+    @property
+    def focus_total(self) -> int:
+        return self._cfg.cycles_before_long
+
+    @property
+    def progress(self) -> float:
+        """Quanto da fase já passou (0 a 1), para o anel da janela."""
+        if self.phase in (Phase.FOCUS, Phase.AWAY, Phase.ASKING_BACK, Phase.MEETING):
+            return min(self._worked / self._target, 1.0) if self._target else 0.0
+        if self.phase is Phase.BREAK:
+            return (
+                min(self._break_elapsed / self._break_planned, 1.0) if self._break_planned else 0.0
+            )
+        if self.phase in (Phase.REMINDER, Phase.BREAK_OVER):
+            return 1.0
+        return 0.0
+
     def set_config(self, cfg: HabitConfig) -> None:
         """Novos tempos (Ajustes): valem a partir do próximo foco ou descanso."""
         self._cfg = cfg

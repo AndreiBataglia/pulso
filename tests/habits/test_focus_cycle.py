@@ -352,3 +352,34 @@ def test_pular_o_foco_vai_ao_lembrete_sem_contar_foco_concluido(cycle, clock):
     assert cycle.phase is Phase.REMINDER
     cycle.take_break()
     assert cycle.skip() == [CycleEvent(kinds.SKIPPED)] and cycle.phase is Phase.FOCUS
+
+
+# ---- o que a janela lê (etapa 7, fatia 3) -------------------------------------------------
+
+
+def test_andamento_numero_do_foco_e_pausa_prevista(cycle, clock):
+    assert cycle.progress == 0.0 and cycle.focus_total == 4
+    cycle.tick(ACTIVE)
+    work(cycle, clock, 25)
+    assert cycle.progress == pytest.approx(0.5, abs=0.01)
+    assert cycle.focus_number == 1 and cycle.worked_s == pytest.approx(25 * MIN)
+    assert cycle.planned_break_s == 10 * MIN
+    work(cycle, clock, 25)
+    assert cycle.phase is Phase.REMINDER and cycle.progress == 1.0  # lembrete: anel cheio
+
+
+def test_o_numero_do_foco_avanca_depois_de_cada_foco_concluido(cycle, clock):
+    reach_reminder(cycle, clock)
+    cycle.take_break()
+    work(cycle, clock, 10)
+    work(cycle, clock, 1)
+    assert cycle.phase is Phase.FOCUS and cycle.focus_number == 2
+
+
+def test_o_andamento_do_descanso_chega_a_1_e_depois_fica_cheio(cycle, clock):
+    reach_reminder(cycle, clock)
+    cycle.take_break()
+    work(cycle, clock, 5)
+    assert cycle.progress == pytest.approx(0.5, abs=0.01)
+    idle_for(cycle, clock, 5 * MIN)
+    assert cycle.progress == 1.0

@@ -7,9 +7,11 @@ O laço de 1 s (plano da etapa 4): ler o sensor → `engine.step(encode(frame), 
 `decoder.update(counts)` → `rules.evaluate(frame, humor)` (se > 0, `engine.reward`) →
 `saver.tick()`.
 
-Os hábitos (pomodoro e água) andam em paralelo, por `tick_habits()`, que roda **também com a
-observação pausada**: o pomodoro é independente da pausa de privacidade. O que a pausa corta é o
-sensor e o aprendizado (a rede não recebe recompensa de hábito enquanto o pet "dorme").
+Os hábitos (ciclo do foco e água) andam em paralelo, por `tick_habits()`, que roda **também com a
+observação pausada**. O ciclo do foco mede a presença pela ociosidade lida do sensor; com a
+observação pausada ele **congela** (sem leitura, sem presença), e a água segue. O sensor de
+reunião (microfone em uso) só é lido com a observação ligada. A pausa corta o sensor e o
+aprendizado (a rede não recebe recompensa de hábito enquanto o pet "dorme").
 """
 
 import logging
@@ -25,9 +27,11 @@ from pulso.brain.engine import BrainSnapshot, Engine
 from pulso.brain.rewards import RewardRules
 from pulso.clock import Clock
 from pulso.habits.coach import HabitCoach, HabitTick
+from pulso.habits.focus_cycle import Mode
 from pulso.habits.kinds import Presence
 from pulso.loop import SensorLoop
 from pulso.sensors.base import Sensor
+from pulso.sensors.meeting import MeetingSensor
 from pulso.storage.brain_store import AutoSaver
 
 log = logging.getLogger(__name__)
@@ -64,6 +68,7 @@ class PetController:
         rules: RewardRules,
         saver: AutoSaver,
         habits: HabitCoach,
+        meeting: MeetingSensor | None = None,
     ) -> None:
         self._loop = SensorLoop(sensor, clock)
         self._engine = engine
@@ -72,7 +77,9 @@ class PetController:
         self._saver = saver
         self._clock = clock
         self.habits = habits
+        self._meeting = meeting  # None = sem sensor de reunião (testes, outros sistemas)
         self._presence = Presence.UNKNOWN  # só um rótulo (presente/longe/?), nada do sensor
+        self._idle: float | None = None  # segundos sem entrada nesta volta (None = sem leitura)
         self.dopamine_events: deque[DopamineEvent] = deque(maxlen=DOPAMINE_LOG_SIZE)
         self.step_cost_ms = 0.0  # custo medido de 1 volta (100 passos de rede), em ms reais
 
@@ -94,6 +101,7 @@ class PetController:
         """Uma volta de 1 s. Pausado → `None`: não lê o sensor, não simula, não aprende."""
         frame = self._loop.tick()
         self._presence = self._presence_of(frame)
+        self._idle = frame.idle_seconds if frame is not None and frame.valid else None
         if frame is None:
             return None
         before = self._decoder.mood
@@ -132,17 +140,24 @@ class PetController:
     # ---- hábitos -----------------------------------------------------------------------------
 
     def tick_habits(self) -> HabitTick:
-        """Anda o pomodoro e a água (também pausado) e recompensa o que foi gravado."""
-        tick = self.habits.tick(self._presence)
-        self._reward_habits(tick.recorded)
+        """Anda o ciclo do foco e a água (também pausado) e recompensa o que foi gravado."""
+        meeting = (
+            self._meeting is not None and self._idle is not None and self._meeting.in_meeting()
+        )
+        tick = self.habits.tick(self._presence, self._idle, meeting)
+        self._reward_habits(tick.rewarded)
         return tick
 
-    def answer_habit(self, action: str) -> str | None:
-        """Resposta do dono a um lembrete (`habits.coach.ANSWERS`). Devolve o que foi gravado."""
-        kind = self.habits.answer(action)
-        if kind is not None:
-            self._reward_habits((kind,))
-        return kind
+    def answer_habit(self, action: str) -> HabitTick:
+        """Resposta do dono a uma pergunta (`habits.coach.ANSWERS`). Devolve o que foi gravado
+        (vazio quando a resposta não grava nada, como "Pausar agora")."""
+        tick = self.habits.answer(action)
+        self._reward_habits(tick.rewarded)
+        return tick
+
+    def set_mode(self, mode: Mode) -> None:
+        """Modo profissional ou casual (a pílula da janela e a bandeja)."""
+        self.habits.set_mode(mode)
 
     def _reward_habits(self, recorded) -> None:
         if self.paused:  # o pet "dorme": o evento fica anotado, mas a rede não aprende nada

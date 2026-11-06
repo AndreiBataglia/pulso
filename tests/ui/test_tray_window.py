@@ -200,18 +200,21 @@ def test_se_o_windows_recusar_o_aviso_aparece_e_o_visto_volta(env):
     assert "Não consegui" in window.pet_tab.speech.text()
 
 
-def test_o_menu_atualiza_os_textos_de_pausa_e_pomodoro(env):
-    window, _, _, tray, *_ = env
-    pomodoro_menu = next(a for a in tray.menu.actions() if a.text() == "Pomodoro").menu()
-    toggle, skip = pomodoro_menu.actions()
+def test_o_menu_atualiza_os_itens_do_foco_e_o_texto_da_pausa(env):
+    window, controller, _, tray, *_ = env
+    focus_menu = next(a for a in tray.menu.actions() if a.text() == "Foco").menu()
+    break_now, skip = focus_menu.actions()
     window._refresh_tray_menu()
-    assert toggle.text() == "Iniciar" and not skip.isEnabled()
-    toggle.trigger()
+    assert not break_now.isEnabled() and not skip.isEnabled()  # ainda sem foco aberto
+    window.tick()  # a 1ª entrada abre o foco
     window._refresh_tray_menu()
-    assert toggle.text() == "Pausar" and skip.isEnabled()
-    toggle.trigger()
+    assert break_now.isEnabled() and skip.isEnabled()
+    break_now.trigger()
+    assert controller.habits.cycle.phase.name == "BREAK"
     window._refresh_tray_menu()
-    assert toggle.text() == "Continuar"
+    assert not break_now.isEnabled() and skip.isEnabled()
+    casual = _action(tray, "Modo casual")
+    assert casual.isCheckable() and not casual.isChecked()
     pause = _action(tray, "Pausar observação")
     pause.trigger()
     window._refresh_tray_menu()

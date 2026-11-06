@@ -30,3 +30,11 @@ def test_cores_dos_humores_se_destacam_do_fundo_do_rosto():
     # Não é texto, mas carrega o humor: pede-se ao menos 3:1 (WCAG para elementos gráficos).
     for mood, color in MOOD_COLORS.items():
         assert contrast(color, FACE_BACKGROUND) >= 3.0, mood
+
+
+@pytest.mark.parametrize("palette", [LIGHT, DARK], ids=["claro", "escuro"])
+def test_cores_das_fases_tem_contraste_de_texto_grande_no_fundo(palette):
+    from pulso.ui.theme import phase_colors
+
+    for name, color in phase_colors(palette).items():
+        assert contrast(color, palette.background) >= 3.0, (name, color)

@@ -219,8 +219,16 @@ num PR só, ou dois que só entram juntos), para o app em uso nunca ficar meio v
       `Pomodoro` antigo continua no lugar até a fatia 3. **Falta (fatia 3):** ligar ao `HabitCoach`/controlador (a
       presença vem de `idle_seconds`; o sensor de reunião só é lido com a observação ligada), gravar os `CycleEvent` com
       o resumo, Ajustes (modo e tolerância) e a janela D.
-- [ ] **Fatia 3, janela D ligada ao ciclo:** todas as telas de uma vez (anel do foco, pílula de modo, Pausar agora,
-      Prorrogar, "o que foi?", reunião, casual, placar do dia); o pomodoro antigo sai no mesmo passo.
+- [x] **Fatia 3, janela D ligada ao ciclo** — feito em 2026-11-06, sem commit (372 testes verdes, ruff limpo; capturas
+      com fontes reais nos dois temas). `HabitCoach` agora tem `cycle` e `water`, grava o resumo da pausa e devolve um
+      `HabitTick` (gravado, avisos, recompensado, resumo); refeição é descanso longo mas a rede não aprende com ela. O
+      controlador lê o sensor de reunião só com a observação ligada; com ela pausada o foco congela. Ajustes ganhou
+      **Modo** e **Parado por mais de (min)**. A aba Pulso tem anel do foco no rosto, pílula de modo, um painel por fase
+      (cronômetro, lembrete, "o que foi?", descanso, reunião, casual) e o placar do dia; `pomodoro.py` saiu e a bandeja
+      ganhou "Modo casual" e o submenu "Foco" (Pausar agora, Pular fase).
+      **Fica para depois:** horário de almoço opcional em Ajustes; pesos crescentes da prorrogação (fatia 4); humor por
+      regras (fatia 4) e rede (fatia 5). A água fica escondida enquanto há pergunta do ciclo na tela (a ignorada soma 1
+      ponto).
 - [ ] **Fatia 4:** humor por regras (`mood_rules.py`), com o motivo no balão; testes por regra.
 - [ ] **Fatia 5:** rede com 2 grupos novos, janela de decisão de 15 min, recompensas; teste de aprendizado com várias
       sementes.
@@ -289,4 +297,5 @@ num PR só, ou dois que só entram juntos), para o app em uso nunca ficar meio v
 | 2026-11-06 | Nova etapa 7 "O momento certo" (humor por regras, rede decide quando lembrar, pergunta na volta, Prorrogar, layout D); saúde/atalho viram etapa 8 |
 | 2026-11-06 | Instalador (`.exe`) e identidade do app no Windows (ícone próprio, sem "Python" na barra) entram na etapa 7 |
 | 2026-11-06 | Etapa 7: foco contínuo por presença (sem Iniciar), modos Profissional/Casual, reunião pelo microfone em uso pausa o foco, câmera e microfone nunca como sensor; fatias 2 e 3 (ciclo + janela D) entram juntas |
+| 2026-11-06 | Etapa 7, fatia 3: ciclo do foco ligado ao app, janela D completa e pomodoro antigo removido (fatias 2 e 3 prontas para entrar juntas) |
 | 2026-11-06 | Etapa 2 concluída (custo medido: 1,6 ms por segundo real, sem thread); contrato `Engine` cresce por etapas |

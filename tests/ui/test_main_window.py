@@ -178,15 +178,14 @@ def test_abre_no_menor_tamanho_e_o_texto_nao_e_cortado(qapp, tmp_path):
     window.close()
 
 
-def test_pausa_fica_na_mesma_linha_do_carinho_so_com_icone(env, qapp):
+def test_pausa_fica_no_topo_ao_lado_da_pilula_so_com_icone(env, qapp):
     window, *_ = env
     tab = window.pet_tab
     window.show()
     qapp.processEvents()
     assert tab.pause.text() == "" and not tab.pause.icon().isNull()
-    assert tab.pause.y() == tab.care.y()  # mesma linha
-    assert tab.pause.height() == tab.care.height()
-    assert tab.pause.x() > tab.care.x()  # e depois do carinho
+    assert abs(tab.pause.geometry().center().y() - tab.mode_button.geometry().center().y()) <= 4
+    assert tab.pause.x() > tab.mode_button.x()  # depois da pílula de modo
 
 
 def test_barra_de_abas_aparece_com_o_cerebro_e_o_titulo_continua_pulso(env, qapp):
@@ -197,3 +196,20 @@ def test_barra_de_abas_aparece_com_o_cerebro_e_o_titulo_continua_pulso(env, qapp
     assert [tabs.tabText(i) for i in range(tabs.count())] == ["Pulso", "Jogo", "Cérebro"]
     assert tabs.tabBar().isVisible()
     assert window.windowTitle() == "Pulso"
+
+
+def test_build_controller_leva_o_modo_e_o_sensor_de_reuniao(tmp_path):
+    from pulso.habits.focus_cycle import Mode, Phase
+    from pulso.sensors.meeting import FakeMeetingSensor
+    from pulso.storage.config import Settings
+
+    controller, _ = build_controller(
+        ScriptedSensor([FRAME]),
+        FakeClock(),
+        tmp_path / "cerebro.npz",
+        db=":memory:",
+        settings=Settings(mode="casual"),
+        meeting=FakeMeetingSensor([True]),
+    )
+    assert controller.habits.mode is Mode.CASUAL
+    assert controller.habits.cycle.phase is Phase.OFF

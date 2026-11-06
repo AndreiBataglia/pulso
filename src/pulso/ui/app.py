@@ -13,7 +13,9 @@ from pulso.brain.rewards import RewardConfig, RewardRules
 from pulso.clock import Clock, SystemClock
 from pulso.controller import PetController
 from pulso.habits.coach import HabitCoach
+from pulso.habits.focus_cycle import Mode
 from pulso.sensors.base import Sensor
+from pulso.sensors.meeting import MeetingSensor
 from pulso.storage.autostart import Autostart
 from pulso.storage.brain_store import AutoSaver, BrainFileError, load_or_create
 from pulso.storage.config import CONFIG_FILE, Settings, habit_config, load_settings, save_settings
@@ -33,11 +35,13 @@ def build_controller(
     warn=lambda text: None,
     db: Path | str | None = None,
     settings: Settings | None = None,
+    meeting: MeetingSensor | None = None,
 ) -> tuple[PetController, bool]:
     """Abre o cérebro salvo (ou cria um novo) e monta o controlador.
 
     `db` é o arquivo do banco de hábitos (padrão: `pulso.db` ao lado do cérebro). `settings` traz
-    os tempos dos hábitos e se as regras automáticas ficam ligadas (padrão: `Settings()`).
+    os tempos dos hábitos, o modo e se as regras automáticas ficam ligadas (padrão: `Settings()`).
+    `meeting` é o sensor de reunião (microfone em uso); sem ele, nunca há reunião.
 
     Devolve `(controlador, primeiro_uso)`.
 
@@ -62,7 +66,7 @@ def build_controller(
     decoder = MoodDecoder(engine.groups)
     settings = settings or Settings()
     store = HabitStore(open_db(db if db is not None else path.parent / DB_FILE))
-    habits = HabitCoach(clock, store, habit_config(settings))
+    habits = HabitCoach(clock, store, habit_config(settings), Mode(settings.mode))
     controller = PetController(
         sensor,
         clock,
@@ -71,6 +75,7 @@ def build_controller(
         RewardRules(clock, RewardConfig(auto_enabled=settings.auto_rules)),
         AutoSaver(engine, path, seed, clock),
         habits,
+        meeting,
     )
     if new_brain:
         controller.shutdown()  # grava já: o arquivo marca que o primeiro uso aconteceu
@@ -99,12 +104,16 @@ def run(fake_sensors: bool = False, minimized: bool = False) -> int:
     clock = SystemClock()
     if fake_sensors:
         from pulso.sensors.fake import ScriptedSensor, demo_scenario
+        from pulso.sensors.meeting import FakeMeetingSensor
 
         sensor: Sensor = ScriptedSensor(demo_scenario())
+        meeting: MeetingSensor = FakeMeetingSensor()
     else:
+        from pulso.sensors.meeting import WindowsMeetingSensor
         from pulso.sensors.windows import WindowsSensor
 
         sensor = WindowsSensor(clock)
+        meeting = WindowsMeetingSensor()
 
     app = QApplication(sys.argv[:1])
     app.setApplicationName("Pulso")
@@ -116,7 +125,9 @@ def run(fake_sensors: bool = False, minimized: bool = False) -> int:
 
     config = data_dir() / CONFIG_FILE
     settings = load_settings(config)
-    controller, first_run = build_controller(sensor, clock, brain_path(), warn, settings=settings)
+    controller, first_run = build_controller(
+        sensor, clock, brain_path(), warn, settings=settings, meeting=meeting
+    )
     app.setWindowIcon(pulso_icon())
     # O X da janela esconde o pet na bandeja; quem encerra de verdade é "Sair do Pulso".
     app.setQuitOnLastWindowClosed(False)

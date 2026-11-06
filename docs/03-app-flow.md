@@ -36,8 +36,11 @@ stateDiagram-v2
   carinho e bronca. As regras automáticas já dão um comportamento mínimo.
 - **Observando:** laço de 1 s ativo; humor atualizado a cada 10 s.
 - **Pausado (privacidade):** sensores parados, aprendizado parado, pet "dormindo" com um selo **"Observação
-  pausada"**. O pomodoro e a água **continuam** (são relógios, não observação).
-- O **pomodoro** tem o próprio ciclo (parado → foco → descanso → foco…), independente dos estados acima.
+  pausada"**. A água **continua** (é relógio, não observação). O **foco congela**: sem ler o sensor não há como saber
+  se o dono está lá (decidido na etapa 7, fatia 3; pausar e retomar não mexe no ciclo).
+- O **ciclo do foco** (etapa 7) começa sozinho quando o dono mexe no PC: Aguardando → Foco → Lembrete → Descanso →
+  Foco…, com Ausente, "O que foi?" e Reunião pelo caminho. A aba Pulso mostra um painel por fase (cartão do cronômetro,
+  lembrete, "o que foi?", descanso); no modo Casual não há ciclo, só a água.
 
 ## 3. Telas
 
@@ -156,9 +159,11 @@ stateDiagram-v2
    gosto dele.
 
 ### J04 — Pomodoro e água
-1. O dono clica 🍅 Iniciar. Depois de 25 min, chega a notificação "hora do descanso", e o pet se espreguiça.
+1. O dono mexe no PC e o foco abre sozinho (sem botão Iniciar). Depois de 50 min, chega "Bora pausar 10?" com
+   **Pausar agora · Prorrogar 5 min · Hoje não**, e o pet se espreguiça ao aceitar.
 2. No meio do descanso, o lembrete de água aparece. O dono clica 💧 Bebi: +1 copo e recompensa "atendido".
-3. Depois de 5 min, chega "hora de voltar". À noite, T03 mostra 6 copos e 8 pomodoros.
+3. Passados os 10 min, chega "hora de voltar" (ou "passou X min do combinado"). Se o dono sai da mesa e volta, o pet
+   pergunta "o que foi?" (pausa, refeição, necessidade, foco sem mexer). O rodapé mostra pausas, prorrogações, copos e focos.
 
 ## 5. Suposições
 - A janela principal tem tamanho fixo moderado (~520×640) e pode ser redimensionada.
