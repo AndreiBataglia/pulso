@@ -58,15 +58,15 @@
 ## Etapa 2 — O neurônio e a rede (F03)
 **Objetivo:** a rede pulsa e escolhe um humor, ainda sem aprender.
 **Depende de:** Etapa 1
-- [ ] Um neurônio LIF isolado, com teste: corrente constante → frequência dentro da faixa teórica.
-- [ ] `brain/engine.py` (contrato) e `tests/brain/test_engine_contract.py`.
-- [ ] `numpy_engine.py`: entrada de Poisson, oculta excitatória e inibitória, saída com inibição lateral,
+- [x] (2026-11-06) Um neurônio LIF isolado, com teste: corrente constante → frequência dentro da faixa teórica.
+- [x] (2026-11-06) `brain/engine.py` (contrato) e `tests/brain/test_engine_contract.py`.
+- [x] (2026-11-06) `numpy_engine.py`: entrada de Poisson, oculta excitatória e inibitória, saída com inibição lateral,
       semente fixa.
-- [ ] `encoding.py` (`SensorFrame` → taxas) e `decoding.py` (contagem → humor, com histerese).
-- [ ] Medir o custo de um segundo real (100 passos) e registrar no diário. Se passar de 20 ms, rever o
+- [x] (2026-11-06) `encoding.py` (`SensorFrame` → taxas) e `decoding.py` (contagem → humor, com histerese).
+- [x] (2026-11-06) Medir o custo de um segundo real (100 passos) e registrar no diário. Se passar de 20 ms, rever o
       tamanho ou usar uma thread (TRD §5.1).
-- [ ] `pulso --print-brain`: humor a cada 10 s, com sensores reais ou falsos.
-- [ ] Diário: equação do LIF com gráfico, codificação por taxa, inibição lateral e "por que 200 neurônios
+- [x] (2026-11-06) `pulso --print-brain`: humor a cada 10 s, com sensores reais ou falsos.
+- [x] (2026-11-06) Diário: equação do LIF com gráfico, codificação por taxa, inibição lateral e "por que 200 neurônios
       bastam".
 - **Pronto quando:** o contrato passa, o custo medido fica no orçamento e o humor muda quando o roteiro do
   sensor falso muda.
@@ -163,3 +163,4 @@
 |------|---------|
 | 2026-11-05 | Versão inicial |
 | 2026-11-05 | Etapa 0 concluída: repositório `AndreiBataglia/pulso`, PR #1 com CI verde, tag `v0.0.0` |
+| 2026-11-06 | Etapa 2 concluída (custo medido: 1,6 ms por segundo real, sem thread); contrato `Engine` cresce por etapas |
