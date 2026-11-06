@@ -212,10 +212,13 @@
 num PR só, ou dois que só entram juntos), para o app em uso nunca ficar meio velho, meio novo.
 - [x] **Fatia 1 (2026-11-06):** aba "Pet" → "Pulso", botão Bronca removido (o Carinho só reage), `--minimizado` e
       `AppUserModelID`.
-- [ ] **Fatia 2, núcleo do ciclo (sem tela nova):** `sensors/` com presença e "microfone em uso" (sensor falso nos
-      testes; a pausa de privacidade para os dois); máquina de estados do ciclo (Aguardando, Foco, Ausente, O que foi?,
-      Lembrete, Descansando, +N min, Reunião) e modos; tolerância; as 4 categorias; migração v3 do banco (categoria e
-      durações da pausa; `break_extended`). Testes roteirizados com relógio e sensor falsos.
+- [~] **Fatia 2, núcleo do ciclo (sem tela nova)** — feito em 2026-11-06, sem commit: `habits/focus_cycle.py` (máquina de
+      estados: Aguardando, Foco, Ausente, O que foi?, Lembrete, Descansando, Além do descanso, Reunião; modos; tolerância;
+      as 4 categorias), `sensors/meeting.py` (microfone em uso pelo registro do Windows, sensor falso) e migração v3 do
+      banco (categoria e resumo da pausa em segundos; sem `break_extended`, o excesso mora em `excess_s`). O
+      `Pomodoro` antigo continua no lugar até a fatia 3. **Falta (fatia 3):** ligar ao `HabitCoach`/controlador (a
+      presença vem de `idle_seconds`; o sensor de reunião só é lido com a observação ligada), gravar os `CycleEvent` com
+      o resumo, Ajustes (modo e tolerância) e a janela D.
 - [ ] **Fatia 3, janela D ligada ao ciclo:** todas as telas de uma vez (anel do foco, pílula de modo, Pausar agora,
       Prorrogar, "o que foi?", reunião, casual, placar do dia); o pomodoro antigo sai no mesmo passo.
 - [ ] **Fatia 4:** humor por regras (`mood_rules.py`), com o motivo no balão; testes por regra.
