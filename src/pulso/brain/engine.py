@@ -31,6 +31,10 @@ class Engine(Protocol):
         """Simula `duration_ms` de tempo da rede com as taxas de entrada (em Hz) constantes."""
         ...
 
+    def reward(self, value: float) -> None:
+        """Dopamina: `value` > 0 reforça o que a rede fez há pouco, `value` < 0 desfaz."""
+        ...
+
     def state_dict(self) -> dict[str, np.ndarray]:
         """Tudo que precisa ser salvo para reconstruir o cérebro."""
         ...

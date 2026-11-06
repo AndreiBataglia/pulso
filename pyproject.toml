@@ -13,6 +13,7 @@ license-files = ["LICENSE"]
 authors = [{ name = "Andrei Bataglia" }]
 dependencies = [
     "numpy>=1.26",
+    "platformdirs>=4",
     "psutil>=5.9",
 ]
 
@@ -30,6 +31,7 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = ["slow: testes de aprendizado (cerca de 1 minuto); pule com -m 'not slow'"]
 
 [tool.ruff]
 line-length = 100

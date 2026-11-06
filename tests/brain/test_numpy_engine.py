@@ -55,12 +55,13 @@ def test_lateral_inhibition_only_between_different_groups():
 
 
 def test_weights_do_not_change_while_running():
-    # Nesta etapa a rede não aprende: os pesos têm que ficar idênticos depois de simular.
+    # Sem dopamina o STDP só enche a elegibilidade: os pesos ficam idênticos depois de simular.
     engine = NumpyEngine(seed=1)
     before = engine.state_dict()
     engine.step(np.full(engine.n_inputs, 80.0), 1000)
     after = engine.state_dict()
-    assert all(np.array_equal(before[k], after[k]) for k in before)
+    assert all(np.array_equal(before[k], after[k]) for k in before if k != "stats")
+    assert after["stats"][2] == before["stats"][2] + 1000  # só o contador de passos anda
 
 
 def test_cost_of_one_real_second_fits_the_budget():
