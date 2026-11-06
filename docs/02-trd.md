@@ -223,7 +223,7 @@ class Engine(Protocol):
 
 ## 12. Suposições
 - Uma thread só (laço no `QTimer` do Qt) enquanto a medição couber no orçamento (§5.1).
-- Pet desenhado com QPainter (formas simples) no MVP, sem arquivos de imagem; pixel art no F17.
+- Pet desenhado com QPainter (fundo escuro, olhos, boca e pequenos emojis) no MVP, sem arquivos de imagem; pixel art no F17.
 - Identificadores em inglês e comentários em português.
 - Python ≥ 3.12.
 
