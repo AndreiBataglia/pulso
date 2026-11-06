@@ -24,6 +24,14 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/).
   pulsos por humor, mapa de pesos (com modo "só o que mudou"), ❓ em cada gráfico, congelar/continuar, Ctrl+1/Ctrl+2
   e rodapé com o custo da rede. `Engine.snapshot()` e `Engine.reward` devolvendo a dopamina (etapa 5). Custo medido:
   ~13 ms por volta de 1 s com a aba visível e nenhum a mais com ela escondida ou a janela minimizada.
+- Hábitos: **pomodoro** (foco 50 / descanso 10, longo 20 a cada 4 ciclos; iniciar, pausar, pular), **lembrete de água**
+  (60 min) com Bebi · Depois · Hoje não, notificação do Windows e `pulso.db` (SQLite com migração v1). Recusar ou
+  ignorar acumula **pendência**; com 3 pontos ou mais o pet fica **nervoso** até o dono dizer que fez. O ócio adia o
+  lembrete e o pomodoro é independente da pausa de privacidade (etapa 6).
+- Bandeja do Windows: ícone sempre visível com menu (mostrar, sempre à frente, lembrete de água, iniciar com o Windows,
+  pausar observação, pomodoro, sair). **Fechar a janela (X) esconde o pet na bandeja** e ele segue com os avisos; "Sair do
+  Pulso" encerra de verdade. A janela fica **sempre à frente** por padrão. Preferências em `config.toml`; "iniciar com o
+  Windows" pela chave `Run` do usuário.
 
 ### Alterado
 - A barra de abas aparece (Pet · Cérebro); a janela cresce ao abrir o Cérebro e volta ao tamanho do pet.

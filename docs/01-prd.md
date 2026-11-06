@@ -109,7 +109,7 @@ Uso: um usuário por instalação, roda em segundo plano o dia todo, **100% loca
 - **Prioridade:** Média
 
 #### F07 — Pomodoro (sugestão de descanso)
-- **Descrição:** ciclos de foco e descanso (padrão 25/5, com descanso longo de 15 min a cada 4 ciclos). O pet
+- **Descrição:** ciclos de foco e descanso (padrão 50/10, com descanso longo de 20 min a cada 4 ciclos; decidido em 2026-11-06). O pet
   avisa a hora de descansar e a de voltar.
 - **Critérios de aceite:**
   - [ ] Iniciar, pausar e pular pelo painel e pela bandeja.
@@ -118,7 +118,7 @@ Uso: um usuário por instalação, roda em segundo plano o dia todo, **100% loca
 - **Prioridade:** Alta
 
 #### F08 — Lembrete de água
-- **Descrição:** a cada X minutos (padrão 45) o pet pede água. O dono responde "Bebi 💧" ou "Depois".
+- **Descrição:** a cada X minutos (padrão 60) o pet pede água. O dono responde "Bebi 💧", "Depois" ou "Hoje não" (e "Bebi" / "Fiz a pausa" ficam sempre visíveis na aba Pet).
 - **Critérios de aceite:**
   - [ ] "Bebi" soma um copo no dia; "Depois" adia 10 min.
   - [ ] **Decidido pelo dono (2026-11-06) — pendência cumulativa:** o Pulso registra se o dono **fez**, **adiou**,
@@ -182,7 +182,7 @@ Uso: um usuário por instalação, roda em segundo plano o dia todo, **100% loca
 - Escala de ~200 neurônios no MVP (faixa planejada: 100–500).
 - Windows 10/11 primeiro; outros sistemas depois (F18).
 - 5 humores, mais "dormindo".
-- Intervalos padrão: pomodoro 25/5/15, água a cada 45 min.
+- Intervalos padrão (decididos em 2026-11-06): pomodoro 50/10/20, água a cada 60 min.
 
 ## 8. Perguntas em aberto
 - O nome "Pulso" está bom? — responsável: dono

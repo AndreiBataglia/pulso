@@ -97,13 +97,17 @@ projeto_tamagotchi/
 │   │   ├── decoding.py     # contagem por grupo → humor (com histerese)
 │   │   └── rewards.py      # regras automáticas + recompensa do dono → dopamina
 │   ├── habits/
+│   │   ├── kinds.py        # tipos de evento, presença do dono e HabitConfig
+│   │   ├── reminder.py     # lembrete que pergunta e espera (adiar, recusar, ignorar)
 │   │   ├── pomodoro.py     # máquina de estados foco/descanso
-│   │   └── water.py        # intervalo, adiar, contar copos
+│   │   ├── water.py        # intervalo, adiar, copos
+│   │   └── coach.py        # junta as máquinas ao banco e calcula a pendência (nervoso)
 │   ├── storage/
 │   │   ├── paths.py        # pastas (platformdirs)
 │   │   ├── brain_store.py  # salvar/carregar o cérebro (.npz com versão)
 │   │   ├── db.py           # SQLite dos eventos de hábito
-│   │   └── config.py       # configuração TOML com valores padrão e validação
+│   │   ├── config.py       # preferências em TOML com valores padrão e validação
+│   │   └── autostart.py    # iniciar com o Windows (chave Run do usuário)
 │   └── ui/
 │       ├── app.py          # monta tudo (cérebro novo ou salvo, tema) e abre a janela
 │       ├── theme.py        # paleta clara/escura e conferência de contraste
@@ -113,7 +117,7 @@ projeto_tamagotchi/
 │       ├── brain_tab.py    # gráficos pyqtgraph
 │       ├── health_tab.py   # resumo de saúde
 │       ├── settings_dialog.py
-│       ├── tray.py         # ícone da bandeja e notificações
+│       ├── tray.py         # ícone da bandeja, menu e notificações (QSystemTrayIcon)
 │       └── hotkey.py       # atalho global (RegisterHotKey)
 └── tests/                  # espelha src/pulso/
 ```
@@ -193,7 +197,7 @@ class Engine(Protocol):
 ## 7. Ambientes e execução
 - **Desenvolvimento:** `python -m venv .venv` → `.venv\Scripts\pip install -e ".[dev]"` → `pulso` (ou
   `python -m pulso`). `pulso --fake-sensors` roda com o sensor roteirizado, sem ler o PC.
-- **Uso real:** `pip install` a partir do GitHub. Opção "iniciar com o Windows" (atalho na pasta Inicializar).
+- **Uso real:** `pip install` a partir do GitHub. Opção "iniciar com o Windows" (valor na chave `HKCU\...\Run`, via `winreg`; sem `.lnk`).
   Um executável (PyInstaller) fica para depois do MVP.
 
 ## 8. Segurança e privacidade
