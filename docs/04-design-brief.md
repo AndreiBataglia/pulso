@@ -16,6 +16,8 @@
 ## 2. Referências
 - **Tamagotchi:** um ser simples, com poucas expressões bem legíveis.
 - **Neko / Desktop Goose:** o "bichinho que mora no PC", mas aqui comportado (não atrapalha).
+- **LOOI (TangibleFuture):** robô de mesa que usa o celular como rosto. Não copiamos o robô, só a lição:
+  **olhos animados sobre fundo escuro carregam o humor com poucos elementos**. Ver §7.1.
 - **Painéis de neurociência (Brian2, NEST):** raster de pulsos clássico, com pontos pretos sobre fundo claro.
 - **Forest / Pomofocus:** o pomodoro com um contador grande e um único botão.
 
@@ -31,7 +33,7 @@ O tema acompanha o Windows (claro ou escuro).
 | Primária | `#0F8A7E` | `#3CC6B5` | Botões principais, dopamina positiva |
 | Sucesso / Aviso / Erro | `#1A7F37` / `#9A6700` / `#CF222E` | `#3FB950` / `#D29922` / `#F85149` | Mensagens; erro também = dopamina negativa |
 
-**Cor do pet por humor** (preenchimento do corpo; os olhos e a boca carregam a expressão):
+**Cor do pet por humor** (cor dos olhos e da boca, desenhados sobre o fundo escuro do rosto):
 
 | Humor | Cor | Expressão |
 |-------|-----|-----------|
@@ -73,11 +75,25 @@ O tema acompanha o Windows (claro ou escuro).
   validação ao lado do campo.
 
 ## 7. Ícones e imagens
-- **Pet desenhado com QPainter** (formas: corpo arredondado, olhos, boca, extras como "z" e gota). Não usa
-  arquivos de imagem no MVP.
+- **Pet desenhado com QPainter**: fundo escuro, olhos e boca, mais pequenos emojis só quando necessário
+  (ex.: "z", gota, 💧). Sem corpo. Não usa arquivos de imagem no MVP.
 - **Ícone da bandeja:** o rosto do pet em 16/32 px, com três variações (normal, pausado com olhos fechados,
   descanso com 🍅).
 - Emojis nos botões (💚 💢 💧 🍅 👁), sempre acompanhados de texto.
+
+### 7.1 Direção visual (inspirada no LOOI)
+**Decisão do dono (2026-11-06):** só o **fundo escuro com olhos, boca e alguns pequenos emojis quando
+necessário**. Outros elementos podem entrar depois, se forem necessários.
+- **Os olhos fazem o trabalho.** O humor se lê pelo formato e pela abertura dos olhos; a boca é secundária.
+  A cor do humor (§3) pinta olhos e boca.
+- **Pausa = olhos fechados** (F02): fica óbvio, sem texto, que o Pulso não está observando.
+- **Microanimações que dão vida:** piscar a intervalos irregulares (3–6 s), olhar para o lado de vez em
+  quando e inclinar levemente o rosto. Sem elas o pet parece uma imagem parada.
+- **Emojis:** pequenos e raros, só para reforçar um estado (💤 sono, 💧 água, 🍅 descanso). Nunca no lugar
+  dos olhos.
+- **Sem câmera nem sensores extras:** o LOOI tem rodas, LEDs e câmera; o Pulso não usa nada disso.
+- Referência (marketing e resenhas): [resenha](https://techbuzzireland.com/2026/02/11/looi-robot-review/),
+  [Hackster](https://hackster.io/news/tangiblefuture-s-looi-turns-smartphones-into-ambulatory-companion-robots-with-chatgpt-support-fddc772c62b2).
 
 ## 8. Mensagens e tom de voz
 O pet fala na primeira pessoa, em frases curtas e carinhosas, sem culpa nem bronca.
@@ -141,9 +157,10 @@ As mensagens do sistema (erros, ajustes) são neutras e dizem como resolver:
 - O desenho do pet em formas simples basta para o MVP; a pixel art fica para o F17.
 
 ## 12. Perguntas em aberto
-- Preferência de formato do pet (bolinha, gato, fantasminha…)? Suposição: uma "bolinha" com olhos, neutra.
+- ~~Formato do pet~~ — resolvido em 2026-11-06: sem corpo, só fundo escuro com olhos, boca e pequenos emojis (§7.1).
 
 ## Histórico de revisões
 | Data | Mudança |
 |------|---------|
 | 2026-11-05 | Versão inicial |
+| 2026-11-06 | Direção visual do rosto: fundo escuro, olhos, boca e pequenos emojis, inspirada no LOOI (§2, §3, §7 e §7.1) |

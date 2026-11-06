@@ -38,19 +38,19 @@
 ## Etapa 1 — Sensores e pausa de privacidade (F01, F02)
 **Objetivo:** ver no terminal o que o Pulso "sente", e provar que a pausa desliga tudo.
 **Depende de:** Etapa 0
-- [ ] `clock.py` (relógio real e falso).
-- [ ] `sensors/base.py` (`SensorFrame`, protocolo `Sensor`), `categories.py` (tabela embutida mais a extra) e
+- [x] (2026-11-06) `clock.py` (relógio real e falso).
+- [x] (2026-11-06) `sensors/base.py` (`SensorFrame`, protocolo `Sensor`), `categories.py` (tabela embutida mais a extra) e
       `fake.py` (roteiro).
-- [ ] `sensors/windows.py`: CPU/RAM (psutil), PID em primeiro plano (`GetForegroundWindow` +
+- [x] (2026-11-06) `sensors/windows.py`: CPU/RAM (psutil), PID em primeiro plano (`GetForegroundWindow` +
       `GetWindowThreadProcessId`), nome do processo, ociosidade (`GetLastInputInfo`) e trocas por minuto.
-- [ ] `loop.py` mínimo, com `pause()`/`resume()` que **param de chamar** o sensor.
-- [ ] Testes:
+- [x] (2026-11-06) `loop.py` mínimo, com `pause()`/`resume()` que **param de chamar** o sensor.
+- [x] (2026-11-06) Testes:
   - categorias, incluindo o desconhecido;
   - na pausa, o sensor falso recebe zero chamadas;
   - teste de grep que garante que `GetWindowText` não aparece em `src/`;
   - erro no sensor vira leitura "desconhecida".
-- [ ] `pulso --print-sensors`: imprime uma linha por segundo (só para desenvolvimento, sem gravar nada).
-- [ ] Diário: como o Windows informa a janela ativa e a ociosidade, e por que o título não é lido.
+- [x] (2026-11-06) `pulso --print-sensors`: imprime uma linha por segundo (só para desenvolvimento, sem gravar nada).
+- [x] (2026-11-06) Diário: como o Windows informa a janela ativa e a ociosidade, e por que o título não é lido.
 - **Arquivos:** `src/pulso/clock.py`, `src/pulso/sensors/*`, `src/pulso/loop.py`, `tests/sensors/*`
 - **Pronto quando:** os critérios de F01 e F02 (exceto botão e atalho, que dependem da interface) passam, e o
   teste real mostra a categoria certa ao alternar entre VS Code e o navegador.
