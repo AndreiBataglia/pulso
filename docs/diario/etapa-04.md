@@ -91,7 +91,11 @@ Escureci a primária clara para `#0D7F74` (4,88:1) e atualizei o Design Brief. M
 ## Medições
 - Piloto de 60 s (app real, sensores reais, pasta de dados temporária): **0,10% de CPU** (da máquina inteira) e
   **149 MB de RAM**. Metas do PRD §4: < 3% e < 200 MB.
-- Teste real de 1 h (app com a interface final): em andamento; o resultado entra neste diário antes do merge.
+- **Uso real do dono, com os dados reais (2026-11-06, interface antes de esconder a barra de abas): 27 min**
+  (164 amostras de 10 s), não 1 h: **CPU média 0,00% (máx. 0,05%) da máquina; RAM 152 → 155 MB** (estável,
+  +3 MB). Dentro das metas do PRD (< 3% e < 200 MB). O app fechou normalmente e gravou o `cerebro.npz`
+  (205 KB). A CPU ficou bem abaixo do piloto (0,10%): provável efeito da janela fora de foco ou escondida, que
+  para a animação; **não verificado**. Uma medição de 1 h seguida não foi feita; o dono considerou os 27 min suficientes.
 
 ## Como testar
 - `pytest` — todos os testes; `pytest -m "not slow"` — sem os 4 de aprendizado (~13 s).

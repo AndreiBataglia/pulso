@@ -100,7 +100,8 @@
 - [x] (2026-11-06) Primeiro uso: fala de boas-vindas (J01).
 - [x] (2026-11-06) Teste de interface (`offscreen`): o clique em Carinho chama `reward(+1)`; Pausar troca o selo e para o
       sensor.
-- [ ] Teste real: deixar rodando 1 h e medir CPU e RAM (meta do PRD §4).
+- [x] (2026-11-06) Teste real e medição de CPU e RAM (meta do PRD §4). Feito em 27 min de uso real, e o dono
+      considerou suficiente: CPU ~0%, RAM 152→155 MB.
 - [ ] Diário: Qt (sinais e *slots*, `QTimer`), desenho com QPainter e uma captura para o README.
 - **Pronto quando:** os critérios de F05 passam, a J01 e a J02 (pelo botão) funcionam e o consumo está dentro da
   meta.
