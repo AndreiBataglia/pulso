@@ -1,4 +1,4 @@
-"""Janela principal: abas (por enquanto só "Pet") e o laço de 1 s no `QTimer`.
+"""Janela principal: abas "Pet" e "Cérebro" e o laço de 1 s no `QTimer`.
 
 Conceitos de Qt usados aqui:
 - **Sinal e *slot***: um botão emite o sinal `clicked`; ligamos (`connect`) esse sinal a um método
@@ -10,7 +10,16 @@ Conceitos de Qt usados aqui:
 import random
 
 from PySide6.QtCore import QRectF, QSize, Qt, QTimer
-from PySide6.QtGui import QCloseEvent, QColor, QIcon, QPainter, QPainterPath, QPixmap
+from PySide6.QtGui import (
+    QCloseEvent,
+    QColor,
+    QIcon,
+    QKeySequence,
+    QPainter,
+    QPainterPath,
+    QPixmap,
+    QShortcut,
+)
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
@@ -24,7 +33,9 @@ from PySide6.QtWidgets import (
 from pulso.clock import Clock
 from pulso.controller import PetController
 from pulso.ui import phrases
+from pulso.ui.brain_tab import BRAIN_MINIMUM, BRAIN_PREFERRED, BrainTab
 from pulso.ui.pet_widget import PetWidget
+from pulso.ui.theme import LIGHT, Palette
 
 WELCOME_HOLD_S = 30.0  # a fala de boas-vindas não é trocada por humores antes disto
 ICON_PX = 20
@@ -129,6 +140,7 @@ class MainWindow(QMainWindow):
         first_run: bool = False,
         tick_ms: int = 1000,
         rng: random.Random | None = None,
+        palette: Palette = LIGHT,
     ) -> None:
         super().__init__()
         self.setWindowTitle("Pulso")
@@ -138,12 +150,19 @@ class MainWindow(QMainWindow):
         self._hold_until = clock.now() + WELCOME_HOLD_S if first_run else 0.0
 
         self.pet_tab = PetTab()
-        tabs = QTabWidget()
-        tabs.addTab(self.pet_tab, "Pet")  # "Cérebro" e "Saúde" entram nas etapas 5 e 7
-        # Com uma aba só, a barra repete o título da janela e gasta espaço: fica escondida.
-        # (Quando houver mais abas, basta `tabs.tabBar().setVisible(True)`.)
+        self.brain_tab = BrainTab(controller, clock, palette)
+        self.tabs = tabs = QTabWidget()
+        tabs.addTab(self.pet_tab, "Pet")  # "Saúde" entra na etapa 7
+        tabs.addTab(self.brain_tab, "Cérebro")
+        # Com uma aba só, a barra repetiria o título da janela: fica escondida nesse caso.
         tabs.tabBar().setVisible(tabs.count() > 1)
         self.setCentralWidget(tabs)
+        for number, index in ((1, 0), (2, 1)):  # Ctrl+1 / Ctrl+2 (Design Brief §10)
+            shortcut = QShortcut(QKeySequence(f"Ctrl+{number}"), self)
+            shortcut.activated.connect(lambda i=index: tabs.setCurrentIndex(i))
+        self._pet_minimum = QSize()
+        self._pet_size = QSize()
+        tabs.currentChanged.connect(self._on_tab_changed)
 
         self.pet_tab.care.clicked.connect(lambda: self._owner_click(+1))
         self.pet_tab.scold.clicked.connect(lambda: self._owner_click(-1))
@@ -169,8 +188,22 @@ class MainWindow(QMainWindow):
         tab_bar = tabs.tabBar()
         tab_bar_height = 0 if tab_bar.isHidden() else tab_bar.sizeHint().height()
         height = self.pet_tab.layout().totalHeightForWidth(width) + tab_bar_height
-        self.setMinimumSize(width, height)
+        self._pet_minimum = QSize(width, height)
+        self.setMinimumSize(self._pet_minimum)
         self.resize(width, height)
+
+    def _on_tab_changed(self, index: int) -> None:
+        """A aba Cérebro precisa de mais espaço que o pet: a janela cresce ao abri-la e volta ao
+        tamanho de antes ao voltar para o Pet (o pet continua abrindo compacto)."""
+        if self.tabs.widget(index) is self.brain_tab:
+            self._pet_size = self.size()
+            self.setMinimumSize(BRAIN_MINIMUM)
+            self.resize(self.size().expandedTo(BRAIN_PREFERRED))
+            self.brain_tab.refresh()
+        else:
+            self.setMinimumSize(self._pet_minimum)
+            if self._pet_size.isValid():
+                self.resize(self._pet_size)
 
     # ---- laço de 1 s -------------------------------------------------------------------------
 
@@ -179,6 +212,7 @@ class MainWindow(QMainWindow):
         result = self._controller.tick()
         if result is None:  # pausado: o controlador não leu nada
             return
+        self.brain_tab.refresh()  # não faz nada se escondida ou congelada
         self._show_mood(result.mood)
         if result.mood_changed and result.mood is not None:
             self._say(phrases.mood_phrase(result.mood, self._rng))

@@ -20,11 +20,13 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from pulso.brain.engine import StepResult
+from pulso.brain.engine import BrainSnapshot, StepResult
 from pulso.brain.lif import DT_MS, LIFParams, LIFPopulation
 from pulso.brain.plasticity import PlasticityConfig, PlasticSynapses
 
 DEFAULT_GROUPS = ("animado", "contente", "entediado", "sonolento", "preocupado")
+LOG_MS = 2000  # quanto tempo de rede os gráficos lembram (2 s de rede ≈ 20 s reais)
+SPIKE_DRAW_MV = 20.0  # só no desenho: o pulso aparece como um pico acima do limiar
 
 
 @dataclass(frozen=True)
@@ -67,6 +69,13 @@ class NumpyEngine:
         # Pulsos do passo anterior (chegam aos vizinhos só no passo seguinte).
         self._hidden_spikes = np.zeros(self._n_hidden)
         self._out_spikes = np.zeros(self._n_out)
+        self._last_dopamine = 0.0
+        # Registro circular para os gráficos (aba Cérebro): pulsos de todos os neurônios e o
+        # potencial de 3 deles, 1 coluna por ms de rede. Não vai para o disco.
+        self._spike_log = np.zeros((self.n_inputs + self._n_hidden + self._n_out, LOG_MS), bool)
+        self._v_log = np.zeros((3, LOG_MS))
+        self._log_count = 0  # quantos ms já foram gravados no total
+        self._traced = (0, cfg.n_hidden_e, 0)  # oculta exc., oculta inib., saída do 1º humor
 
     # ---- construção ----------------------------------------------------------------------
 
@@ -132,6 +141,7 @@ class NumpyEngine:
             if self._in_syn.cfg.eta > 0:  # camada congelada: nem gasta CPU com rastros
                 self._in_syn.update(in_f, self._hidden_spikes)
             self._out_syn.update(delivered_hidden, self._out_spikes)
+            self._record(in_spk)
             hidden_total += int(self._hidden_spikes.sum())
             out_total += self._out_spikes
 
@@ -139,9 +149,56 @@ class NumpyEngine:
         counts = out_total.reshape(len(self.groups), self.config.group_size).sum(axis=1)
         return StepResult(counts=counts.astype(int), hidden_spikes=hidden_total)
 
+    def _record(self, in_spk: np.ndarray) -> None:
+        """Grava o passo que acabou de rodar no registro circular dos gráficos."""
+        col = self._log_count % LOG_MS
+        n_in, n_h = self.n_inputs, self._n_hidden
+        self._spike_log[:n_in, col] = in_spk
+        self._spike_log[n_in : n_in + n_h, col] = self._hidden_spikes
+        self._spike_log[n_in + n_h :, col] = self._out_spikes
+        h, o = self._traced[:2], self._traced[2]
+        self._v_log[:2, col] = self.hidden.v[list(h)]
+        self._v_log[2, col] = self.output.v[o]
+        spiked = self._spike_log[[n_in + h[0], n_in + h[1], n_in + n_h + o], col]
+        self._v_log[spiked, col] = SPIKE_DRAW_MV
+        self._log_count += 1
+
+    def snapshot(self) -> BrainSnapshot:
+        cfg = self.config
+        n = min(self._log_count, LOG_MS)
+        shift = -(self._log_count % LOG_MS) if self._log_count >= LOG_MS else 0
+        spikes = np.roll(self._spike_log, shift, axis=1)[:, :n] if shift else self._spike_log[:, :n]
+        volts = np.roll(self._v_log, shift, axis=1)[:, :n] if shift else self._v_log[:, :n]
+        n_in, n_h, n_e = self.n_inputs, self._n_hidden, cfg.n_hidden_e
+        p = self.hidden.params
+        return BrainSnapshot(
+            spikes=spikes.copy(),
+            layers=[
+                ("entrada", 0, n_in),
+                ("oculta_exc", n_in, n_in + n_e),
+                ("oculta_inib", n_in + n_e, n_in + n_h),
+                ("saida", n_in + n_h, n_in + n_h + self._n_out),
+            ],
+            groups=list(self.groups),
+            group_size=cfg.group_size,
+            voltage=volts.copy(),
+            voltage_labels=[
+                "oculta (excitatória)",
+                "oculta (inibitória)",
+                f"saída ({self.groups[0]})",
+            ],
+            v_rest_mv=p.v_rest_mv,
+            v_threshold_mv=p.v_threshold_mv,
+            weights=self.w_hidden_out[:n_e].copy(),
+            weights_max=cfg.w_out_max_mv,
+            dopamine=self._last_dopamine,
+            reward_baseline=self._reward_baseline,
+            rewards=(int(self._stats[0]), int(self._stats[1])),
+        )
+
     # ---- recompensa ----------------------------------------------------------------------
 
-    def reward(self, value: float) -> None:
+    def reward(self, value: float) -> float:
         """Entrega dopamina `d = r − r̄` (erro de previsão: só surpresa ensina).
 
         Se as recompensas vêm sempre iguais (r̄ já as espera), `d` tende a zero e o aprendizado
@@ -155,6 +212,8 @@ class NumpyEngine:
             self._stats[0] += 1
         elif value < 0:
             self._stats[1] += 1
+        self._last_dopamine = dopamine
+        return dopamine
 
     # ---- salvar e restaurar --------------------------------------------------------------
 
@@ -205,3 +264,7 @@ class NumpyEngine:
         self.output.reset()
         self._hidden_spikes[:] = 0.0
         self._out_spikes[:] = 0.0
+        self._spike_log[:] = False  # os gráficos recomeçam em branco
+        self._v_log[:] = 0.0
+        self._log_count = 0
+        self._last_dopamine = 0.0

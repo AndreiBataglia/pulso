@@ -30,6 +30,14 @@ class MoodDecoder:
         self._margin = margin
         self._acc = np.zeros(len(moods))
         self._steps = 0
+        self._last_window = np.zeros(len(moods))  # contagem da última janela de 10 s fechada
+
+    def counts(self) -> np.ndarray:
+        """Pulsos por humor para os gráficos: a última janela fechada (ou, antes da primeira
+        decisão, o que já se juntou nesta)."""
+        if self._last_window.any():
+            return self._last_window.copy()
+        return self._acc.copy()
 
     def update(self, counts: np.ndarray) -> str | None:
         """Soma a contagem de uma volta. Ao fechar a janela, devolve o humor; senão, `None`."""
@@ -38,6 +46,7 @@ class MoodDecoder:
         if self._steps < self._window_steps:
             return None
         window, self._acc, self._steps = self._acc, np.zeros(len(self.moods)), 0
+        self._last_window = window
         return self._decide(window)
 
     def _decide(self, window: np.ndarray) -> str | None:

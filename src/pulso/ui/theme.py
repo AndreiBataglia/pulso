@@ -82,6 +82,7 @@ def stylesheet(p: Palette) -> str:
         border-radius: 12px; padding: 4px 12px; }}
     QLabel#badge[paused="true"] {{ border-color: {p.text_secondary}; color: {p.text_secondary}; }}
     QLabel#caption {{ color: {p.text_secondary}; }}
+    QLabel#brain_title {{ font-size: 15px; font-weight: 600; }}
     QPushButton#pause {{ padding: 8px 12px; }}
     QPushButton {{ background: {p.surface}; color: {p.text}; border: 1px solid {p.text_secondary};
         border-radius: 8px; padding: 8px 16px; }}

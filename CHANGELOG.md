@@ -20,7 +20,13 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/).
   piscar e olhar de lado), balão de fala, botões Carinho, Bronca e Pausa (só ícone), janela no tamanho mínimo, selo
   de pausa (só aparece pausado), legenda do humor, reação ao carinho/bronca, boas-vindas no primeiro uso, tema claro/escuro do Windows e `PetController`
   (o laço de 1 s sem Qt). `pulso` abre a janela (`--fake-sensors` usa o roteiro falso) (etapa 4).
+- Aba **Cérebro** (pyqtgraph): raster de pulsos por camada, potencial de 3 neurônios, dopamina com a cor de quem a deu,
+  pulsos por humor, mapa de pesos (com modo "só o que mudou"), ❓ em cada gráfico, congelar/continuar, Ctrl+1/Ctrl+2
+  e rodapé com o custo da rede. `Engine.snapshot()` e `Engine.reward` devolvendo a dopamina (etapa 5). Custo medido:
+  ~13 ms por volta de 1 s com a aba visível e nenhum a mais com ela escondida ou a janela minimizada.
 
 ### Alterado
+- A barra de abas aparece (Pet · Cérebro); a janela cresce ao abrir o Cérebro e volta ao tamanho do pet.
+- `Engine.reward` passa a devolver a dopamina entregue (`value − r̄`).
 - Primária clara escurecida de `#0F8A7E` para `#0D7F74`: o texto branco do botão dava 4,24:1 (mínimo 4,5:1).
 - `pulso` sem argumentos agora abre o app (antes imprimia a ajuda).
