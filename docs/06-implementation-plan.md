@@ -31,7 +31,7 @@
       construção" e link para os docs.
 - [x] (2026-11-05) `src/pulso/__main__.py` que imprime a versão, e um teste trivial.
 - [x] (2026-11-05) `.github/workflows/ci.yml`: ruff e pytest no `windows-latest` (Python 3.12 e 3.13).
-- [ ] `gh repo create <nome> --public`, primeiro push e selo do CI no README.
+- [x] (2026-11-05) `gh repo create pulso --public`, primeiro push e selo do CI no README (CI verde no PR #1).
 - [x] (2026-11-05) Diário `etapa-00.md`: o que é venv, pyproject, CI, *Conventional Commits* e o fluxo branch → PR → tag.
 - **Pronto quando:** `pulso --version` funciona localmente e o CI está verde no GitHub.
 
@@ -162,4 +162,4 @@
 | Data | Mudança |
 |------|---------|
 | 2026-11-05 | Versão inicial |
-| 2026-11-05 | Etapa 0 feita localmente (falta repositório, push e CI verde, que dependem de autorização) |
+| 2026-11-05 | Etapa 0 concluída: repositório `AndreiBataglia/pulso`, PR #1 com CI verde, tag `v0.0.0` |
