@@ -104,8 +104,8 @@ Uso: um usuário por instalação, roda em segundo plano o dia todo, **100% loca
 - **Descrição:** uma aba mostra a rede funcionando: gráfico de pulsos (*raster*, um ponto por disparo), o
   potencial de alguns neurônios, o nível de dopamina e o mapa de pesos.
 - **Critérios de aceite:**
-  - [ ] Os gráficos atualizam em tempo real sem travar a interface.
-  - [ ] Com a aba fechada ou a janela minimizada, os gráficos não consomem CPU.
+  - [x] (2026-11-06) Os gráficos atualizam em tempo real sem travar a interface (~13 ms por volta de 1 s).
+  - [x] (2026-11-06) Com a aba fechada ou a janela minimizada, os gráficos não consomem CPU (testado: nem a fotografia é pedida).
 - **Prioridade:** Média
 
 #### F07 — Pomodoro (sugestão de descanso)

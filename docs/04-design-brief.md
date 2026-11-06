@@ -58,7 +58,8 @@ O tema acompanha o Windows (claro ou escuro).
 
 ## 5. Espaçamento e layout
 - Grade de 8 px; margens de 16 px; espaço de 8 px entre botões.
-- Janela padrão de ~520×640, redimensionável. Em T01, o pet ocupa ~55% da altura.
+- Janela padrão de ~520×640, redimensionável. Em T01, o pet ocupa ~55% da altura. A janela do pet abre no **menor**
+  tamanho; ao abrir o Cérebro ela cresce para ~520×760 (mínimo 420×700) e volta ao tamanho do pet ao voltar.
 - Abas no topo: **Pet · Cérebro · Saúde**, com o botão ⚙ à direita.
 
 ## 6. Componentes
@@ -78,7 +79,8 @@ O tema acompanha o Windows (claro ou escuro).
   desse humor** até o dono admitir que fez a pausa ou bebeu água; a legenda diz o motivo, sem culpa nem bronca (§8).
 - **Reação do rosto:** Carinho deixa o rosto contente por ~2,5 s e Bronca o deixa arrependido; depois volta ao humor.
   Toda expressão tem legenda dizendo o que significa (ex.: "Preocupado: acho que você precisa de uma pausa").
-- **Gráficos (pyqtgraph):**
+- **Gráficos (pyqtgraph):** só mostram (sem zoom nem menu); ❓ ao lado do título de cada um (dica ao passar o mouse e ao
+  clicar); botão **Congelar/Continuar** no topo; Ctrl+1 e Ctrl+2 trocam de aba.
   - fundo igual à superfície e eixos no texto secundário;
   - camadas no raster: entrada = cinza, oculta excitatória = azul, inibitória = vermelho,
     saída = a cor do humor de cada grupo.

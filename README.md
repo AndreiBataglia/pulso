@@ -2,9 +2,11 @@
 
 [![CI](https://github.com/AndreiBataglia/pulso/actions/workflows/ci.yml/badge.svg)](https://github.com/AndreiBataglia/pulso/actions/workflows/ci.yml)
 
-**Status: em construção (etapa 4 concluída: sensores, rede que aprende e o pet na janela; faltam o painel do cérebro e os hábitos).**
+**Status: em construção (etapa 5 concluída: sensores, rede que aprende, o pet na janela e a aba que mostra o cérebro ao vivo; faltam os hábitos).**
 
 ![Os seis rostos do Pulso: animado, contente, entediado, sonolento, preocupado e dormindo](docs/img/humores.png)
+
+![A aba Cérebro: raster de pulsos, potenciais, dopamina, humor e mapa de pesos (roteiro de sensores falso)](docs/img/cerebro.png)
 
 ## English
 

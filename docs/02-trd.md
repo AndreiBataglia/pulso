@@ -166,13 +166,16 @@ class Engine(Protocol):
     groups: list[str]                                   # nomes dos grupos de saída (os humores)
 
     def step(self, rates_hz: np.ndarray, duration_ms: int) -> StepResult: ...   # contagem de pulsos por grupo
-    def reward(self, value: float) -> None: ...         # dopamina
-    def snapshot(self) -> BrainSnapshot: ...            # dados para os gráficos (pulsos recentes, V, d, pesos)
+    def reward(self, value: float) -> float: ...        # dopamina; devolve d = r − r̄ (para o gráfico)
+    def snapshot(self) -> BrainSnapshot: ...            # dados para os gráficos (pulsos recentes, V, d, pesos): cópias, sem mexer na rede
     def state_dict(self) -> dict[str, np.ndarray]: ...  # o que salvar
     def load_state_dict(self, state: dict[str, np.ndarray]) -> None: ...
 ```
 - **O contrato cresce por etapas:** na etapa 2 tem `step`, `state_dict` e `load_state_dict`; `reward` entra na
-  etapa 3 e `snapshot` na 5. O teste de contrato acompanha cada acréscimo.
+  etapa 3 e `snapshot` na 5 (e `reward` passou a devolver a dopamina). O teste de contrato acompanha cada acréscimo.
+- **`snapshot()` e a memória dos gráficos:** o motor numpy grava, a cada ms de rede, os pulsos de todos os neurônios e o
+  potencial de 3 deles num registro circular de 2 s de rede (≈ 20 s reais, ~430 KB). Não vai para o disco. A aba só
+  pede a fotografia quando está visível e descongelada.
 - O codificador, o decodificador e as regras **ficam fora** do motor: trocar o motor não mexe neles.
 - Um teste de contrato (`tests/brain/test_engine_contract.py`) roda **qualquer** `Engine` contra os mesmos
   cenários. Um motor novo só é aceito se passar nele.

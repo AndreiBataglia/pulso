@@ -109,12 +109,13 @@
 ## Etapa 5 — Ver o cérebro (F06)
 **Objetivo:** a aba Cérebro mostra a rede ao vivo.
 **Depende de:** Etapa 4
-- [ ] `snapshot()` no motor (pulsos recentes, V de 3 neurônios, dopamina, pesos).
-- [ ] `brain_tab.py`: raster, potenciais, dopamina com marcas de fonte, barras por humor, mapa de pesos e
-      rodapé com ms por passo.
-- [ ] Dicas ❓ em cada gráfico; congelar e continuar.
-- [ ] Não redesenhar com a aba oculta ou a janela minimizada (medir).
-- [ ] Diário: como ler um raster e o que observar quando a rede aprende.
+- [x] (2026-11-06) `snapshot()` no motor (pulsos recentes, V de 3 neurônios, dopamina, pesos).
+- [x] (2026-11-06) `brain_tab.py`: raster, potenciais, dopamina com marcas de fonte, barras por humor, mapa de pesos e
+      rodapé com o custo da rede (por volta de 1 s, não por passo de 1 ms: é o que o orçamento do TRD mede).
+- [x] (2026-11-06) Dicas ❓ em cada gráfico; congelar e continuar.
+- [x] (2026-11-06) Não redesenhar com a aba oculta ou a janela minimizada (medido: 3,2 ms por volta com a janela escondida, igual ao pet;
+      12,8 ms com o Cérebro visível).
+- [x] (2026-11-06) Diário: como ler um raster e o que observar quando a rede aprende.
 - **Pronto quando:** os critérios de F06 passam e a J03 é visível nos gráficos.
 
 ## Etapa 6 — Hábitos: pomodoro e água (F07, F08)
@@ -183,4 +184,5 @@
 |------|---------|
 | 2026-11-05 | Versão inicial |
 | 2026-11-05 | Etapa 0 concluída: repositório `AndreiBataglia/pulso`, PR #1 com CI verde, tag `v0.0.0` |
+| 2026-11-06 | Etapa 5: o rodapé mostra o custo por volta de 1 s (não por passo); o mapa de pesos ganhou o modo "só o que mudou" |
 | 2026-11-06 | Etapa 2 concluída (custo medido: 1,6 ms por segundo real, sem thread); contrato `Engine` cresce por etapas |
