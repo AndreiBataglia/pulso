@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.coverage
+# Dados pessoais nunca entram no repositório
+*.npz
+*.db
+*.sqlite
+config.toml
+.claude/settings.local.json
