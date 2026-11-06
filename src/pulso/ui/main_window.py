@@ -106,7 +106,6 @@ class PetTab(QWidget):
         self.caption.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         self.care = QPushButton("💚 Carinho")
         self.care.setObjectName("care")
-        self.scold = QPushButton("💢 Bronca")
         self.pause = QPushButton()
         self.pause.setObjectName("pause")
         self.pause.setIconSize(QSize(ICON_PX, ICON_PX))
@@ -124,7 +123,6 @@ class PetTab(QWidget):
         self.pomodoro_skip.setToolTip("Pula a fase atual do pomodoro.")
         self.pomodoro_skip.setAccessibleName("Pular fase")
         self.care.setToolTip("Um carinho: o Pulso aprende que você gostou do jeito dele.")
-        self.scold.setToolTip("Uma bronca: o Pulso aprende que você não gostou.")
         self.later.setToolTip("Depois: me lembra de novo em alguns minutos.")
         self.decline.setToolTip("Hoje não: deixa passar (conta como recusa).")
         self.drink.setToolTip("Bebi água: zera o lembrete de água.")
@@ -143,7 +141,6 @@ class PetTab(QWidget):
         row.setSpacing(8)
         row.addStretch()
         row.addWidget(self.care)
-        row.addWidget(self.scold)
         row.addWidget(self.pause)  # ao lado dos demais, só o ícone
         row.addStretch()
 
@@ -215,7 +212,6 @@ class PetTab(QWidget):
         )  # fmt: skip
         self.pause.setAccessibleName(label)
         self.care.setEnabled(not paused)
-        self.scold.setEnabled(not paused)
 
 
 class MainWindow(QMainWindow):
@@ -252,7 +248,7 @@ class MainWindow(QMainWindow):
         self.game_tab = GameTab(scores, rng)
         self.brain_tab = BrainTab(controller, clock, palette)
         self.tabs = tabs = QTabWidget()
-        tabs.addTab(self.pet_tab, "Pet")  # "Saúde" entra na etapa 7
+        tabs.addTab(self.pet_tab, "Pulso")  # "Saúde" entra na etapa 8
         tabs.addTab(self.game_tab, "Jogo")
         tabs.addTab(self.brain_tab, "Cérebro")
         self.settings_button = QToolButton()  # canto da barra de abas: os Ajustes
@@ -272,8 +268,7 @@ class MainWindow(QMainWindow):
         self._pet_size = QSize()
         tabs.currentChanged.connect(self._on_tab_changed)
 
-        self.pet_tab.care.clicked.connect(lambda: self._owner_click(+1))
-        self.pet_tab.scold.clicked.connect(lambda: self._owner_click(-1))
+        self.pet_tab.care.clicked.connect(self._pet_click)
         self.pet_tab.pause.clicked.connect(self.toggle_pause)
         tab = self.pet_tab
         for button, action in (
@@ -290,7 +285,6 @@ class MainWindow(QMainWindow):
         self._hint: str | None = None
         for button in (
             tab.care,
-            tab.scold,
             tab.pause,
             tab.drink,
             tab.rested,
@@ -456,12 +450,13 @@ class MainWindow(QMainWindow):
 
     # ---- botões ------------------------------------------------------------------------------
 
-    def _owner_click(self, sign: int) -> None:
+    def _pet_click(self) -> None:
+        """Carinho: o Pulso só reage (não há mais bronca, ver doc 06, etapa 7)."""
         pet = self.pet_tab.pet
-        pet.burst("💚" if sign > 0 else "💢")  # retorno visual imediato
-        pet.react("contente" if sign > 0 else "arrependido")  # depois, volta ao humor
-        self._controller.owner_reward(sign)
-        self._say(phrases.PETTED if sign > 0 else phrases.SCOLDED, force=True)
+        pet.burst("💚")  # retorno visual imediato
+        pet.react("contente")  # depois, volta ao humor
+        self._controller.owner_reward(+1)
+        self._say(phrases.PETTED, force=True)
 
     def toggle_pause(self) -> None:
         if self._controller.paused:

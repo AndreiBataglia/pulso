@@ -41,12 +41,11 @@ def env(qapp, tmp_path):
     window.close()
 
 
-def test_clique_em_carinho_e_bronca_chama_reward(env):
+def test_clique_em_carinho_chama_reward_e_nao_ha_bronca(env):
     window, _, _, engine, clock, _ = env
     window.pet_tab.care.click()
-    clock.advance(10)
-    window.pet_tab.scold.click()
-    assert engine.rewards == [1.0, -1.0]
+    assert engine.rewards == [1.0]
+    assert not hasattr(window.pet_tab, "scold")  # a bronca saiu na etapa 7
 
 
 def test_clique_da_retorno_visual_imediato(env):
@@ -71,7 +70,7 @@ def test_pausar_troca_o_selo_para_o_sensor_e_o_pet_dorme(env):
     assert phrases.MEANING_SLEEPING == tab.caption.text()
     assert tab.pet.sleeping
     assert tab.speech.text() == phrases.PAUSED
-    assert not tab.care.isEnabled() and not tab.scold.isEnabled()
+    assert not tab.care.isEnabled()
     for _ in range(5):
         window.tick()
     assert sensor.calls == calls  # nenhuma leitura enquanto pausado
@@ -147,7 +146,7 @@ def test_rosto_explica_o_humor_embaixo(env):
 def test_nenhum_texto_usa_o_emoji_de_olho(env):
     window, *_ = env
     tab = window.pet_tab
-    textos = [tab.pause.toolTip(), tab.badge.text(), tab.care.text(), tab.scold.text()]
+    textos = [tab.pause.toolTip(), tab.badge.text(), tab.care.text()]
     textos += [phrases.WELCOME, phrases.PAUSED, *phrases.MOOD_MEANINGS.values()]
     assert not any("👁" in t for t in textos)
 
@@ -165,16 +164,6 @@ def test_carinho_deixa_o_rosto_contente_e_depois_volta_ao_humor(env):
     window.pet_tab.pause.click()
 
 
-def test_bronca_deixa_o_rosto_arrependido_e_volta(env):
-    window, *_ = env
-    pet = window.pet_tab.pet
-    window.pet_tab.scold.click()
-    assert pet.shown == "arrependido"
-    for _ in range(60):
-        pet.advance(0.05)
-    assert pet.shown == pet.target
-
-
 def test_abre_no_menor_tamanho_e_o_texto_nao_e_cortado(qapp, tmp_path):
     clock = FakeClock()
     controller, _, _ = _controller(clock, tmp_path / "c.npz")
@@ -189,15 +178,15 @@ def test_abre_no_menor_tamanho_e_o_texto_nao_e_cortado(qapp, tmp_path):
     window.close()
 
 
-def test_pausa_fica_na_mesma_linha_de_carinho_e_bronca_so_com_icone(env, qapp):
+def test_pausa_fica_na_mesma_linha_do_carinho_so_com_icone(env, qapp):
     window, *_ = env
     tab = window.pet_tab
     window.show()
     qapp.processEvents()
     assert tab.pause.text() == "" and not tab.pause.icon().isNull()
-    assert tab.pause.y() == tab.care.y() == tab.scold.y()  # mesma linha
+    assert tab.pause.y() == tab.care.y()  # mesma linha
     assert tab.pause.height() == tab.care.height()
-    assert tab.pause.x() > tab.scold.x()  # e depois dos outros dois
+    assert tab.pause.x() > tab.care.x()  # e depois do carinho
 
 
 def test_barra_de_abas_aparece_com_o_cerebro_e_o_titulo_continua_pulso(env, qapp):
@@ -205,6 +194,6 @@ def test_barra_de_abas_aparece_com_o_cerebro_e_o_titulo_continua_pulso(env, qapp
     window.show()
     qapp.processEvents()
     tabs = window.tabs
-    assert [tabs.tabText(i) for i in range(tabs.count())] == ["Pet", "Jogo", "Cérebro"]
+    assert [tabs.tabText(i) for i in range(tabs.count())] == ["Pulso", "Jogo", "Cérebro"]
     assert tabs.tabBar().isVisible()
     assert window.windowTitle() == "Pulso"

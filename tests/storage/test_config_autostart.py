@@ -37,10 +37,32 @@ def test_tipo_errado_volta_ao_padrao_so_naquele_campo(tmp_path):
 
 def test_comando_de_inicio_usa_o_mesmo_python_e_o_modulo():
     command = default_command()
-    assert command.endswith(" -m pulso") and command.startswith('"')
+    assert command.endswith(" -m pulso --minimizado") and command.startswith('"')
     assert sys.executable.lower().replace("python.exe", "") in command.lower().replace(
         "pythonw.exe", ""
     )
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="registro do Windows")
+def test_chave_antiga_e_reescrita_com_minimizado_mas_nunca_ligada_sozinha():
+    import winreg
+
+    key_path = rf"Software\PulsoTeste-{uuid.uuid4().hex}"
+    autostart = Autostart(key_path, command='"x.exe" -m pulso --minimizado')
+    try:
+        assert not autostart.migrate() and not autostart.enabled()  # desligado: nada acontece
+        with winreg.CreateKeyEx(winreg.HKEY_CURRENT_USER, key_path) as key:
+            winreg.SetValueEx(key, VALUE_NAME, 0, winreg.REG_SZ, '"x.exe" -m pulso')  # a antiga
+        assert autostart.migrate()
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, key_path) as key:
+            assert winreg.QueryValueEx(key, VALUE_NAME)[0].endswith("--minimizado")
+        assert not autostart.migrate()  # já atualizada: não reescreve de novo
+    finally:
+        try:
+            autostart.set_enabled(False)
+            winreg.DeleteKey(winreg.HKEY_CURRENT_USER, key_path)
+        except OSError:
+            pass
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="registro do Windows")

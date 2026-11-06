@@ -5,14 +5,13 @@ import random
 SLEEPING = "dormindo"  # estado de pausa; não é um humor da rede
 
 WELCOME = (
-    "Oi, eu sou o Pulso! Use 💚 e 💢 para me ensinar o que você gosta. "
+    "Oi, eu sou o Pulso! Use 💚 para me dar carinho quando eu acertar. "
     "Com o botão de pausa eu fecho os olhos e paro de observar."
 )
 GREETING = "Oi de novo! Já tava com saudade."
 PAUSED = "Tô de olhos fechados. Me acorda quando quiser."
 RESUMED = "Voltei! Que bom te ver."
 PETTED = "Hmm, que bom! Vou lembrar disso."
-SCOLDED = "Entendi. Vou tentar fazer diferente."
 
 # O que cada rosto quer dizer, para o dono nunca ter que adivinhar (aparece sob o rosto).
 MOOD_MEANINGS = {

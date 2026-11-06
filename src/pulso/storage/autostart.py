@@ -19,9 +19,15 @@ def windowless_python() -> Path:
     return windowless if windowless.exists() else python
 
 
+MINIMIZED_ARG = "--minimizado"
+
+
 def default_command() -> str:
-    """O comando que o Windows roda no login: o mesmo Python de agora, sem console."""
-    return f'"{windowless_python()}" -m pulso'
+    """O comando que o Windows roda no login: o mesmo Python de agora, sem console.
+
+    Com `--minimizado` o Pulso abre só na bandeja, sem a janela na cara do dono.
+    """
+    return f'"{windowless_python()}" -m pulso {MINIMIZED_ARG}'
 
 
 class Autostart:
@@ -38,6 +44,23 @@ class Autostart:
                 winreg.QueryValueEx(key, VALUE_NAME)
             return True
         except (OSError, ImportError):  # sem chave/valor, ou fora do Windows
+            return False
+
+    def migrate(self) -> bool:
+        """Reescreve a chave antiga (sem `--minimizado`) para abrir só na bandeja.
+
+        Só mexe se o dono já tinha ligado a opção; nunca liga sozinha. Devolve True se reescreveu.
+        """
+        try:
+            import winreg
+
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, self._key_path) as key:
+                current = winreg.QueryValueEx(key, VALUE_NAME)[0]
+            if MINIMIZED_ARG in str(current):
+                return False
+            self.set_enabled(True)
+            return True
+        except (OSError, ImportError):  # desligado, sem permissão ou fora do Windows
             return False
 
     def set_enabled(self, on: bool) -> None:

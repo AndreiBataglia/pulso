@@ -125,6 +125,11 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="cria o atalho 'Pulso' no Menu Iniciar (para abrir de novo depois de sair)",
     )
+    parser.add_argument(
+        "--minimizado",
+        action="store_true",
+        help="abre só na bandeja, sem mostrar a janela (usado por 'Iniciar com o Windows')",
+    )
     args = parser.parse_args(argv)
     if args.criar_atalho:
         return _create_shortcut()
@@ -136,7 +141,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     from pulso.ui.app import run  # importado aqui: o Qt só carrega se a janela for aberta
 
-    return run(fake_sensors=args.fake_sensors)
+    return run(fake_sensors=args.fake_sensors, minimized=args.minimizado)
 
 
 if __name__ == "__main__":

@@ -77,7 +77,25 @@ def build_controller(
     return controller, first_run
 
 
-def run(fake_sensors: bool = False) -> int:
+APP_ID = "AndreiBataglia.Pulso"
+
+
+def set_app_id(app_id: str = APP_ID) -> bool:
+    """Dá ao processo uma identidade própria no Windows.
+
+    Sem isso a barra de tarefas agrupa o Pulso com o `pythonw.exe` e mostra o ícone do Python.
+    Com o `AppUserModelID` próprio, ela usa o ícone da janela. Devolve False fora do Windows.
+    """
+    if sys.platform != "win32":
+        return False
+    import ctypes
+
+    return ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id) == 0
+
+
+def run(fake_sensors: bool = False, minimized: bool = False) -> int:
+    """Abre o app. Com `minimized` ele fica só na bandeja (a janela não é mostrada)."""
+    set_app_id()  # antes de criar qualquer janela
     clock = SystemClock()
     if fake_sensors:
         from pulso.sensors.fake import ScriptedSensor, demo_scenario
@@ -102,6 +120,8 @@ def run(fake_sensors: bool = False) -> int:
     app.setWindowIcon(pulso_icon())
     # O X da janela esconde o pet na bandeja; quem encerra de verdade é "Sair do Pulso".
     app.setQuitOnLastWindowClosed(False)
+    autostart = Autostart()
+    autostart.migrate()  # chave antiga (sem --minimizado) passa a abrir só na bandeja
     window = MainWindow(
         controller,
         clock,
@@ -110,10 +130,11 @@ def run(fake_sensors: bool = False) -> int:
         tray=Tray(),
         settings=settings,
         save_settings=lambda settings: save_settings(config, settings),
-        autostart=Autostart(),
+        autostart=autostart,
         scores=GameStore(controller.habits.store.connection),
     )
     # Fim de sessão do Windows (desligar/sair): o X não pode segurar o encerramento.
     app.commitDataRequest.connect(window.prepare_to_quit)
-    window.show()
+    if not minimized:
+        window.show()
     return app.exec()
