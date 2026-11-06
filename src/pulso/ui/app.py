@@ -61,7 +61,7 @@ def build_controller(
             f"Guardei o arquivo como {kept.name} e comecei um cérebro novo."
         )
         engine, seed = load_or_create(path)
-        first_run = False  # o dono já conhece o pet; só o cérebro recomeçou
+        first_run = False  # o dono já conhece o Pulso; só o cérebro recomeçou
         new_brain = True
     decoder = MoodDecoder(engine.groups)
     settings = settings or Settings()
@@ -129,7 +129,7 @@ def run(fake_sensors: bool = False, minimized: bool = False) -> int:
         sensor, clock, brain_path(), warn, settings=settings, meeting=meeting
     )
     app.setWindowIcon(pulso_icon())
-    # O X da janela esconde o pet na bandeja; quem encerra de verdade é "Sair do Pulso".
+    # O X da janela esconde o Pulso na bandeja; quem encerra de verdade é "Sair do Pulso".
     app.setQuitOnLastWindowClosed(False)
     autostart = Autostart()
     autostart.migrate()  # chave antiga (sem --minimizado) passa a abrir só na bandeja

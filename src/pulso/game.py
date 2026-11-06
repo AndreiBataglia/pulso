@@ -1,7 +1,7 @@
 """Os jogos do dia a dia: jokenpô e par ou ímpar. Só regras, sem Qt e sem banco.
 
-O pet joga **limpo**: escolhe ao acaso, sem espiar a jogada do dono (nos testes, o
-`random.Random` é injetado). O resultado é sempre do ponto de vista do pet: ganhou, perdeu ou
+O Pulso joga **limpo**: escolhe ao acaso, sem espiar a jogada do dono (nos testes, o
+`random.Random` é injetado). O resultado é sempre do ponto de vista do Pulso: ganhou, perdeu ou
 empatou. Ele mexe só na expressão do rosto, nunca na rede: ganhar ou perder é sorte e entraria
 como ruído no que ela aprende.
 """
@@ -9,7 +9,7 @@ como ruído no que ela aprende.
 import random
 from dataclasses import dataclass
 
-WON, LOST, DRAW = "won", "lost", "draw"  # do ponto de vista do pet
+WON, LOST, DRAW = "won", "lost", "draw"  # do ponto de vista do Pulso
 
 ROCK, PAPER, SCISSORS = "pedra", "papel", "tesoura"
 RPS_MOVES = (ROCK, PAPER, SCISSORS)
@@ -22,7 +22,7 @@ MAX_FINGERS = 5  # de 0 a 5 dedos
 
 @dataclass(frozen=True)
 class Round:
-    """Uma rodada: o que cada um jogou e como acabou para o pet."""
+    """Uma rodada: o que cada um jogou e como acabou para o Pulso."""
 
     game: str  # "rps" ou "evenodd"
     owner: str
@@ -31,7 +31,7 @@ class Round:
 
 
 def rps(owner: str, rng: random.Random) -> Round:
-    """Jokenpô: o dono jogou `owner`; o pet sorteia a dele."""
+    """Jokenpô: o dono jogou `owner`; o Pulso sorteia a dele."""
     if owner not in RPS_MOVES:
         raise ValueError(f"jogada desconhecida: {owner!r}")
     pet = rng.choice(RPS_MOVES)
@@ -43,7 +43,7 @@ def rps(owner: str, rng: random.Random) -> Round:
 
 
 def even_odd(choice: str, fingers: int, rng: random.Random) -> Round:
-    """Par ou ímpar: o dono escolhe `choice` e mostra `fingers`; o pet mostra a dele. O pet fica
+    """Par ou ímpar: o dono escolhe `choice` e mostra `fingers`; o Pulso mostra a dele. O Pulso fica
     com o que sobrou. Soma par → "par" ganha; soma ímpar → "ímpar" ganha. Nunca empata."""
     if choice not in (EVEN, ODD):
         raise ValueError(f"escolha desconhecida: {choice!r}")

@@ -463,7 +463,7 @@ class MainWindow(QMainWindow):
             tab.take_break, tab.pause_now, tab.skip, tab.postpone, tab.decline_break,
             tab.end_break, *tab.away_buttons.values(),
         ):  # fmt: skip
-            button.installEventFilter(self)  # a dica vira fala do pet, não balão do Windows
+            button.installEventFilter(self)  # a dica vira fala do Pulso, não balão do Windows
         self._say(phrases.WELCOME if first_run else phrases.GREETING, force=True)
         self._show_mood(controller.shown_mood)
         self._controller.habits.water.set_enabled(self._settings.water_enabled)
@@ -515,8 +515,8 @@ class MainWindow(QMainWindow):
             self.resize(self.width(), target)
 
     def _on_tab_changed(self, index: int) -> None:
-        """A aba Cérebro precisa de mais espaço que o pet: a janela cresce ao abri-la e volta ao
-        tamanho de antes ao voltar para o Pet (o pet continua abrindo compacto)."""
+        """A aba Cérebro precisa de mais espaço que o Pulso: a janela cresce ao abri-la e volta ao
+        tamanho de antes ao voltar para o Pulso (o Pulso continua abrindo compacto)."""
         if self.tabs.widget(index) is self.brain_tab:
             self._pet_size = self.size()
             self.setMinimumSize(BRAIN_MINIMUM)
@@ -565,7 +565,7 @@ class MainWindow(QMainWindow):
             self._say(text, force=True)
             if self._tray is not None:
                 self._tray.notify(text)
-        if tick.recorded:  # uma omissão pode ter deixado o pet nervoso
+        if tick.recorded:  # uma omissão pode ter deixado o Pulso nervoso
             self._sync_mood()
             self._refresh_footer()
 
@@ -573,7 +573,7 @@ class MainWindow(QMainWindow):
         """O dono respondeu a uma pergunta (ou tocou em "Bebi", "Pausar agora"...)."""
         tick = self._controller.answer_habit(action)
         if action == "drink":
-            self.pet_tab.pet.drink()  # o pet bebe junto, com o copo esvaziando
+            self.pet_tab.pet.drink()  # o Pulso bebe junto, com o copo esvaziando
         text = self._reply_text(action, tick)
         if text is not None and not self._controller.habits.nervous:
             self._say(text, force=True)
@@ -700,7 +700,7 @@ class MainWindow(QMainWindow):
             self._fit_panel()
 
     def _narrate(self, old: Phase, new: Phase) -> None:
-        """O pet conta as viradas de fase que não trazem aviso próprio. As que o dono provocou
+        """O Pulso conta as viradas de fase que não trazem aviso próprio. As que o dono provocou
         (modo, resposta) já falaram; aqui ficam reunião, descanso e a volta à reunião."""
         cycle = self._controller.habits.cycle
         if new is Phase.MEETING:
@@ -760,10 +760,10 @@ class MainWindow(QMainWindow):
     # ---- fala --------------------------------------------------------------------------------
 
     def eventFilter(self, obj, event) -> bool:  # noqa: N802 (nome do Qt)
-        """Passar o mouse num botão faz o pet dizer o que ele faz; sair devolve a fala de antes."""
+        """Passar o mouse num botão faz o Pulso dizer o que ele faz; sair devolve a fala."""
         kind = event.type()
         if kind == QEvent.Type.ToolTip and isinstance(obj, QPushButton):
-            return True  # a dica é a fala do pet, sem o balão padrão do Windows
+            return True  # a dica é a fala do Pulso, sem o balão padrão do Windows
         if kind == QEvent.Type.Enter and isinstance(obj, QPushButton) and obj.toolTip():
             speech = self.pet_tab.speech
             if self._hint is None or speech.text() != self._hint:
@@ -792,7 +792,7 @@ class MainWindow(QMainWindow):
         tray = self._tray
         if tray is None:
             return
-        tray.on_click(self.bring_to_front)  # clicar no aviso traz o pet para a frente
+        tray.on_click(self.bring_to_front)  # clicar no aviso traz o Pulso para a frente
         tray.on_open(self.bring_to_front)
         tray.add_action("Mostrar o Pulso", self.bring_to_front)
         tray.menu.addSeparator()
@@ -898,7 +898,7 @@ class MainWindow(QMainWindow):
         self._quitting = True
 
     def bring_to_front(self) -> None:
-        """Mostra a janela do pet (ao clicar numa notificação)."""
+        """Mostra a janela do Pulso (ao clicar numa notificação)."""
         self.tabs.setCurrentWidget(self.pet_tab)
         self.showNormal()
         self.raise_()
@@ -908,7 +908,7 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event: QCloseEvent) -> None:  # noqa: N802 (nome do Qt)
         if not self._quitting and self._tray is not None and self._tray.available:
-            event.ignore()  # o X não encerra: o pet segue na bandeja, com os avisos
+            event.ignore()  # o X não encerra: o Pulso segue na bandeja, com os avisos
             self.hide()
             if not self._told_tray:
                 self._told_tray = True

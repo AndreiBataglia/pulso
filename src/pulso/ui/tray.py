@@ -77,11 +77,11 @@ class Tray:
             self._icon.showMessage(TITLE, text, QSystemTrayIcon.MessageIcon.NoIcon, SHOW_MS)
 
     def on_click(self, callback: Callable[[], None]) -> None:
-        """Clicar na notificação chama `callback` (abrir a janela do pet)."""
+        """Clicar na notificação chama `callback` (abrir a janela do Pulso)."""
         self._icon.messageClicked.connect(callback)
 
     def on_open(self, callback: Callable[[], None]) -> None:
-        """Clicar (ou clicar duas vezes) no ícone chama `callback` (abrir a janela do pet)."""
+        """Clicar (ou clicar duas vezes) no ícone chama `callback` (abrir a janela do Pulso)."""
         reasons = (
             QSystemTrayIcon.ActivationReason.Trigger,
             QSystemTrayIcon.ActivationReason.DoubleClick,

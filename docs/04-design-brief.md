@@ -6,10 +6,10 @@
 
 ## 1. Personalidade e princípios
 **Fofo, curioso, discreto, transparente.**
-- **O pet é o protagonista** na aba T01; os controles ficam embaixo dele, pequenos.
+- **O Pulso é o protagonista** na aba T01; os controles ficam embaixo dele, pequenos.
 - **Discreto:** nada de som por padrão, nada de pular na frente do trabalho. Os avisos vão para a notificação do
-  Windows e para o balão do pet.
-- **Transparente:** o dono sempre sabe se o pet está dormindo (olhos fechados + selo "😴 Observação pausada" em T01 e no ícone da
+  Windows e para o balão do Pulso.
+- **Transparente:** o dono sempre sabe se o Pulso está dormindo (olhos fechados + selo "😴 Observação pausada" em T01 e no ícone da
   bandeja).
 - **Didático:** cada gráfico do cérebro tem um ❓ que explica o que ele mostra em uma ou duas frases.
 
@@ -33,7 +33,7 @@ O tema acompanha o Windows (claro ou escuro).
 | Primária | `#0D7F74` | `#3CC6B5` | Botões principais, dopamina positiva |
 | Sucesso / Aviso / Erro | `#1A7F37` / `#9A6700` / `#CF222E` | `#3FB950` / `#D29922` / `#F85149` | Mensagens; erro também = dopamina negativa |
 
-**Cor do pet por humor** (cor dos olhos e da boca, desenhados sobre o fundo escuro do rosto):
+**Cor do Pulso por humor** (cor dos olhos e da boca, desenhados sobre o fundo escuro do rosto):
 
 | Humor | Cor | Expressão |
 |-------|-----|-----------|
@@ -52,33 +52,33 @@ O tema acompanha o Windows (claro ou escuro).
 | Uso | Fonte | Tamanho | Peso |
 |-----|-------|---------|------|
 | Título da aba / contador do pomodoro | Segoe UI | 28 px | Semibold |
-| Fala do pet | Segoe UI | 15 px | Regular |
+| Fala do Pulso | Segoe UI | 15 px | Regular |
 | Corpo e botões | Segoe UI | 13 px | Regular |
 | Números do cérebro (ms, contagens) | Cascadia Mono (cai para Consolas) | 12 px | Regular |
 
 ## 5. Espaçamento e layout
 - Grade de 8 px; margens de 16 px; espaço de 8 px entre botões.
-- Janela padrão de ~520×640, redimensionável. Em T01, o pet ocupa ~55% da altura. A janela do pet abre no **menor**
-  tamanho; ao abrir o Cérebro ela cresce para ~520×760 (mínimo 420×700) e volta ao tamanho do pet ao voltar.
-- Abas no topo: **Pet · Cérebro · Saúde**, com o botão ⚙ à direita.
+- Janela padrão de ~520×640, redimensionável. Em T01, o Pulso ocupa ~55% da altura. A janela do Pulso abre no **menor**
+  tamanho; ao abrir o Cérebro ela cresce para ~520×760 (mínimo 420×700) e volta ao tamanho do Pulso ao voltar.
+- Abas no topo: **Pulso · Jogo · Cérebro · Saúde**, com o botão ⚙ à direita.
 
 ## 6. Componentes
 - **Botões:**
   - primário (preenchido): uma ação principal por área, como "Iniciar pomodoro" ou "Salvar";
   - secundário (contorno): os demais;
   - perigo (vermelho): só "Recomeçar cérebro", sempre com confirmação.
-- **Balão de fala:** superfície com uma ponta virada para o pet; pode trazer até 2 botões (Bebi / Depois).
+- **Balão de fala:** superfície com uma ponta virada para o Pulso; pode trazer até 2 botões (Bebi / Depois).
 - **Barra de abas:** escondida enquanto houver uma única aba (o título da janela já diz "Pulso"); aparece com a aba Cérebro.
 - **Selo de estado:** pílula "😴 Observação pausada" (cinza), **só aparece enquanto pausado**. Observando é o normal e não
   ganha aviso fixo (decisão do dono, 2026-11-06); o rosto sempre explica o humor numa legenda sob ele.
-- **Botão de pausa:** só ícone (⏸ pausar / ▶ retomar, desenhados, sem emoji), na mesma linha e com a mesma altura de
-  Carinho e Bronca, com dica ao passar o mouse.
+- **Botão de pausa:** só ícone (⏸ pausar / ▶ retomar, desenhados, sem emoji), no topo, ao lado da pílula de modo,
+  com dica ao passar o mouse.
 - **Tamanho da janela:** abre sempre no menor tamanho possível (e não encolhe além dele). A legenda do humor fica
   **acima** do rosto, e a legenda e o balão reservam 2 e 3 linhas para o rosto nunca ser coberto.
 - **Nervoso (etapa 6, a desenhar):** quando as recusas/omissões de hábito acumulam, o rosto fica nervoso e **não sai
   desse humor** até o dono admitir que fez a pausa ou bebeu água; a legenda diz o motivo, sem culpa nem bronca (§8).
-- **Reação do rosto:** Carinho deixa o rosto contente por ~2,5 s e Bronca o deixa arrependido; depois volta ao humor.
-  Toda expressão tem legenda dizendo o que significa (ex.: "Preocupado: acho que você precisa de uma pausa").
+- **Reação do rosto:** Carinho deixa o rosto contente por ~2,5 s; depois volta ao humor (a Bronca saiu na etapa 7).
+  Toda expressão tem legenda dizendo o que significa (ex.: "Preocupado: a rede está inquieta, mas ainda não sei dizer por quê").
 - **Gráficos (pyqtgraph):** só mostram (sem zoom nem menu); ❓ ao lado do título de cada um (dica ao passar o mouse e ao
   clicar); botão **Congelar/Continuar** no topo; Ctrl+1 e Ctrl+2 trocam de aba.
   - fundo igual à superfície e eixos no texto secundário;
@@ -88,9 +88,9 @@ O tema acompanha o Windows (claro ou escuro).
   validação ao lado do campo.
 
 ## 7. Ícones e imagens
-- **Pet desenhado com QPainter**: fundo escuro, olhos e boca, mais pequenos emojis só quando necessário
+- **Rosto do Pulso desenhado com QPainter**: fundo escuro, olhos e boca, mais pequenos emojis só quando necessário
   (ex.: "z", gota, 💧). Sem corpo. Não usa arquivos de imagem no MVP.
-- **Ícone da bandeja:** o rosto do pet em 16/32 px, com três variações (normal, pausado com olhos fechados,
+- **Ícone da bandeja:** o rosto do Pulso em 16/32 px, com três variações (normal, pausado com olhos fechados,
   descanso com 🍅).
 - Emojis nos botões (💚 💢 💧 🍅; **nunca 👁**, decisão do dono), sempre acompanhados de texto.
 
@@ -101,7 +101,7 @@ necessário**. Outros elementos podem entrar depois, se forem necessários.
   A cor do humor (§3) pinta olhos e boca.
 - **Pausa = olhos fechados** (F02): fica óbvio, sem texto, que o Pulso não está observando.
 - **Microanimações que dão vida:** piscar a intervalos irregulares (3–6 s), olhar para o lado de vez em
-  quando e inclinar levemente o rosto. Sem elas o pet parece uma imagem parada.
+  quando e inclinar levemente o rosto. Sem elas o Pulso parece uma imagem parada.
 - **Emojis:** pequenos e raros, só para reforçar um estado (💤 sono, 💧 água, 🍅 descanso). Nunca no lugar
   dos olhos.
 - **Sem câmera nem sensores extras:** o LOOI tem rodas, LEDs e câmera; o Pulso não usa nada disso.
@@ -109,7 +109,7 @@ necessário**. Outros elementos podem entrar depois, se forem necessários.
   [Hackster](https://hackster.io/news/tangiblefuture-s-looi-turns-smartphones-into-ambulatory-companion-robots-with-chatgpt-support-fddc772c62b2).
 
 ## 8. Mensagens e tom de voz
-O pet fala na primeira pessoa, em frases curtas e carinhosas, sem culpa nem bronca.
+O Pulso fala na primeira pessoa, em frases curtas e carinhosas, sem culpa nem bronca.
 - ✅ "Psiu! Um gole d'água? 💧" · ❌ "Você não bebe água há 45 minutos."
 - ✅ "Hora de esticar as pernas 🍅" · ❌ "ALERTA: pausa obrigatória."
 - ✅ "Tô de olhos fechados. Me acorda quando quiser." (pausa) · ❌ "Monitoramento desativado."
@@ -118,10 +118,10 @@ As mensagens do sistema (erros, ajustes) são neutras e dizem como resolver:
 - ✅ "Esse atalho já é usado por outro programa. Escolha outra combinação."
 
 ## 9. Telas-chave
-**T01 — Pet**
+**T01 — Pulso**
 ```
 ┌──────────────────────────────────────────┐
-│  Pet   Cérebro   Saúde                 ⚙ │
+│ Pulso  Cérebro   Saúde                 ⚙ │
 ├──────────────────────────────────────────┤
 │       (😴 Observação pausada, só se pausado)     │
 │  Contente: está tudo tranquilo (legenda) │
@@ -132,7 +132,7 @@ As mensagens do sistema (erros, ajustes) são neutras e dizem como resolver:
 │        │ Que bom que você voltou! │      │
 │        ╰──────────────────────────╯      │
 │                                          │
-│   [ 💚 Carinho ]  [ 💢 Bronca ]  [ ⏸ ]   │
+│   [ 💚 Carinho ]  [ 💧 Bebi   ]  [ ⏸ ]   │
 ├──────────────────────────────────────────┤
 │  🍅 18:42  [ Pausar ]     💧 4 copos hoje │
 └──────────────────────────────────────────┘
@@ -166,10 +166,10 @@ As mensagens do sistema (erros, ajustes) são neutras e dizem como resolver:
 
 ## 11. Suposições
 - Fonte do sistema (Segoe UI), sem fontes embutidas.
-- O desenho do pet em formas simples basta para o MVP; a pixel art fica para o F17.
+- O desenho do Pulso em formas simples basta para o MVP; a pixel art fica para o F17.
 
 ## 12. Perguntas em aberto
-- ~~Formato do pet~~ — resolvido em 2026-11-06: sem corpo, só fundo escuro com olhos, boca e pequenos emojis (§7.1).
+- ~~Formato do Pulso~~ — resolvido em 2026-11-06: sem corpo, só fundo escuro com olhos, boca e pequenos emojis (§7.1).
 
 ## Histórico de revisões
 | Data | Mudança |

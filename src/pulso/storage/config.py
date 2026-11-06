@@ -22,7 +22,7 @@ CONFIG_FILE = "config.toml"
 
 @dataclass(frozen=True)
 class Settings:
-    always_on_top: bool = True  # a janela fica sobre as outras (o pet precisa ser visto)
+    always_on_top: bool = True  # a janela fica sobre as outras (o Pulso precisa ser visto)
     water_enabled: bool = True  # lembrete de água ligado
     auto_rules: bool = False  # recompensas automáticas por processo/ócio (hábitos valem sempre)
     focus_min: int = 50  # tempos do pomodoro e da água, em minutos

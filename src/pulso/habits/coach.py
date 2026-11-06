@@ -2,11 +2,11 @@
 
 É a única peça que **grava** eventos de hábito. As máquinas de estado (`FocusCycle`, `Water`) só
 decidem; o `HabitCoach` anota o que aconteceu em `habit_event` (com o resumo das pausas) e responde
-"o pet está nervoso?".
+"o Pulso está nervoso?".
 
 **Pendência (regra, não rede):** cada hábito (água, pausa) soma pontos por recusa (`refuse_points`)
 e por omissão (`ignore_points`); "depois" vale 0 e só o "fiz" zera. Com `nervous_at` pontos ou mais
-em **qualquer** dos dois, o pet fica nervoso. Como é calculada dos eventos gravados, sobrevive a
+em **qualquer** dos dois, o Pulso fica nervoso. Como é calculada dos eventos gravados, sobrevive a
 fechar o app, e não esfria sozinha com o tempo.
 """
 

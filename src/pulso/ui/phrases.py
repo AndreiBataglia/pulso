@@ -1,4 +1,4 @@
-"""As falas do pet: primeira pessoa, curtas e carinhosas, sem culpa nem bronca (Design Brief §8)."""
+"""As falas do Pulso: primeira pessoa, curtas e carinhosas, sem culpa (Design Brief §8)."""
 
 import random
 
@@ -92,7 +92,7 @@ def nervous_phrase(reason: str | None) -> str:
 
 
 def mood_phrase(mood: str, rng: random.Random | None = None) -> str:
-    """Uma frase do humor (sorteada, para o pet não repetir sempre a mesma)."""
+    """Uma frase do humor (sorteada, para o Pulso não repetir sempre a mesma)."""
     options = MOOD_PHRASES[mood]
     return (rng or random).choice(options)
 

@@ -4,7 +4,7 @@ A rede dispara o tempo todo; o humor é decidido só a cada 10 s (10 voltas do l
 pulsos de cada grupo nesse intervalo. O grupo que mais pulsou vence.
 
 **Histerese:** para trocar o humor atual, o desafiante precisa vencer com folga (`margin`). Sem
-isso, dois grupos quase empatados fariam o pet trocar de cara a cada decisão. A palavra vem de
+isso, dois grupos quase empatados fariam o Pulso trocar de cara a cada decisão. A palavra vem de
 "ficar para trás": o estado atual tem uma vantagem, como o termostato que só liga 1 grau acima do
 ponto em que desliga.
 """

@@ -1,4 +1,4 @@
-"""Lembrete de água (F08): a cada `interval` o pet pede um copo; o dono responde.
+"""Lembrete de água (F08): a cada `interval` o Pulso pede um copo; o dono responde.
 
 Respostas: **bebi** (zera a pendência, soma um copo), **depois** (adia `snooze`), **não quero**
 (recusei) e o silêncio (**ignorei**). O botão "Bebi" também vale sem lembrete na tela: o Pulso não
@@ -35,7 +35,7 @@ class Water:
 
     @property
     def asking(self) -> bool:
-        """O pet está pedindo água agora?"""
+        """O Pulso está pedindo água agora?"""
         return self._reminder.shown
 
     @property

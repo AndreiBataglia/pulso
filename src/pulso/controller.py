@@ -11,7 +11,7 @@ Os hábitos (ciclo do foco e água) andam em paralelo, por `tick_habits()`, que 
 observação pausada**. O ciclo do foco mede a presença pela ociosidade lida do sensor; com a
 observação pausada ele **congela** (sem leitura, sem presença), e a água segue. O sensor de
 reunião (microfone em uso) só é lido com a observação ligada. A pausa corta o sensor e o
-aprendizado (a rede não recebe recompensa de hábito enquanto o pet "dorme").
+aprendizado (a rede não recebe recompensa de hábito enquanto o Pulso "dorme").
 """
 
 import logging
@@ -122,7 +122,7 @@ class PetController:
 
     def owner_reward(self, sign: int) -> bool:
         """Carinho (`sign` > 0) ou bronca (`sign` < 0). Devolve False se o clique foi ignorado
-        (repetido em poucos segundos) ou se o pet está pausado."""
+        (repetido em poucos segundos) ou se o Pulso está pausado."""
         if self.paused:
             return False
         value = self._rules.owner(sign)
@@ -160,7 +160,7 @@ class PetController:
         self.habits.set_mode(mode)
 
     def _reward_habits(self, recorded) -> None:
-        if self.paused:  # o pet "dorme": o evento fica anotado, mas a rede não aprende nada
+        if self.paused:  # o Pulso "dorme": o evento fica anotado, mas a rede não aprende nada
             return
         for kind in recorded:
             value = self._rules.habit(kind)

@@ -54,7 +54,7 @@ class SettingsDialog(QDialog):
         self.auto_rules.setChecked(current.auto_rules)
         self.auto_rules.setToolTip(
             "Regras por processo e ócio (palpites sobre o seu humor). Desligado, o Pulso aprende "
-            "só com carinho, bronca e os seus hábitos."
+            "só com o carinho e as suas respostas aos lembretes."
         )
         note = QLabel(
             "Os tempos novos valem já para o próximo foco, o próximo descanso e o próximo lembrete."

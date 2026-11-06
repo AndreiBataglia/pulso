@@ -7,7 +7,7 @@
 
 ![Pulso: o foco, o lembrete da pausa e o descanso](docs/img/capa.png)
 
-**Status: em construção.** Já funcionam: os sensores, a rede que aprende, o pet na janela, a aba do cérebro,
+**Status: em construção.** Já funcionam: os sensores, a rede que aprende, o Pulso na janela, a aba do cérebro,
 hábitos (foco por presença, pausas e água), bandeja do Windows, ajustes e um jogo. A etapa 7 (*O momento certo*)
 está em andamento: o ciclo do foco e a janela nova já existem; faltam o humor por regras e a rede decidir *quando*
 lembrar. Depois vêm a aba de saúde, o atalho global e o instalador.
@@ -29,32 +29,34 @@ explica os conceitos usados em [`docs/diario/`](docs/diario/).
 
 ## Como o Pulso ajuda
 
-O foco é **criar rotina sem ser chato**. O pet pergunta, você responde; ele nunca bloqueia nem controla a tela.
+O foco é **criar rotina sem ser chato**. O Pulso pergunta, você responde; ele nunca bloqueia nem controla a tela.
 
 ![As seis fases da janela do Pulso: foco, lembrete da pausa, descanso, voltou (o que foi?), reunião e modo casual](docs/img/fases.png)
 
 - **O foco começa sozinho.** Não existe botão *Iniciar*: quando você mexe no PC, o foco abre (50 min por padrão) e o
   anel em volta do rosto mostra o andamento. A pílula **Profissional / Casual** troca o modo.
 - **Lembrete da pausa.** Ao fim do foco: **Pausar agora**, **Prorrogar 5 min** ou **Hoje não**. Pausa no horário
-  deixa o pet contente; recusar ou ignorar soma pendência e o deixa nervoso.
+  deixa o Pulso contente; recusar ou ignorar soma pendência e o deixa nervoso.
 - **Descanso.** O rosto descansa com a contagem. Se passar do combinado, ele só conta quanto, sem bronca.
 - **"O que foi?"** Quando você volta de uma ausência, o Pulso pergunta: *pausa*, *refeição*, *necessidade* ou
   *foco sem mexer*. Refeição e necessidade nunca o deixam nervoso, e sem resposta conta como pausa.
 - **Reunião.** Microfone em uso por outro programa **pausa** o foco, sem penalizar, e ele continua de onde parou.
   A câmera e o microfone nunca são usados como sensor de presença.
 - **Modo casual.** Sem ciclo de foco: só o lembrete de água.
-- **Água.** *Bebi* faz o pet beber com você. O placar do dia fica no rodapé (pausas, prorrogações, copos, focos).
+- **Água.** *Bebi* faz o Pulso beber com você. O placar do dia fica no rodapé (pausas, prorrogações, copos, focos).
 - **Você manda nos tempos.** Em **Ajustes** (⚙ ou menu da bandeja): foco, descansos, intervalo da água, modo e
   quanto tempo parado conta como ausente.
-- **O pet vive na bandeja do Windows**, com avisos, pode iniciar com o Windows (abrindo só na bandeja), ficar
+- **O Pulso vive na bandeja do Windows**, com avisos, pode iniciar com o Windows (abrindo só na bandeja), ficar
   sempre à frente e ser reaberto pelo Menu Iniciar. Sair de vez é pelo ícone da bandeja.
-- **Um jogo para o dia a dia.** Na aba **Jogo**, jokenpô e par ou ímpar: se o pet ganha, fica contente; se perde,
+- **Um jogo para o dia a dia.** Na aba **Jogo**, jokenpô e par ou ímpar: se o Pulso ganha, fica contente; se perde,
   fica bravo. O resultado muda só o rosto e o placar, nunca a rede.
 
 ## A rede de pulso
 
-O pet aprende com o que **você** responde (carinho e as respostas aos lembretes), não com palpites. As regras que
-tiravam conclusões do programa em uso ficam desligadas por padrão (dá para ligá-las em Ajustes).
+O Pulso aprende com o que **você** faz e responde, não com palpites: cada carinho, *Bebi*, pausa feita ou *Hoje não*
+vira um sinal de recompensa (dopamina) para a rede. Existem também recompensas automáticas, que tentam adivinhar se
+você se cuidou olhando só o nome do programa em uso e o tempo parado. Como são palpites que você nunca confirma, elas
+vêm **desligadas** e só funcionam se você ligá-las em Ajustes.
 
 ![Os seis rostos do Pulso: animado, contente, entediado, sonolento, preocupado e nervoso (e dormindo, quando a observação está pausada)](docs/img/humores.png)
 
@@ -92,7 +94,7 @@ flowchart TD
 - **A rede decide o humor de base**, e ela aprende com o que **você** responde (setas de dopamina).
 - **Nervoso vence a rede.** Recusar ou ignorar lembretes soma pendência; só um *fiz* a zera (*depois* vale 0). O
   balão diz o motivo: água, pausa ou as duas.
-- **Pausar a observação** põe o pet para dormir e congela o foco.
+- **Pausar a observação** põe o Pulso para dormir e congela o foco.
 - **Refeição e necessidade** (a pergunta "o que foi?") nunca somam pendência, e a rede só aprende com pausa e foco.
 - **Ainda não feito (fatia 4):** o humor passa a seguir regras explicáveis (cumpriu → contente, pendência → nervoso,
   muito tempo sem interação → sonolento) e a rede passa a decidir *quando* lembrar (fatia 5).
@@ -100,7 +102,7 @@ flowchart TD
 *In English:* the window has one panel per phase (focus, break reminder, rest, "what happened?" after an absence,
 meeting, casual mode). The network learns from your own answers; the process-based guesses are off by default.
 A microphone in use by another program pauses focus without penalty. Timers, mode and the away tolerance are
-configurable in Settings, the pet lives in the tray, and a small rock-paper-scissors / odds-and-evens game
+configurable in Settings, the companion lives in the tray, and a small rock-paper-scissors / odds-and-evens game
 changes only its face, never the network.
 
 ## Atualizações
@@ -118,14 +120,14 @@ changes only its face, never the network.
 - Saiu o pomodoro antigo. *Vem a seguir:* humor por regras explicáveis e a rede decidindo *quando* lembrar.
 
 ### v0.6.0 · Hábitos, bandeja, ajustes e jogo
-- Pomodoro e lembrete de água com notificação do Windows; recusar ou ignorar soma pendência e deixa o pet nervoso.
-- Bandeja do Windows (o X esconde o pet), iniciar com o Windows, sempre à frente e atalho no Menu Iniciar.
+- Pomodoro e lembrete de água com notificação do Windows; recusar ou ignorar soma pendência e deixa o Pulso nervoso.
+- Bandeja do Windows (o X esconde o Pulso), iniciar com o Windows, sempre à frente e atalho no Menu Iniciar.
 - Aba **Ajustes** com os tempos; aba **Jogo** (jokenpô e par ou ímpar, só muda o rosto).
-- O pet aprende só com as suas respostas; as regras por processo ficam desligadas por padrão.
+- O Pulso aprende só com as suas respostas; as regras por processo ficam desligadas por padrão.
 
 ### v0.5.0 e antes · A base
 - **v0.5.0:** aba **Cérebro** com raster, potenciais, dopamina, humor e mapa de pesos.
-- **v0.4.0:** o pet aparece na janela (rosto em QPainter, balão, carinho).
+- **v0.4.0:** o Pulso aparece na janela (rosto em QPainter, balão, carinho).
 - **v0.3.0:** aprendizado R-STDP com dopamina; **v0.2.0:** rede de pulso LIF em numpy; sensores de nível B e CI desde o início.
 
 ## Privacidade

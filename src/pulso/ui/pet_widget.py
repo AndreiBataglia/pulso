@@ -1,4 +1,4 @@
-"""O rosto do pet, desenhado com QPainter (Design Brief §7.1): disco escuro, olhos, boca e emojis.
+"""O rosto do Pulso, desenhado com QPainter (Design Brief §7.1): disco escuro, olhos, boca e emojis.
 
 O rosto é redondo e pode ter um **anel** em volta (direção D do canvas de design): o anel mostra o
 andamento do foco ou do descanso, cheio no lembrete, tracejado na reunião. Sem anel (`None`), só o
@@ -70,7 +70,7 @@ _LOOK_COLOR = dict(
     descansando=MOOD_COLORS["sonolento"],
     bebendo="#7FD1FF",
 )
-DRINK_S = 15.0  # quanto o pet "bebe" depois do "Bebi"
+DRINK_S = 15.0  # quanto o Pulso "bebe" depois do "Bebi"
 REACTION_S = 2.5  # quanto tempo dura a reação ao carinho/bronca
 
 
@@ -113,7 +113,7 @@ class PetWidget(QWidget):
         self._timer = QTimer(self)
         self._timer.setInterval(FRAME_MS)
         self._timer.timeout.connect(self._on_timer)
-        self.setAccessibleName("Rosto do pet")
+        self.setAccessibleName("Rosto do Pulso")
 
     # ---- estado ------------------------------------------------------------------------------
 
@@ -149,7 +149,7 @@ class PetWidget(QWidget):
         return self._activity
 
     def rest(self, countdown: str | None) -> None:
-        """Descanso do pomodoro: o pet descansa e mostra a contagem (`None` = acabou o descanso)."""
+        """Descanso do foco: o Pulso descansa e mostra a contagem (`None` = acabou)."""
         if countdown is None:
             if self._activity == "descansando":
                 self._activity = None
@@ -174,7 +174,7 @@ class PetWidget(QWidget):
         return self._ring
 
     def drink(self) -> None:
-        """O dono bebeu água: o pet bebe por `DRINK_S` segundos, com o copo esvaziando."""
+        """O dono bebeu água: o Pulso bebe por `DRINK_S` segundos, com o copo esvaziando."""
         self._activity = "bebendo"
         self._drink_until = self._t + DRINK_S
         self._ensure_timer()
