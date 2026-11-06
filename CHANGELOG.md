@@ -12,3 +12,7 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/).
 - Cérebro sem aprendizado: neurônio LIF, rede de pulso em numpy (entrada de Poisson, oculta 80E+20I, saída com
   inibição lateral), contrato `Engine`, codificador, decodificador com histerese e
   `pulso --print-brain [--fake-sensors]` (etapa 2). Custo medido: 1,6 ms por segundo real.
+- Aprendizado: STDP com rastro de elegibilidade e dopamina como erro de previsão (R-STDP) na oculta→saída,
+  `Engine.reward`, regras de recompensa (dono e automáticas, com filtro de cliques repetidos),
+  `cerebro.npz` com versão e gravação atômica, `AutoSaver` e semente guardada (etapa 3).
+  Custo medido: 2,7 ms por segundo real. Limitação conhecida: 1 de 6 sementes não aprende o cenário de teste.

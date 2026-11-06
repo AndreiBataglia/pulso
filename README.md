@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/AndreiBataglia/pulso/actions/workflows/ci.yml/badge.svg)](https://github.com/AndreiBataglia/pulso/actions/workflows/ci.yml)
 
-**Status: em construção (etapa 0).**
+**Status: em construção (etapa 3 concluída: sensores, rede de pulso e aprendizado; falta a interface).**
 
 ## English
 

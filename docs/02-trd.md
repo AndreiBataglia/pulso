@@ -2,7 +2,7 @@
 
 > Documento de Requisitos Técnicos: **com o quê** vamos construir e **por quê**.
 > É a referência para qualquer decisão técnica: se algo não estiver aqui, decida, registre aqui e siga.
-> Última revisão: 2026-11-05
+> Última revisão: 2026-11-06
 
 ## 1. Visão geral da arquitetura
 Um único programa Python, local, com um **laço de 1 segundo**:
@@ -136,8 +136,14 @@ projeto_tamagotchi/
   muda o peso na hora: vai para um **rastro de elegibilidade** `e`. Quando chega a dopamina,
   `Δw = η · d · e`.
   - A dopamina é `d = r − r̄`: recompensa menos a média recente, uma aproximação do "erro de previsão".
-  - Pesos limitados a [0, w_max] e normalizados por neurônio, para a rede não "explodir".
-  - Plásticas: entrada→oculta e oculta→saída.
+  - Pesos limitados a [0, w_max] e normalizados, para a rede não "explodir": na oculta→saída a soma é
+    mantida **por neurônio que manda** (reforçar um humor tira dos outros); na entrada→oculta, por neurônio
+    que recebe.
+  - A elegibilidade é dividida pelo seu RMS na hora da dopamina: cada recompensa move um orçamento de peso
+    parecido, e o contexto que faz a rede disparar mais não leva todo o reforço.
+  - **Plástica por padrão: só a oculta→saída** (`η = 0,05`). A entrada→oculta tem o mecanismo pronto, mas
+    fica congelada (`η = 0`): nos experimentos da etapa 3, punir essa camada silenciava o contexto punido
+    (diário `etapa-03.md`). Limitação conhecida: 1 de 6 sementes testadas não aprendeu o cenário de teste.
 - **⚠ Dois relógios:** a rede simula 100 ms a cada 1 s real (10× mais devagar que o tempo real). Constantes
   que dependem da **recompensa** (τ da elegibilidade) são definidas em **tempo de rede**. Assim,
   τe = 1 s de rede ≈ 10 s reais, o bastante para o carinho que chega alguns segundos depois do humor ainda
@@ -145,7 +151,8 @@ projeto_tamagotchi/
 - **Decodificação:** a cada 10 s o grupo com mais pulsos vence. Uma **histerese** (o novo humor precisa vencer
   com margem) evita trocas nervosas.
 - **Custo estimado:** ~150 LIF × 100 passos por segundo, com multiplicação matriz-vetor 210×150: bem abaixo
-  de 5 ms por segundo. **Medido na etapa 2: 1,6 ms por segundo real, então não precisa de thread; um teste falha se passar de 20 ms.**
+  de 5 ms por segundo. **Medido: 1,6 ms por segundo real na etapa 2 e 2,7 ms na etapa 3 (com aprendizado), então não precisa de
+  thread; um teste falha se passar de 20 ms.**
 
 ### 5.2 O contrato trocável (`Engine`)
 ```python
@@ -238,4 +245,5 @@ class Engine(Protocol):
 | Data | Mudança |
 |------|---------|
 | 2026-11-05 | Versão inicial |
+| 2026-11-06 | Etapa 3: só a oculta→saída aprende, normalizações, elegibilidade pelo RMS, custo 2,7 ms |
 | 2026-11-06 | Etapa 2: 63 entradas, contrato `Engine` por etapas, custo medido, linha de 100 colunas |

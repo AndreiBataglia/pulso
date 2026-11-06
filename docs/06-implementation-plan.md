@@ -2,7 +2,7 @@
 
 > A sequência exata de construção, passo a passo. Cada etapa deixa o app **funcionando**
 > (mesmo que incompleto) e pode ser testada antes de seguir para a próxima.
-> Última revisão: 2026-11-05
+> Última revisão: 2026-11-06
 
 ## Como usar este plano
 - Siga as etapas em ordem; as dependências estão indicadas.
@@ -74,20 +74,22 @@
 ## Etapa 3 — Aprender: STDP, dopamina e memória (F04)
 **Objetivo:** o pet aprende e lembra o que aprendeu.
 **Depende de:** Etapa 2
-- [ ] STDP com rastros pré e pós. Teste: pré antes de pós fortalece; pós antes de pré enfraquece.
-- [ ] Rastro de elegibilidade e R-STDP. Testes:
+- [x] (2026-11-06) STDP com rastros pré e pós. Teste: pré antes de pós fortalece; pós antes de pré enfraquece
+      (no sinal da elegibilidade, que é onde o STDP escreve).
+- [x] (2026-11-06) Rastro de elegibilidade e R-STDP. Testes:
   - sem dopamina, o peso não muda;
   - com dopamina positiva, as sinapses elegíveis sobem.
-- [ ] `rewards.py`: regras automáticas (ócio longo → sonolento +, volta → animado +, mais de 90 min sem pausa →
+- [x] (2026-11-06) `rewards.py`: regras automáticas (ócio longo → sonolento +, volta → animado +, mais de 90 min sem pausa →
       preocupado +), recompensa do dono, pesos configuráveis e filtro de cliques repetidos.
-- [ ] `storage/paths.py` e `brain_store.py`: `.npz` com versão, gravação atômica, salvamento a cada 5 min,
+- [x] (2026-11-06) `storage/paths.py` e `brain_store.py`: `.npz` com versão, gravação atômica, salvamento a cada 5 min,
       ao pausar e ao sair.
-- [ ] Teste de aprendizado: num cenário roteirizado, depois de N recompensas o humor recompensado vence em ≥ 80%
-      das decisões.
-- [ ] Teste: salvar → carregar → mesmos pesos; versão desconhecida → recusa com aviso.
-- [ ] Diário: STDP, o problema da recompensa atrasada, elegibilidade, os **dois relógios** (TRD §5.1) e a
+- [x] (2026-11-06) Teste de aprendizado: num cenário roteirizado, depois de N recompensas o humor recompensado
+      vence em ≥ 80% das decisões (N = 360; 100% nas sementes 1, 2 e 4; a 3 não aprende, ver diário).
+- [x] (2026-11-06) Teste: salvar → carregar → mesmos pesos; versão desconhecida → recusa com aviso.
+- [x] (2026-11-06) Diário: STDP, o problema da recompensa atrasada, elegibilidade, os **dois relógios** (TRD §5.1) e a
       dopamina como erro de previsão.
 - **Pronto quando:** os critérios de F04 passam e o teste de aprendizado está verde em 3 sementes diferentes.
+  Os botões Carinho/Bronca e a chamada do `AutoSaver` no laço dependem da interface: etapa 4.
 
 ## Etapa 4 — O pet aparece (F05, botões de F02 e F04)
 **Objetivo:** primeira versão "de verdade", usável no dia a dia.
