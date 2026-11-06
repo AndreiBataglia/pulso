@@ -4,6 +4,7 @@ import random
 
 import numpy as np
 import pytest
+from PySide6.QtCore import QCoreApplication, QEvent
 
 from pulso.brain.decoding import MoodDecoder
 from pulso.brain.rewards import RewardRules
@@ -248,3 +249,5 @@ def test_tab_isolada_cria_sem_janela(parts, qapp):
     tab = BrainTab(controller, clock)
     assert tab.refresh_count == 1  # o desenho inicial, mesmo antes de aparecer
     tab.close()
+    tab.deleteLater()  # uma aba solta (sem janela) precisa ser apagada, senão o Qt cai ao sair
+    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
