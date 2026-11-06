@@ -1,7 +1,7 @@
 # Esquema de Back-end — Pulso
 
 > Como os dados são **guardados, organizados e protegidos**.
-> Última revisão: 2026-11-05
+> Última revisão: 2026-11-06 (etapa 3: nomes reais das chaves)
 
 ## 1. Visão geral do armazenamento
 Não há servidor nem login: tudo fica em **3 arquivos locais** na pasta de dados do usuário
@@ -27,13 +27,14 @@ Não se aplica. O programa é de um usuário só e não abre rede. A proteção 
 | `format_version` | escalar int | Versão do formato (começa em 1); carregador recusa versão desconhecida com aviso |
 | `engine` | string | Nome do motor (`numpy_lif_rstdp`); trocar de motor não reaproveita pesos de outro |
 | `groups` | (5,) string | Ordem dos humores nos grupos de saída |
-| `w_in_hid` | (n_in, n_hid) float32 | Pesos entrada→oculta (plásticos) |
-| `w_hid_hid` | (n_hid, n_hid) float32 | Recorrência da oculta (fixa no MVP) |
-| `w_hid_out` | (n_hid, n_out) float32 | Pesos oculta→saída (plásticos) |
-| `mask_*` | mesmas formas, bool | Quais conexões existem (esparsidade) |
+| `w_in_hidden` | (n_in, n_hid) float64 | Pesos entrada→oculta (mecanismo plástico; congelado por padrão) |
+| `w_hidden_hidden` | (n_hid, n_hid) float64 | Recorrência da oculta (fixa no MVP) |
+| `w_hidden_out` | (n_hid, n_out) float64 | Pesos oculta→saída (plásticos) |
+| `w_out_out` | (n_out, n_out) float64 | Inibição lateral entre os humores (fixa) |
+| `mask_in_hidden`, `mask_hidden_out` | mesmas formas, bool | Quais conexões plásticas existem (esparsidade) |
 | `reward_baseline` | escalar float | Média recente das recompensas (r̄) |
 | `seed` | escalar int | Semente que gerou a rede (reprodutibilidade) |
-| `stats` | (3,) int64 | Total de recompensas positivas, negativas e de passos simulados |
+| `stats` | (3,) int64 | Total de recompensas positivas, negativas e de passos simulados (ms de rede) |
 | `saved_at` | string ISO | Quando salvou |
 
 - Potenciais de membrana e rastros **não** são salvos: zeram ao abrir, como "acordar".
