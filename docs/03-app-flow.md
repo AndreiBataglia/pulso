@@ -49,15 +49,15 @@ stateDiagram-v2
   - o desenho do pet com o humor atual e uma frase;
   - o contador do pomodoro;
   - os copos de água de hoje;
-  - um indicador "👁 observando" ou "😴 pausado".
+  - uma legenda sob o rosto explicando o humor e, só quando pausado, o selo "😴 Observação pausada".
 - **Ações:**
 
 | Ação | O que acontece | Próxima tela | Em caso de erro |
 |------|----------------|--------------|-----------------|
-| 💚 Carinho | Recompensa +1 (dopamina); o pet faz uma animação de alegria | T01 | — |
-| 💢 Bronca | Recompensa −1; o pet faz uma animação de "ops" | T01 | — |
-| 👁 Pausar observação | Sensores e aprendizado param; o pet dorme | T01 (estado pausado) | — |
-| ▶ Retomar observação | Volta a observar | T01 | Se o sensor falhar, mostra o aviso "sensor indisponível" e segue com leitura desconhecida |
+| 💚 Carinho | Recompensa +1 (dopamina); o rosto fica contente por ~2,5 s e volta ao humor | T01 | — |
+| 💢 Bronca | Recompensa −1; o rosto fica arrependido por ~2,5 s e volta ao humor | T01 | — |
+| ⏸ Pausar (botão só com ícone, ao lado de Carinho e Bronca) | Sensores e aprendizado param; o pet dorme | T01 (estado pausado) | — |
+| ▶ Retomar | Volta a observar | T01 | Se o sensor falhar, mostra o aviso "sensor indisponível" e segue com leitura desconhecida |
 | 🍅 Iniciar / Pausar / Pular pomodoro | Controla o ciclo (F07) | T01 | — |
 | 💧 Bebi | +1 copo; o lembrete reinicia o intervalo; recompensa "lembrete atendido" | T01 | — |
 | ⏰ Depois | Adia o lembrete 10 min; recompensa "dispensado" (−, leve) | T01 | — |

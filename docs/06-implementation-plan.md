@@ -94,11 +94,11 @@
 ## Etapa 4 — O pet aparece (F05, botões de F02 e F04)
 **Objetivo:** primeira versão "de verdade", usável no dia a dia.
 **Depende de:** Etapa 3
-- [ ] `app.py`, `main_window.py` com abas (por enquanto só "Pet") e o laço no `QTimer` de 1 s.
-- [ ] `pet_widget.py`: 5 humores mais "dormindo", com transições e a cor por humor (Design Brief §3).
-- [ ] Botões Carinho, Bronca e Pausar/Retomar observação; selo "Observando/Pausado".
-- [ ] Primeiro uso: fala de boas-vindas (J01).
-- [ ] Teste de interface (`offscreen`): o clique em Carinho chama `reward(+1)`; Pausar troca o selo e para o
+- [x] (2026-11-06) `app.py`, `main_window.py` com abas (por enquanto só "Pet") e o laço no `QTimer` de 1 s.
+- [x] (2026-11-06) `pet_widget.py`: 5 humores mais "dormindo", com transições e a cor por humor (Design Brief §3).
+- [x] (2026-11-06) Botões Carinho, Bronca e Pausar/Retomar (pequeno, sem emoji); selo só quando pausado.
+- [x] (2026-11-06) Primeiro uso: fala de boas-vindas (J01).
+- [x] (2026-11-06) Teste de interface (`offscreen`): o clique em Carinho chama `reward(+1)`; Pausar troca o selo e para o
       sensor.
 - [ ] Teste real: deixar rodando 1 h e medir CPU e RAM (meta do PRD §4).
 - [ ] Diário: Qt (sinais e *slots*, `QTimer`), desenho com QPainter e uma captura para o README.

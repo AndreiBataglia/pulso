@@ -82,7 +82,8 @@ projeto_tamagotchi/
 │   └── img/                # capturas para o README e o diário
 ├── src/pulso/
 │   ├── app.py              # ponto de entrada: monta tudo e inicia o Qt
-│   ├── loop.py             # orquestrador do laço de 1 s (sensores → cérebro → humor → UI)
+│   ├── loop.py             # laço mínimo de 1 s: lê o sensor (com a pausa de privacidade)
+│   ├── controller.py       # PetController: sensor → rede → humor → recompensas → gravação (sem Qt)
 │   ├── clock.py            # relógio injetável (real ou falso, para testes)
 │   ├── sensors/
 │   │   ├── base.py         # SensorFrame (dataclass) e protocolo Sensor
@@ -104,7 +105,10 @@ projeto_tamagotchi/
 │   │   ├── db.py           # SQLite dos eventos de hábito
 │   │   └── config.py       # configuração TOML com valores padrão e validação
 │   └── ui/
-│       ├── main_window.py  # janela com abas
+│       ├── app.py          # monta tudo (cérebro novo ou salvo, tema) e abre a janela
+│       ├── theme.py        # paleta clara/escura e conferência de contraste
+│       ├── phrases.py      # falas do pet
+│       ├── main_window.py  # janela com abas e o QTimer de 1 s
 │       ├── pet_widget.py   # desenho e animação do pet (QPainter)
 │       ├── brain_tab.py    # gráficos pyqtgraph
 │       ├── health_tab.py   # resumo de saúde
@@ -117,7 +121,7 @@ projeto_tamagotchi/
   documentação em português**. Código de alto nível e bem comentado, explicando o porquê de cada equação. Ruff
   como *lint* e formatador (linha de 100, como no `pyproject.toml`).
 - **Regras de arquitetura:**
-  - `brain/`, `habits/`, `sensors/base.py` e `storage/` **não importam Qt**, para que possam ser testados sem
+  - `brain/`, `habits/`, `controller.py`, `sensors/base.py` e `storage/` **não importam Qt**, para que possam ser testados sem
     interface.
   - Só `ui/` importa PySide6 e pyqtgraph.
   - Só `sensors/windows.py` chama a API do Windows.
