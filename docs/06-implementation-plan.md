@@ -155,13 +155,106 @@
       (⚙ na barra de abas e "Ajustes…" na bandeja) com foco, descansos, intervalo da água e o interruptor das regras;
       aplica sem reiniciar. **Aba Jogo:** jokenpô e par ou ímpar (`game.py`), rosto **bravo** novo, placar em
       `game_result` (migração v2). O pet também descansa (com contagem no rosto) ao aceitar a pausa e bebe ao "Bebi".
-- [ ] **Falta (dono):** uso real do J04 (a notificação do Windows aparecer de fato, os tempos 50/10/60 no dia a dia), o
-      "Iniciar com o Windows" de verdade (reiniciar e ver o pet abrir) e o fim de sessão do Windows com o pet aberto.
+- [x] (2026-11-06, teste real do dono) "Iniciar com o Windows": reiniciou e o pet abriu sozinho (uma instância só), ajustes
+      e cérebro preservados; achado: a janela abre junto (corrigir na etapa 7). Fim de sessão do Windows com o pet aberto:
+      sem tela de bloqueio, dados salvos.
+- [ ] **Falta (dono):** uso real do J04: a notificação do Windows aparecer de fato e os tempos 50/10/60 no dia a dia.
 - **Pronto quando:** os critérios de F07 e F08 passam e a J04 funciona de ponta a ponta.
 
-## Etapa 7 — Saúde, ajustes, bandeja e atalho (F09, F10, atalho de F02)
+## Etapa 7 — O momento certo (F12 e F13 leve) e a janela nova
+**Objetivo:** o rosto passa a ter um porquê claro e a rede aprende algo útil: **quando** lembrar.
+**Depende de:** Etapa 6 · **Branch:** `etapa-07-momento-certo`
+**Decidido com o dono (2026-11-06):**
+- **Humor por regras claras; a rede decide o momento do lembrete.** O rosto segue regras explicáveis (cumpriu →
+  contente; pendência → nervoso; muito tempo sem interação → sonolento; jogo → bravo/feliz) e o balão diz o motivo. A
+  rede ganha 2 grupos de saída ("lembrar agora" × "esperar"); o formato do cérebro muda e o arquivo antigo é guardado
+  com outro nome (nunca apagado).
+- **Sem bronca.** O botão Bronca sai (bronca sem ação do Pulso não ensina nada); o Carinho só reage, não ensina.
+- **Aba "Pet" vira "Pulso".**
+- **Sensor de interação (nível B):** segundos com entrada no último minuto (0–60) por `GetLastInputInfo`, sem *hook*
+  e sem ler teclas.
+- **Foco contínuo por presença (decidido em 2026-11-06, substitui "o foco começa ao clicar Iniciar"):** o foco é
+  medido o tempo todo pela presença (teclado e mouse somados). A 1ª entrada abre o foco; parado menos que a tolerância
+  (5 min) ainda conta; acima disso o foco para no último gesto e a volta pergunta "o que foi?". O botão Iniciar sai: no
+  cartão fica **Pausar agora** (adianta o descanso) e pular fase; o "Pausa" da grade sai (grade com Carinho e Bebi).
+  Ciclo completo no quadro "D · Ciclo completo" do canvas.
+- **Modos Profissional (padrão) e Casual:** pílula no topo da aba Pulso e no menu da bandeja, gravado em Ajustes. Casual
+  não conta foco nem chama para pausa; só a água.
+- **Reunião pausa o foco:** microfone em uso por outro app (metadado do Windows, sem capturar som) pausa o ciclo; não
+  conta nem penaliza e não gera "o que foi?". Cobre Teams no app ou no navegador.
+- **Câmera e microfone nunca são sensores de presença** (seria capturar imagem ou som: fora do nível B). Só se lê *se*
+  o microfone está em uso por outro programa.
+- **Sair durante o lembrete = pausa aceita no horário** (soma ponto). Mexer durante o descanso não o encerra; só o botão
+  "Voltar ao foco antes". Fim do descanso ainda fora: conta "+N min além" e o foco volta na 1ª entrada.
+- **Pergunta na volta:** depois de um tempo parado durante o foco (padrão 5 min, ajustável), ao voltar o balão
+  pergunta *o que foi*: **Pausa** (conta como pausa feita, mesmo parcial; se passou do tempo avisa "+N min além da
+  pausa"), **Refeição** (ausência necessária: conta como descanso longo, sem excesso nem penalidade), **Necessidade**
+  (banheiro/rápida: não penaliza nem conta como pausa; o foco continua) e **Foco sem mexer** (leitura, reunião, vídeo:
+  o tempo vira foco). Sem resposta = pausa. Horário de almoço opcional em Ajustes pré-marca "Refeição". Fica
+  registrado em `habit_event` só o resumo (planejado, feito, excesso, categoria), nunca o sinal do sensor. A rede só
+  aprende com pausa e foco.
+- **Janela de decisão:** a rede pode adiar o lembrete por no máximo **15 min** após o fim do foco (rede de segurança:
+  aos 15 min ele toca de qualquer jeito); decide a cada 10 s.
+- **Lembrete: Pausar agora · Prorrogar 5 min · Hoje não.** O dono prorroga quantas vezes quiser, mas cada prorrogação
+  pesa mais (pendência −0,25, −0,5, −0,75…) e o rosto fica mais preocupado; fim do dia mostra quantas vezes adiou.
+  **Mistura com placar positivo:** pausa feita no horário (sem prorrogar) soma ponto e **melhora o humor**; o dia com as
+  pausas em dia deixa o Pulso contente.
+- **Recompensas da rede:** aceitou +1, recusou −1, ignorou −0,5, prorrogou −0,25 (crescente).
+- **Janela nova (direção D do canvas de design):** organização do A (rosto, balão, cartão do pomodoro, grade de 3 ações,
+  rodapé) com o estilo do B (rosto redondo com **anel do foco**, botões em pílula, contador grande). Durante o lembrete,
+  a grade de ações some e o balão mostra só as respostas (regra da direção C).
+
+- [x] (2026-11-06) Desenhar no canvas os estados do D: lembrete, descansando e "o que foi?" (artifact privado
+      "Pulso — layouts da janela").
+- [x] (2026-11-06) Quadro "D · Ciclo completo": diagrama de estados, foco revisado, reunião, casual e volta com excesso.
+
+**Ordem das fatias (decidida em 2026-11-06):** a lógica nova e a janela D chegam **juntas** à `main` (fatias 2 e 3
+num PR só, ou dois que só entram juntos), para o app em uso nunca ficar meio velho, meio novo.
+- [x] **Fatia 1 (2026-11-06):** aba "Pet" → "Pulso", botão Bronca removido (o Carinho só reage), `--minimizado` e
+      `AppUserModelID`.
+- [~] **Fatia 2, núcleo do ciclo (sem tela nova)** — feito em 2026-11-06, sem commit: `habits/focus_cycle.py` (máquina de
+      estados: Aguardando, Foco, Ausente, O que foi?, Lembrete, Descansando, Além do descanso, Reunião; modos; tolerância;
+      as 4 categorias), `sensors/meeting.py` (microfone em uso pelo registro do Windows, sensor falso) e migração v3 do
+      banco (categoria e resumo da pausa em segundos; sem `break_extended`, o excesso mora em `excess_s`). O
+      `Pomodoro` antigo continua no lugar até a fatia 3. **Falta (fatia 3):** ligar ao `HabitCoach`/controlador (a
+      presença vem de `idle_seconds`; o sensor de reunião só é lido com a observação ligada), gravar os `CycleEvent` com
+      o resumo, Ajustes (modo e tolerância) e a janela D.
+- [x] **Fatia 3, janela D ligada ao ciclo** — feito em 2026-11-06, sem commit (372 testes verdes, ruff limpo; capturas
+      com fontes reais nos dois temas). `HabitCoach` agora tem `cycle` e `water`, grava o resumo da pausa e devolve um
+      `HabitTick` (gravado, avisos, recompensado, resumo); refeição é descanso longo mas a rede não aprende com ela. O
+      controlador lê o sensor de reunião só com a observação ligada; com ela pausada o foco congela. Ajustes ganhou
+      **Modo** e **Parado por mais de (min)**. A aba Pulso tem anel do foco no rosto, pílula de modo, um painel por fase
+      (cronômetro, lembrete, "o que foi?", descanso, reunião, casual) e o placar do dia; `pomodoro.py` saiu e a bandeja
+      ganhou "Modo casual" e o submenu "Foco" (Pausar agora, Pular fase).
+      **Fica para depois:** horário de almoço opcional em Ajustes; pesos crescentes da prorrogação (fatia 4); humor por
+      regras (fatia 4) e rede (fatia 5). A água fica escondida enquanto há pergunta do ciclo na tela (a ignorada soma 1
+      ponto).
+- [ ] **Fatia 4:** humor por regras (`mood_rules.py`), com o motivo no balão; testes por regra.
+- [ ] **Fatia 5:** rede com 2 grupos novos, janela de decisão de 15 min, recompensas; teste de aprendizado com várias
+      sementes.
+- [~] **Identidade do app no Windows (pedido do dono) — `AppUserModelID` `AndreiBataglia.Pulso` feito na fatia 1; falta
+      conferir a barra de tarefas com o app do dono e decidir a opção `Qt.Tool`:** hoje a barra de tarefas mostra o ícone do Python porque o
+      processo é o `pythonw.exe` e o Windows agrupa pelo executável. Definir o `AppUserModelID` próprio
+      (`SetCurrentProcessExplicitAppUserModelID`, ex.: `AndreiBataglia.Pulso`) e usar o ícone do Pulso na janela, no atalho
+      e na bandeja. Como o pet vive na bandeja: o X já esconde a janela (e o botão da barra some com ela); avaliar também
+      **não mostrar na barra de tarefas enquanto a janela está aberta** (opção em Ajustes, `Qt.Tool`; custo: perde o botão
+      de minimizar), com a bandeja como único ponto de volta.
+- [x] (fatia 1, 2026-11-06; chave antiga migrada sozinha ao abrir, só se já estava ligada) **Abrir só na bandeja ao iniciar com o Windows (visto no teste real de 2026-11-06: a janela veio aberta):** novo
+      argumento `--minimizado`, gravado pela chave `Run` (`storage/autostart.py`); `ui/app.py` só chama `window.show()`
+      sem ele. Quem já ligou a opção precisa desligar e ligar de novo para a chave ser reescrita (ou migrar a chave no
+      primeiro início). Teste: o comando gravado contém o argumento e a janela não é mostrada com ele.
+- [ ] **Instalador (trazido da etapa final a pedido do dono), branch `etapa-07-instalador`:** executável com PyInstaller
+      (sem console, com o ícone do Pulso, que também resolve o nome "Pulso" em vez de "Python" no Gerenciador de Tarefas),
+      atalho do Menu Iniciar e "iniciar com o Windows" apontando para o `.exe`, *release* no GitHub com o arquivo. Decidir
+      a pasta de dados e a migração do que já existe em `%LOCALAPPDATA%\Pulso`. Testar em máquina sem Python.
+- [ ] Docs: PRD, TRD, App Flow, Design Brief, Esquema e diário `etapa-07.md`.
+- **Pronto quando:** em teste roteirizado a rede aprende a adiar quando o dono costuma recusar na hora e a lembrar quando
+  costuma aceitar; o rosto sempre tem um motivo dizível; a pergunta na volta registra as 4 categorias; o foco começa e
+  para só pela presença, e a reunião o pausa sem pergunta.
+
+## Etapa 8 — Saúde, ajustes, bandeja e atalho (F09, F10, atalho de F02)
 **Objetivo:** o programa completo do MVP.
-**Depende de:** Etapa 6
+**Depende de:** Etapa 7
 - [ ] `health_tab.py`: hoje e últimos 7 dias, com o aviso de "não é orientação médica".
 - [ ] `storage/config.py` (TOML, padrões, limites) e `settings_dialog.py`, incluindo "Recomeçar cérebro" com
       backup.
@@ -178,8 +271,8 @@
 - [ ] README final: capturas e GIF, instalação, "como funciona o cérebro" (diagrama), privacidade, roteiro
       (F12+) e link para o diário.
 - [ ] Rodar 1 semana no uso real e registrar no diário se a meta de aprendizado do PRD §4 foi atingida.
-- [ ] Instalador: executável (PyInstaller) na *release*, com o atalho do Menu Iniciar e o "iniciar com o Windows" já
-      resolvidos (decidido em 2026-11-06: fica para o projeto consolidado; até lá vale `pip install -e` + `pulso --criar-atalho`).
+- [x] Instalador: **movido para a etapa 7 em 2026-11-06, a pedido do dono** (antes: projeto consolidado). Aqui só se
+      confere que a *release* v1.0.0 traz o `.exe`.
 - [ ] Tag `v1.0.0` e *release* no GitHub com notas.
 
 ## Riscos e pontos de atenção
@@ -201,4 +294,8 @@
 | 2026-11-06 | Etapa 5: o rodapé mostra o custo por volta de 1 s (não por passo); o mapa de pesos ganhou o modo "só o que mudou" |
 | 2026-11-06 | Adiantado da etapa 7 (pedido do dono): bandeja com menu, X → bandeja, Sair, sempre à frente, iniciar com o Windows e interruptor da água |
 | 2026-11-06 | Etapa 6: hábitos (pomodoro, água, pendência cumulativa e rosto nervoso) implementados; falta o uso real e a bandeja (etapa 7) |
+| 2026-11-06 | Nova etapa 7 "O momento certo" (humor por regras, rede decide quando lembrar, pergunta na volta, Prorrogar, layout D); saúde/atalho viram etapa 8 |
+| 2026-11-06 | Instalador (`.exe`) e identidade do app no Windows (ícone próprio, sem "Python" na barra) entram na etapa 7 |
+| 2026-11-06 | Etapa 7: foco contínuo por presença (sem Iniciar), modos Profissional/Casual, reunião pelo microfone em uso pausa o foco, câmera e microfone nunca como sensor; fatias 2 e 3 (ciclo + janela D) entram juntas |
+| 2026-11-06 | Etapa 7, fatia 3: ciclo do foco ligado ao app, janela D completa e pomodoro antigo removido (fatias 2 e 3 prontas para entrar juntas) |
 | 2026-11-06 | Etapa 2 concluída (custo medido: 1,6 ms por segundo real, sem thread); contrato `Engine` cresce por etapas |

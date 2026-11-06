@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Pulso D: lembrete, descanso e volta</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#3CC6B5}a:hover{color:#7FE3D6}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="width: 1160px; height: 640px; display: flex; gap: 40px; font-family: 'Segoe UI', system-ui, sans-serif; color: #E6EDF3">
+
+  <!-- Lembrete -->
+  <div style="width: 360px; height: 640px; box-sizing: border-box; background: #16181D; display: flex; flex-direction: column; padding: 0 16px 16px; gap: 12px">
+    <nav style="display: flex; align-items: center; gap: 4px; height: 48px; border-bottom: 1px solid #2B2F37">
+      <button style="background: none; border: none; border-bottom: 2px solid #3CC6B5; color: #E6EDF3; font-size: 14px; font-weight: 600; padding: 12px 10px; margin-bottom: -1px">Pulso</button>
+      <button style="background: none; border: none; color: #9198A1; font-size: 14px; padding: 12px 10px">Jogo</button>
+      <button style="background: none; border: none; color: #9198A1; font-size: 14px; padding: 12px 10px">Cérebro</button>
+    </nav>
+    <span style="font-size: 12px; font-weight: 600; color: #FFB347; letter-spacing: 0.6px">LEMBRETE</span>
+    <div style="height: 196px; display: flex; align-items: center; justify-content: center">
+      <div style="position: relative; width: 196px; height: 196px">
+        <svg width="196" height="196" viewBox="0 0 196 196" aria-hidden="true" style="position: absolute; left: 0; top: 0">
+          <circle cx="98" cy="98" r="92" fill="none" stroke="#FFB347" stroke-width="7"></circle>
+        </svg>
+        <div style="position: absolute; left: 16px; top: 16px; width: 164px; height: 164px; border-radius: 82px; background: #0E1014; display: flex; align-items: center; justify-content: center; gap: 34px">
+          <div style="width: 26px; height: 38px; border-radius: 13px; background: #FFB347"></div>
+          <div style="width: 26px; height: 38px; border-radius: 13px; background: #FFB347"></div>
+        </div>
+      </div>
+    </div>
+    <div style="background: #20232A; border: 1px solid #FFB347; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 10px">
+      <span style="font-size: 15px; font-weight: 600; text-align: center">50 min de foco. Bora pausar 10?</span>
+      <span style="font-size: 12px; color: #9198A1; text-align: center">Pausa no horário vale ponto e me deixa contente.</span>
+      <button style="height: 44px; border-radius: 22px; border: none; background: #3CC6B5; color: #0E1014; font-size: 14px; font-weight: 600">Pausar agora</button>
+      <button style="height: 44px; border-radius: 22px; border: 1px solid #353A44; background: none; color: #E6EDF3; font-size: 14px">Prorrogar 5 min</button>
+      <a href="#" style="font-size: 13px; text-align: center">Hoje não</a>
+    </div>
+    <div style="flex-grow: 1"></div>
+    <div style="display: flex; justify-content: space-between; font-size: 12px; color: #9198A1">
+      <span>prorrogou 1× hoje</span><span>3 pontos</span>
+    </div>
+  </div>
+
+  <!-- Descansando -->
+  
+
+  <!-- O que foi? -->
+  <div style="width: 360px; height: 640px; box-sizing: border-box; background: #16181D; display: flex; flex-direction: column; padding: 0 16px 16px; gap: 12px">
+    <nav style="display: flex; align-items: center; gap: 4px; height: 48px; border-bottom: 1px solid #2B2F37">
+      <button style="background: none; border: none; border-bottom: 2px solid #3CC6B5; color: #E6EDF3; font-size: 14px; font-weight: 600; padding: 12px 10px; margin-bottom: -1px">Pulso</button>
+      <button style="background: none; border: none; color: #9198A1; font-size: 14px; padding: 12px 10px">Jogo</button>
+      <button style="background: none; border: none; color: #9198A1; font-size: 14px; padding: 12px 10px">Cérebro</button>
+    </nav>
+    <span style="font-size: 12px; font-weight: 600; color: #B59CE6; letter-spacing: 0.6px">DESCANSANDO</span>
+    <div style="height: 236px; display: flex; align-items: center; justify-content: center">
+      <div style="position: relative; width: 236px; height: 236px">
+        <svg width="236" height="236" viewBox="0 0 236 236" aria-hidden="true" style="position: absolute; left: 0; top: 0">
+          <circle cx="118" cy="118" r="111" fill="none" stroke="#2B2F37" stroke-width="7"></circle>
+          <circle cx="118" cy="118" r="111" fill="none" stroke="#B59CE6" stroke-width="7" stroke-linecap="round" stroke-dasharray="697" stroke-dashoffset="400" transform="rotate(-90 118 118)"></circle>
+        </svg>
+        <div style="position: absolute; left: 18px; top: 18px; width: 200px; height: 200px; border-radius: 100px; background: #0E1014; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px">
+          <div style="display: flex; gap: 40px">
+            <div style="width: 30px; height: 5px; border-radius: 3px; background: #B59CE6"></div>
+            <div style="width: 30px; height: 5px; border-radius: 3px; background: #B59CE6"></div>
+          </div>
+          <span style="font-size: 40px; font-weight: 600; font-variant-numeric: tabular-nums">04:12</span>
+        </div>
+      </div>
+    </div>
+    <div style="background: #20232A; border-radius: 16px; padding: 10px 14px; font-size: 13px; line-height: 1.45; text-align: center">Levanta, estica, olha longe. Se passar do tempo, eu te conto quanto.</div>
+    <div style="flex-grow: 1"></div>
+    <button style="height: 44px; border-radius: 22px; border: 1px solid #353A44; background: none; color: #E6EDF3; font-size: 14px">Voltar ao foco antes</button>
+  </div><div style="width: 360px; height: 640px; box-sizing: border-box; background: #16181D; display: flex; flex-direction: column; padding: 0 16px 16px; gap: 12px">
+    <nav style="display: flex; align-items: center; gap: 4px; height: 48px; border-bottom: 1px solid #2B2F37">
+      <button style="background: none; border: none; border-bottom: 2px solid #3CC6B5; color: #E6EDF3; font-size: 14px; font-weight: 600; padding: 12px 10px; margin-bottom: -1px">Pulso</button>
+      <button style="background: none; border: none; color: #9198A1; font-size: 14px; padding: 12px 10px">Jogo</button>
+      <button style="background: none; border: none; color: #9198A1; font-size: 14px; padding: 12px 10px">Cérebro</button>
+    </nav>
+    <span style="font-size: 12px; font-weight: 600; color: #3CC6B5; letter-spacing: 0.6px">VOLTOU · O QUE FOI?</span>
+    <div style="height: 150px; display: flex; align-items: center; justify-content: center">
+      <div style="width: 140px; height: 140px; border-radius: 70px; background: #0E1014; display: flex; align-items: center; justify-content: center; gap: 28px">
+        <div style="width: 22px; height: 32px; border-radius: 11px; background: #A3B1C6"></div>
+        <div style="width: 22px; height: 32px; border-radius: 11px; background: #A3B1C6"></div>
+      </div>
+    </div>
+    <div style="background: #20232A; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 10px">
+      <span style="font-size: 15px; font-weight: 600; text-align: center">Você ficou 22 min fora. O que foi?</span>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+        <button style="height: 48px; border-radius: 24px; border: none; background: #3CC6B5; color: #0E1014; font-size: 14px; font-weight: 600">Pausa</button>
+        <button style="height: 48px; border-radius: 24px; border: 1px solid #353A44; background: #1B1E24; color: #E6EDF3; font-size: 14px">Refeição</button>
+        <button style="height: 48px; border-radius: 24px; border: 1px solid #353A44; background: #1B1E24; color: #E6EDF3; font-size: 14px">Necessidade</button>
+        <button style="height: 48px; border-radius: 24px; border: 1px solid #353A44; background: #1B1E24; color: #E6EDF3; font-size: 14px">Foco sem mexer</button>
+      </div>
+      <span style="font-size: 12px; color: #9198A1; text-align: center; line-height: 1.4">Sem resposta, conto como pausa: +12 min além dos 10.</span>
+    </div>
+    <div style="flex-grow: 1"></div>
+    <span style="font-size: 12px; color: #9198A1; text-align: center">Refeição e necessidade nunca me deixam nervoso.</span>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1160,"height":640}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

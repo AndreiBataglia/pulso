@@ -1,4 +1,8 @@
-"""O rosto do pet, desenhado com QPainter (Design Brief §7.1): fundo escuro, olhos, boca e emojis.
+"""O rosto do pet, desenhado com QPainter (Design Brief §7.1): disco escuro, olhos, boca e emojis.
+
+O rosto é redondo e pode ter um **anel** em volta (direção D do canvas de design): o anel mostra o
+andamento do foco ou do descanso, cheio no lembrete, tracejado na reunião. Sem anel (`None`), só o
+disco, do mesmo tamanho, para o rosto não mudar de tamanho de uma fase para outra.
 
 Como a animação funciona
 ------------------------
@@ -104,6 +108,7 @@ class PetWidget(QWidget):
         self._activity: str | None = None  # "descansando" ou "bebendo" (sobre o humor da rede)
         self._drink_until = 0.0
         self._countdown: str | None = None  # texto da contagem regressiva do descanso
+        self._ring: tuple[float, str, bool] | None = None  # (andamento 0–1, cor, tracejado)
         self._last_frame = time.monotonic()
         self._timer = QTimer(self)
         self._timer.setInterval(FRAME_MS)
@@ -153,6 +158,20 @@ class PetWidget(QWidget):
         self._countdown = countdown
         self._ensure_timer()
         self.update()
+
+    def set_ring(self, progress: float, color: str, dashed: bool = False) -> None:
+        """Anel em volta do rosto: `progress` de 0 a 1 (sentido horário, a partir do topo)."""
+        self._ring = (min(max(progress, 0.0), 1.0), color, dashed)
+        self.update()
+
+    def clear_ring(self) -> None:
+        """Sem anel (modo casual): só o disco do rosto."""
+        self._ring = None
+        self.update()
+
+    @property
+    def ring(self) -> tuple[float, str, bool] | None:
+        return self._ring
 
     def drink(self) -> None:
         """O dono bebeu água: o pet bebe por `DRINK_S` segundos, com o copo esvaziando."""
@@ -254,13 +273,18 @@ class PetWidget(QWidget):
         p = QPainter(self)
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
         w, h = self.width(), self.height()
-        width = max(min(w - 16, (h - 16) * 4 / 3), 1.0)
-        height = width * 3 / 4
-        face = QRectF((w - width) / 2, (h - height) / 2, width, height)
-
+        d = max(min(w, h) - 8.0, 1.0)  # diâmetro do conjunto (anel + rosto)
+        ring_w = max(d * 0.035, 2.0)
+        disc_d = d - ring_w * 4.4
+        center = QPointF(w / 2, h / 2)
+        self._draw_ring(p, center, d, ring_w)
         p.setPen(Qt.PenStyle.NoPen)
         p.setBrush(QColor(FACE_BACKGROUND))
-        p.drawRoundedRect(face, width * 0.12, width * 0.12)
+        p.drawEllipse(center, disc_d / 2, disc_d / 2)
+        width = disc_d * 0.9  # as proporções dos olhos e da boca seguem as de um rosto 4:3
+        height = width * 0.75
+        side = disc_d * 0.72  # quadrado dentro do disco: onde moram os extras (💤, copo, contagem)
+        face = QRectF(center.x() - side / 2, center.y() - side / 2, side, side)
 
         look = self._look
         color = QColor(*(int(round(c)) for c in self._color))
@@ -280,6 +304,28 @@ class PetWidget(QWidget):
         self._draw_activity(p, face)
         self._draw_bursts(p, face)
         p.end()
+
+    def _draw_ring(self, p: QPainter, center: QPointF, d: float, ring_w: float) -> None:
+        if self._ring is None:
+            return
+        progress, hex_color, dashed = self._ring
+        r = (d - ring_w) / 2
+        rect = QRectF(center.x() - r, center.y() - r, r * 2, r * 2)
+        p.setBrush(Qt.BrushStyle.NoBrush)
+        p.setPen(_line_pen(QColor(145, 152, 161, 70), ring_w))  # a trilha, em qualquer tema
+        p.drawEllipse(rect)
+        color = QColor(hex_color)
+        if dashed:  # reunião: o foco está parado
+            pen = _line_pen(_alpha(color, 0.7), ring_w)
+            pen.setDashPattern([0.9, 2.2])
+            p.setPen(pen)
+            p.drawEllipse(rect)
+        elif progress >= 0.999:
+            p.setPen(_line_pen(color, ring_w))
+            p.drawEllipse(rect)
+        elif progress > 0.0:
+            p.setPen(_line_pen(color, ring_w))
+            p.drawArc(rect, 90 * 16, int(-progress * 360 * 16))
 
     def _draw_eyes(self, p: QPainter, color: QColor, width: float, height: float, look) -> None:
         gaze = self._gaze_x * width * 0.03

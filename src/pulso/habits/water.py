@@ -38,6 +38,11 @@ class Water:
         """O pet está pedindo água agora?"""
         return self._reminder.shown
 
+    @property
+    def remaining_s(self) -> float | None:
+        """Segundos até o próximo lembrete (`None` se o lembrete de água está desligado)."""
+        return self._reminder.remaining_s
+
     def tick(self, presence: Presence) -> list[str]:
         """Devolve os acontecimentos desta volta: `SHOW_WATER` e/ou `WATER_IGNORED`."""
         outcome = self._reminder.tick(presence)

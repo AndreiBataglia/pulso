@@ -84,7 +84,7 @@ def test_dopamina_mostra_o_valor_e_a_cor_de_quem_deu(parts, qapp):
     _show(window, qapp)
     window.pet_tab.care.click()
     clock.advance(30)
-    window.pet_tab.scold.click()
+    controller.owner_reward(-1)  # a bronca saiu da tela, mas a regra de recompensa continua
     window.brain_tab.refresh()
     opts = window.brain_tab._dopamine_bars.opts
     assert opts["height"][0] > 0 > opts["height"][1]

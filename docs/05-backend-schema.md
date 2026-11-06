@@ -73,6 +73,19 @@ erDiagram
   depois do último "fiz" **do mesmo hábito**; água e pausa são separadas). `break_streak_end` só é gravado na etapa 7.
 - `CHECK (kind IN (...))` garante os valores permitidos.
 
+**Migração v3 (etapa 7, ciclo do foco por presença):** o SQLite não altera um `CHECK`, então a tabela é refeita e os
+eventos antigos são copiados (os `id` seguem). Entram:
+
+| Coluna / tipo | Descrição |
+|---|---|
+| `kind` = `away_need`, `away_focus` | Respostas de "o que foi?" que não são pausa: **necessidade** (não penaliza, o foco segue) e **foco sem mexer** (o tempo fora vira foco) |
+| `category` TEXT, `CHECK` em `pause`, `meal`, `need`, `focus` | A resposta de "o que foi?" (as 4 categorias). Uma pausa pelo lembrete grava `pause` |
+| `planned_s`, `actual_s`, `excess_s` INTEGER | Resumo da pausa em segundos: planejado, feito e excesso (`excess_s` = 0 se passou menos de 30 s). Nunca o sinal do sensor |
+| `value` em `pomodoro_break_done` | Quantas vezes o lembrete foi prorrogado antes (0 = no horário, soma ponto) |
+
+Pausa e refeição de "o que foi?" são gravadas como `pomodoro_break_done` (com a categoria), então zeram a pendência de
+pausa. O tipo `break_extended` do plano não foi criado: o excesso mora em `excess_s`.
+
 ### game_result (migração v2)
 **Para quê:** o placar dos jogos (jokenpô e par ou ímpar), do ponto de vista do pet.
 

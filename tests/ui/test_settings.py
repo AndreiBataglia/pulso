@@ -97,8 +97,8 @@ def test_foco_novo_vale_ja(env):
     window, _, _, saved = env
     window.apply_settings(Settings(focus_min=25))
     assert saved[-1].focus_min == 25
-    window.pet_tab.pomodoro_toggle.click()
-    assert "Foco 25:00" in window.pet_tab.pomodoro_label.text()
+    window.tick()  # a 1ª entrada abre o foco sozinha, já com o tempo novo
+    assert window.pet_tab.timer_value.text() == "25:00"
 
 
 def test_intervalo_novo_da_agua_vale_na_hora(env):
@@ -142,3 +142,24 @@ def test_o_app_comeca_com_os_tempos_do_config_e_as_regras_automaticas_desligadas
     )  # no app, os palpites por processo começam desligados
     padrao, _ = build_controller(ScriptedSensor([FRAME]), FakeClock(), tmp_path / "outro.npz")
     assert padrao.habits.cfg.focus_min == 50 and not padrao._rules.cfg.auto_enabled
+
+
+def test_modo_e_ausencia_vao_para_o_config_e_sao_validados(tmp_path):
+    path = tmp_path / "config.toml"
+    mine = Settings(mode="casual", away_min=8)
+    save_settings(path, mine)
+    assert load_settings(path) == mine
+    assert 'mode = "casual"' in path.read_text(encoding="utf-8")
+    assert habit_config(mine).away_idle_s == 8 * 60
+    path.write_text('[habits]\nmode = "turbo"\naway_min = 999\n', encoding="utf-8")
+    loaded = load_settings(path)
+    assert loaded.mode == "profissional" and loaded.away_min == 5  # inválidos voltam ao padrão
+
+
+def test_dialogo_devolve_modo_e_ausencia(qapp):
+    dialog = SettingsDialog(Settings())
+    dialog.mode.setCurrentIndex(dialog.mode.findData("casual"))
+    dialog.spins["away_min"].setValue(12)
+    result = dialog.settings()
+    assert result.mode == "casual" and result.away_min == 12
+    dialog.close()

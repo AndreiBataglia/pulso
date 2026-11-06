@@ -6,6 +6,8 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/).
 ## [Não lançado]
 
 ### Adicionado
+- **Etapa 7 (fatias 2 e 3):** ciclo do foco por presença (`FocusCycle`: aguardando, foco, ausente, "o que foi?", lembrete, descanso, além do descanso, reunião), modos Profissional e Casual, sensor de reunião (microfone em uso por outro programa, sem capturar som), migração v3 do banco (categoria e resumo da pausa em segundos).
+- Janela nova: anel do foco no rosto, pílula de modo, um painel por fase, **Pausar agora · Prorrogar 5 min · Hoje não**, "o que foi?", reunião, casual e placar do dia. Bandeja com "Modo casual" e submenu "Foco". Ajustes com modo e tolerância de ausência.
 - **Aba Jogo:** jokenpô e par ou ímpar com o pet (ganhou: contente; perdeu: bravo), placar do dia em `game_result` (migração v2).
 - **Ajustes** (⚙ e menu da bandeja): tempos do pomodoro e da água e interruptor das regras automáticas, aplicados na hora.
 - Pet com atividades: ao aceitar a pausa ele descansa (olhos fechados, respirando) com a contagem regressiva no rosto; ao clicar em "Bebi" ele bebe por 15 s com um copo esvaziando.
@@ -39,9 +41,15 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/).
   Windows" pela chave `Run` do usuário.
 
 ### Alterado
+- Aba "Pet" virou "Pulso"; o botão Bronca saiu (o Carinho só reage). Com a observação pausada o foco congela (sem leitura não há presença). Refeição conta como descanso longo, mas a rede só aprende com pausa e foco.
+- README com capa, fases da janela, fluxo do humor e blocos de atualização.
+
 - Recompensas só por resposta do dono: as regras por processo/ócio ficam desligadas por padrão (ligáveis em Ajustes) e os hábitos (bebi, fiz a pausa, hoje não) pesam como carinho e bronca.
 - A barra de abas ganhou "Jogo" e o botão ⚙ (Pet · Jogo · Cérebro; Ctrl+1/2/3).
 - A barra de abas aparece (Pet · Cérebro); a janela cresce ao abrir o Cérebro e volta ao tamanho do pet.
 - `Engine.reward` passa a devolver a dopamina entregue (`value − r̄`).
 - Primária clara escurecida de `#0F8A7E` para `#0D7F74`: o texto branco do botão dava 4,24:1 (mínimo 4,5:1).
 - `pulso` sem argumentos agora abre o app (antes imprimia a ajuda).
+
+### Removido
+- `habits/pomodoro.py` e o botão Iniciar: o foco abre sozinho.

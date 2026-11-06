@@ -116,3 +116,11 @@ def test_ignorei_so_soma_o_tempo_com_o_dono_presente(water, clock):
     assert water.tick(Presence.PRESENT) == []  # 4 min no total
     clock.advance(1 * MIN)
     assert water.tick(Presence.PRESENT) == [kinds.WATER_IGNORED]  # 5 min
+
+
+def test_remaining_s_conta_ate_o_proximo_lembrete_e_e_none_se_desligado(water, clock):
+    assert water.remaining_s == pytest.approx(CFG.water_interval_min * MIN)
+    clock.advance(20 * MIN)
+    assert water.remaining_s == pytest.approx(40 * MIN)
+    water.set_enabled(False)
+    assert water.remaining_s is None

@@ -68,6 +68,18 @@ def contrast(a: str, b: str) -> float:
     return (la + 0.05) / (lb + 0.05)
 
 
+def phase_colors(p: Palette) -> dict[str, str]:
+    """A cor de cada fase do ciclo (texto do estado e anel), conferida contra o fundo do tema."""
+    dark = luminance(p.background) < 0.2
+    return {
+        "focus": p.primary,
+        "alert": p.warning,
+        "rest": "#B59CE6" if dark else "#6F4FB8",
+        "meeting": "#7FD1FF" if dark else "#0B6FA4",
+        "idle": p.text_secondary,
+    }
+
+
 def stylesheet(p: Palette) -> str:
     """Folha de estilo Qt do app inteiro."""
     return f"""
@@ -83,7 +95,7 @@ def stylesheet(p: Palette) -> str:
     QLabel#badge[paused="true"] {{ border-color: {p.text_secondary}; color: {p.text_secondary}; }}
     QLabel#caption {{ color: {p.text_secondary}; }}
     QLabel#brain_title {{ font-size: 15px; font-weight: 600; }}
-    QPushButton#pause {{ padding: 8px 12px; }}
+    QPushButton#pause {{ padding: 4px 8px; }}
     QPushButton {{ background: {p.surface}; color: {p.text}; border: 1px solid {p.text_secondary};
         border-radius: 8px; padding: 8px 16px; }}
     QPushButton:hover {{ border-color: {p.primary}; }}
@@ -94,6 +106,25 @@ def stylesheet(p: Palette) -> str:
     QCheckBox::indicator:checked {{ background: {p.primary}; border-color: {p.primary}; }}
     QToolButton#settings {{ border: 0; padding: 2px 8px; font-size: 18px; }}
     QToolButton#settings:hover {{ color: {p.primary}; }}
-    QPushButton#care {{ background: {p.primary}; color: {p.on_primary};
-        border-color: {p.primary}; }}
+    QPushButton#action {{ border-radius: 22px; padding: 0 12px; min-height: 42px; }}
+    QPushButton#pill {{ border-radius: 14px; padding: 2px 12px; min-height: 24px;
+        font-size: 12px; }}
+    QPushButton#pill[casual="true"] {{ border-color: {p.primary}; }}
+    QPushButton#primary {{ background: {p.primary}; color: {p.on_primary};
+        border-color: {p.primary}; border-radius: 22px; padding: 0 16px; min-height: 42px;
+        font-weight: 600; }}
+    QPushButton#primary:disabled {{ background: {p.surface}; color: {p.text_secondary};
+        border-color: {p.text_secondary}; }}
+    QPushButton#ghost {{ border-radius: 22px; padding: 0 16px; min-height: 42px; }}
+    QPushButton#round {{ border-radius: 22px; padding: 0; min-width: 44px; max-width: 44px;
+        min-height: 42px; }}
+    QPushButton#link {{ border: 0; background: transparent; color: {p.primary};
+        text-decoration: underline; padding: 2px 8px; }}
+    QFrame#card {{ background: {p.surface}; border: 1px solid {p.surface}; border-radius: 16px; }}
+    QFrame#card[alert="true"] {{ border-color: {p.warning}; }}
+    QFrame#card QLabel {{ background: transparent; }}
+    QFrame#card[dim="true"] QLabel {{ color: {p.text_secondary}; }}
+    QLabel#state {{ background: transparent; font-size: 12px; font-weight: 600; }}
+    QLabel#bigtime {{ font-size: 34px; font-weight: 600; }}
+    QLabel#cardtitle {{ font-size: 15px; font-weight: 600; }}
     """

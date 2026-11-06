@@ -5,14 +5,13 @@ import random
 SLEEPING = "dormindo"  # estado de pausa; não é um humor da rede
 
 WELCOME = (
-    "Oi, eu sou o Pulso! Use 💚 e 💢 para me ensinar o que você gosta. "
+    "Oi, eu sou o Pulso! Use 💚 para me dar carinho quando eu acertar. "
     "Com o botão de pausa eu fecho os olhos e paro de observar."
 )
 GREETING = "Oi de novo! Já tava com saudade."
 PAUSED = "Tô de olhos fechados. Me acorda quando quiser."
 RESUMED = "Voltei! Que bom te ver."
 PETTED = "Hmm, que bom! Vou lembrar disso."
-SCOLDED = "Entendi. Vou tentar fazer diferente."
 
 # O que cada rosto quer dizer, para o dono nunca ter que adivinhar (aparece sob o rosto).
 MOOD_MEANINGS = {
@@ -20,18 +19,21 @@ MOOD_MEANINGS = {
     "contente": "Contente: está tudo tranquilo, gostei do seu ritmo.",
     "entediado": "Entediado: está quieto por aqui, sem novidade.",
     "sonolento": "Sonolento: o computador está parado, me deu sono.",
-    "preocupado": "Preocupado: acho que você precisa de uma pausa.",
+    "preocupado": "Preocupado: a rede está inquieta, mas ainda não sei dizer por quê.",
 }
 MEANING_NEW = "Acordando: ainda estou te conhecendo."
 MEANING_SLEEPING = "Dormindo: a observação está pausada, não estou lendo nada."
-MEANING_HINT = "O humor vem da rede de pulsos, que aprende com os seus carinhos e broncas."
+MEANING_HINT = "O humor vem da rede de pulsos, que aprende com o seu carinho e as suas respostas."
 
 MOOD_PHRASES: dict[str, tuple[str, ...]] = {
     "animado": ("Bora! Tô cheio de energia!", "Que dia bom pra fazer coisas!"),
     "contente": ("Tô bem, e você?", "Tudo tranquilo por aqui."),
     "entediado": ("Hmm... tá quietinho por aqui.", "Será que acontece algo logo?"),
     "sonolento": ("Que soninho...", "Ai, ai... bocejando aqui."),
-    "preocupado": ("Faz tempo que você não descansa, né?", "Um alongadinho ia bem..."),
+    "preocupado": (
+        "Tô meio inquieto, sem saber por quê...",
+        "Algo me deixou com a pulga atrás da orelha.",
+    ),
 }
 
 
@@ -45,6 +47,38 @@ LATER_AGAIN = "Tudo bem, eu lembro de novo daqui a pouco."
 NO_PROBLEM = "Tá bem. É só porque eu gosto de você."
 IN_TRAY = "Continuo aqui na bandeja. Clique no meu ícone para me abrir; para sair de vez, use Sair."
 RELAXED = "Ufa, agora estou mais tranquilo. Obrigado!"
+
+
+# Ciclo do foco por presença (etapa 7): o Pulso narra o que percebeu, sem cobrar.
+MEETING_ON = "Microfone em uso: pausei o foco. Quando a reunião acabar, eu continuo de onde parou."
+MEETING_OFF = "A reunião acabou. Voltei a contar o foco."
+BREAK_STARTED = "Levanta, estica, olha longe. Se passar do tempo, eu te conto quanto."
+LONG_BREAK_STARTED = "Descanso longo! Vale água, alongar e sair um pouco da frente da tela."
+AWAY_NOTICED = "Você ficou parado. Parei de contar o foco no seu último gesto."
+CASUAL_ON = "Modo casual: não conto foco nem te chamo para pausa. Só lembro da água."
+PROFESSIONAL_ON = "Modo profissional: conto o seu foco e te chamo para a pausa."
+AWAY_REPLIES = {
+    "pause": RESTED,
+    "meal": "Bom apetite! Conto como descanso longo, sem cobrança.",
+    "need": "Tudo bem. O foco continua de onde estava.",
+    "focus": "Entendi: esse tempo conta como foco.",
+}
+
+
+def break_summary(planned_s: int | None, excess_s: int | None) -> str:
+    """O resumo da pausa que acabou (o excesso só é contado, nunca cobrado)."""
+    if not excess_s:
+        return RESTED
+    planned = round((planned_s or 0) / 60)
+    return f"Descansou {planned} min + {max(round(excess_s / 60), 1)} além. Tudo certo!"
+
+
+def away_question(minutes: int) -> str:
+    return f"Você ficou {max(minutes, 1)} min fora. O que foi?"
+
+
+def remind_break(focus_min: int, break_min: int) -> str:
+    return f"{focus_min} min de foco. Bora pausar {break_min}?"
 
 
 def nervous_meaning(reason: str | None) -> str:

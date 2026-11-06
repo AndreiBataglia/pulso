@@ -16,7 +16,10 @@ from pulso.habits import kinds
 
 log = logging.getLogger(__name__)
 
+# A v1 guarda a lista de tipos de quando nasceu (uma migração antiga nunca muda com o tempo).
+_V1_KIND_LIST = ", ".join(f"'{k}'" for k in kinds.ALL_KINDS if k not in kinds.V3_KINDS)
 _KIND_LIST = ", ".join(f"'{k}'" for k in kinds.ALL_KINDS)
+_CATEGORY_LIST = ", ".join(f"'{c}'" for c in kinds.CATEGORIES)
 
 MIGRATIONS = (
     # v1
@@ -24,7 +27,7 @@ MIGRATIONS = (
     CREATE TABLE habit_event (
         id    INTEGER PRIMARY KEY AUTOINCREMENT,
         ts    TEXT NOT NULL,
-        kind  TEXT NOT NULL CHECK (kind IN ({_KIND_LIST})),
+        kind  TEXT NOT NULL CHECK (kind IN ({_V1_KIND_LIST})),
         value INTEGER
     );
     CREATE INDEX idx_habit_event_ts ON habit_event (ts);
@@ -38,6 +41,25 @@ MIGRATIONS = (
         result TEXT NOT NULL CHECK (result IN ('won', 'lost', 'draw'))
     );
     CREATE INDEX idx_game_result_ts ON game_result (ts);
+    """,
+    # v3: o ciclo de foco por presença. O SQLite não altera um CHECK: refaz a tabela e copia tudo.
+    # Novos: tipos `away_need`/`away_focus`, `category` (a resposta de "o que foi?") e o resumo da
+    # pausa em segundos (planejado, feito, excesso). Nunca o sinal do sensor.
+    f"""
+    CREATE TABLE habit_event_v3 (
+        id        INTEGER PRIMARY KEY AUTOINCREMENT,
+        ts        TEXT NOT NULL,
+        kind      TEXT NOT NULL CHECK (kind IN ({_KIND_LIST})),
+        value     INTEGER,
+        category  TEXT CHECK (category IS NULL OR category IN ({_CATEGORY_LIST})),
+        planned_s INTEGER,
+        actual_s  INTEGER,
+        excess_s  INTEGER
+    );
+    INSERT INTO habit_event_v3 (id, ts, kind, value) SELECT id, ts, kind, value FROM habit_event;
+    DROP TABLE habit_event;
+    ALTER TABLE habit_event_v3 RENAME TO habit_event;
+    CREATE INDEX idx_habit_event_ts ON habit_event (ts);
     """,
 )
 SCHEMA_VERSION = len(MIGRATIONS)
@@ -107,10 +129,22 @@ class HabitStore:
         self._conn = conn
         self._now = now
 
-    def record(self, kind: str, value: int | None = None) -> None:
+    def record(
+        self,
+        kind: str,
+        value: int | None = None,
+        category: str | None = None,
+        planned_s: int | None = None,
+        actual_s: int | None = None,
+        excess_s: int | None = None,
+    ) -> None:
+        """Grava um evento. `category`, `planned_s`, `actual_s` e `excess_s` (v3) só existem nas
+        pausas e nas respostas de "o que foi?": é o resumo, nunca o sinal do sensor."""
         stamp = self._now().isoformat(timespec="seconds")
         self._conn.execute(
-            "INSERT INTO habit_event (ts, kind, value) VALUES (?, ?, ?)", (stamp, kind, value)
+            "INSERT INTO habit_event (ts, kind, value, category, planned_s, actual_s, excess_s) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (stamp, kind, value, category, planned_s, actual_s, excess_s),
         )
 
     def count_today(self, kind: str) -> int:

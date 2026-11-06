@@ -29,6 +29,8 @@ class Settings:
     break_min: int = 10
     long_break_min: int = 20
     water_interval_min: int = 60
+    away_min: int = 5  # parado por mais que isto = ausente: o foco para no último gesto
+    mode: str = "profissional"  # "profissional" (conta foco e chama para a pausa) ou "casual"
 
 
 # Seção do TOML de cada campo.
@@ -40,6 +42,8 @@ _SECTIONS = {
     "break_min": "habits",
     "long_break_min": "habits",
     "water_interval_min": "habits",
+    "away_min": "habits",
+    "mode": "habits",
 }
 # Intervalo aceito (mínimo, máximo) dos tempos, em minutos.
 RANGES = {
@@ -47,10 +51,15 @@ RANGES = {
     "break_min": (1, 60),
     "long_break_min": (1, 120),
     "water_interval_min": (10, 240),
+    "away_min": (1, 30),
 }
+# Campos de texto: só estes valores valem.
+CHOICES = {"mode": ("profissional", "casual")}
 
 
 def _valid(name: str, value, default) -> bool:
+    if isinstance(default, str):
+        return isinstance(value, str) and value in CHOICES[name]
     if isinstance(default, bool):
         return isinstance(value, bool)
     if isinstance(value, bool) or not isinstance(value, int):
@@ -66,6 +75,7 @@ def habit_config(settings: Settings) -> HabitConfig:
         break_min=settings.break_min,
         long_break_min=settings.long_break_min,
         water_interval_min=settings.water_interval_min,
+        away_idle_s=settings.away_min * 60.0,
     )
 
 
@@ -101,7 +111,8 @@ def save_settings(path: Path, settings: Settings) -> None:
         for field in fields(Settings):
             if _SECTIONS[field.name] == section:
                 value = getattr(settings, field.name)
-                lines.append(f"{field.name} = {str(value).lower()}")  # True → true; 50 → 50
+                text = f'"{value}"' if isinstance(value, str) else str(value).lower()
+                lines.append(f"{field.name} = {text}")  # True → true; 50 → 50; "casual" → "casual"
         lines.append("")
     tmp = path.with_name(path.name + ".tmp")
     try:

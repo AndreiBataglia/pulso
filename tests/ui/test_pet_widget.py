@@ -116,3 +116,13 @@ def test_beber_no_meio_do_descanso_volta_ao_descanso(pet):
     for _ in range(160):
         pet.advance(0.1)
     assert pet.shown == "descansando"
+
+
+def test_anel_do_rosto_guarda_o_andamento_limitado_e_some_no_casual(pet):
+    assert pet.ring is None
+    pet.set_ring(0.4, "#3B82F6")
+    assert pet.ring == (0.4, "#3B82F6", False)
+    pet.set_ring(7.0, "#7FD1FF", dashed=True)
+    assert pet.ring == (1.0, "#7FD1FF", True)  # passou de 1: fica em 1
+    pet.clear_ring()
+    assert pet.ring is None

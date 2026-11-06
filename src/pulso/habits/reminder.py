@@ -32,6 +32,13 @@ class Reminder:
         """O balão está na tela esperando resposta?"""
         return self._shown
 
+    @property
+    def remaining_s(self) -> float | None:
+        """Segundos até aparecer (0 se já está na tela); `None` se desarmado."""
+        if self._due_at is None:
+            return None
+        return max(self._due_at - self._clock.now(), 0.0)
+
     def arm(self, due_in_s: float) -> None:
         """(Re)arma para daqui a `due_in_s` segundos e some com o balão, se havia um."""
         self._due_at = self._clock.now() + due_in_s

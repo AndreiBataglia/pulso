@@ -99,7 +99,7 @@ projeto_tamagotchi/
 │   ├── habits/
 │   │   ├── kinds.py        # tipos de evento, presença do dono e HabitConfig
 │   │   ├── reminder.py     # lembrete que pergunta e espera (adiar, recusar, ignorar)
-│   │   ├── pomodoro.py     # máquina de estados foco/descanso
+│   │   ├── focus_cycle.py  # máquina de estados do foco por presença (fases, modos, reunião)
 │   │   ├── water.py        # intervalo, adiar, copos
 │   │   └── coach.py        # junta as máquinas ao banco e calcula a pendência (nervoso)
 │   ├── storage/

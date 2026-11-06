@@ -1,4 +1,5 @@
-"""Tela de Ajustes: os tempos do pomodoro e da água, e se a rede aprende também com o que vê no PC.
+"""Tela de Ajustes: tempos do foco e da água, tolerância de ausência, modo, e se a rede aprende
+também com o que vê no PC.
 
 Só monta e devolve um `Settings` novo (`settings()`); quem grava e aplica é a janela principal.
 """
@@ -7,6 +8,7 @@ from dataclasses import replace
 
 from PySide6.QtWidgets import (
     QCheckBox,
+    QComboBox,
     QDialog,
     QDialogButtonBox,
     QFormLayout,
@@ -16,6 +18,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from pulso.habits.focus_cycle import Mode
 from pulso.storage.config import RANGES, Settings
 
 _LABELS = {
@@ -23,7 +26,9 @@ _LABELS = {
     "break_min": "Descanso curto",
     "long_break_min": "Descanso longo (a cada 4 focos)",
     "water_interval_min": "Lembrar de beber água a cada",
+    "away_min": "Parado por mais de (conta como ausente)",
 }
+_MODES = {Mode.PROFESSIONAL: "Profissional", Mode.CASUAL: "Casual (só a água)"}
 
 
 class SettingsDialog(QDialog):
@@ -32,6 +37,11 @@ class SettingsDialog(QDialog):
         self.setWindowTitle("Ajustes do Pulso")
         self._current = current
         form = QFormLayout()
+        self.mode = QComboBox()
+        for mode, text in _MODES.items():
+            self.mode.addItem(text, mode.value)
+        self.mode.setCurrentIndex(self.mode.findData(current.mode))
+        form.addRow("Modo", self.mode)
         self.spins: dict[str, QSpinBox] = {}
         for name, label in _LABELS.items():
             spin = QSpinBox()
@@ -47,7 +57,7 @@ class SettingsDialog(QDialog):
             "só com carinho, bronca e os seus hábitos."
         )
         note = QLabel(
-            "Os tempos novos valem já para a próxima fase do pomodoro e para o próximo lembrete."
+            "Os tempos novos valem já para o próximo foco, o próximo descanso e o próximo lembrete."
         )
         note.setObjectName("caption")
         note.setWordWrap(True)
@@ -67,4 +77,9 @@ class SettingsDialog(QDialog):
     def settings(self) -> Settings:
         """As preferências com o que está na tela (o resto fica como estava)."""
         values = {name: spin.value() for name, spin in self.spins.items()}
-        return replace(self._current, auto_rules=self.auto_rules.isChecked(), **values)
+        return replace(
+            self._current,
+            auto_rules=self.auto_rules.isChecked(),
+            mode=self.mode.currentData(),
+            **values,
+        )
