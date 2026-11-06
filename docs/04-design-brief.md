@@ -67,12 +67,15 @@ O tema acompanha o Windows (claro ou escuro).
   - secundário (contorno): os demais;
   - perigo (vermelho): só "Recomeçar cérebro", sempre com confirmação.
 - **Balão de fala:** superfície com uma ponta virada para o pet; pode trazer até 2 botões (Bebi / Depois).
+- **Barra de abas:** escondida enquanto houver uma única aba (o título da janela já diz "Pulso"); aparece com a aba Cérebro.
 - **Selo de estado:** pílula "😴 Observação pausada" (cinza), **só aparece enquanto pausado**. Observando é o normal e não
   ganha aviso fixo (decisão do dono, 2026-11-06); o rosto sempre explica o humor numa legenda sob ele.
 - **Botão de pausa:** só ícone (⏸ pausar / ▶ retomar, desenhados, sem emoji), na mesma linha e com a mesma altura de
   Carinho e Bronca, com dica ao passar o mouse.
 - **Tamanho da janela:** abre sempre no menor tamanho possível (e não encolhe além dele). A legenda do humor fica
   **acima** do rosto, e a legenda e o balão reservam 2 e 3 linhas para o rosto nunca ser coberto.
+- **Nervoso (etapa 6, a desenhar):** quando as recusas/omissões de hábito acumulam, o rosto fica nervoso e **não sai
+  desse humor** até o dono admitir que fez a pausa ou bebeu água; a legenda diz o motivo, sem culpa nem bronca (§8).
 - **Reação do rosto:** Carinho deixa o rosto contente por ~2,5 s e Bronca o deixa arrependido; depois volta ao humor.
   Toda expressão tem legenda dizendo o que significa (ex.: "Preocupado: acho que você precisa de uma pausa").
 - **Gráficos (pyqtgraph):**

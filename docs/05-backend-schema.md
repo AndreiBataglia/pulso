@@ -67,6 +67,10 @@ erDiagram
 | value | INTEGER | não | NULL | Dado extra; em `break_streak_end` são os minutos de trabalho seguidos antes da pausa |
 
 - **Índice:** `ts` (consultas de "hoje" e "últimos 7 dias").
+- **A mudar na etapa 6 (decisão do dono, 2026-11-06):** separar **fiz / adiei / recusei / ignorei** para água e pausa
+  (novos `kind`, ex.: `water_declined`, `water_ignored`, `break_declined`, `break_ignored`; `CHECK` e migração v1
+  atualizados). A **pendência cumulativa** que deixa o pet nervoso não é guardada: é calculada a partir destes
+  eventos (recusas e omissões desde o último "fiz").
 - `CHECK (kind IN (...))` garante os valores permitidos.
 
 ### meta

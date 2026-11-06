@@ -119,6 +119,23 @@
 ## Etapa 6 — Hábitos: pomodoro e água (F07, F08)
 **Objetivo:** o Pulso cuida do dono.
 **Depende de:** Etapa 4 (a 5 não é necessária)
+- [ ] **Revisar antes de codar (pedido do dono, 2026-11-06):** (a) os tempos de foco, descanso e água, olhando o uso
+      real; (b) como o Pulso **sabe se o dono fez ou recusou** a pausa e a água. Hoje o esquema só tem `water_drunk`/
+      `water_snoozed` e `pomodoro_break_done`/`pomodoro_skipped`: falta separar **fiz**, **depois**, **recusei** e
+      **ignorei** (não respondeu), o que muda o `CHECK` de `habit_event.kind`, a migração v1, as recompensas e o
+      resumo de saúde (F09). Decidir com o dono e atualizar PRD F07/F08 e o esquema antes de implementar.
+- [ ] **Pendência cumulativa (decidido pelo dono, 2026-11-06):** recusar ou ignorar lembretes de pausa/água acumula;
+      só "fiz" zera. Com pendência alta o pet fica **nervoso e preso nesse humor** até o dono admitir que fez. Regra,
+      não rede (como o resto dos hábitos). A definir com o dono antes de codar:
+      - a conta: pontos por recusa/ignorar, limite do "nervoso", e se a pendência esfria sozinha com o tempo;
+      - **botão sempre disponível** "Bebi" / "Fiz a pausa" (o Pulso não vê o copo: sem ele o dono não tem como se
+        explicar), mesmo sem lembrete na tela;
+      - a pendência **não conta** com a observação pausada nem com o dono ocioso/longe do PC;
+      - tom do Design Brief §8: nervoso sem culpa nem bronca, e a legenda diz o motivo ("3 lembretes de água sem
+        resposta");
+      - ajuste para desligar ou suavizar (F10), para o pet não virar uma fonte de estresse;
+      - a pendência é **calculada a partir de `habit_event`** (sobrevive a fechar o app);
+      - o rosto "nervoso" (hoje só existe "preocupado") e como ele vence o humor da rede enquanto houver pendência.
 - [ ] `habits/pomodoro.py` e `habits/water.py`: máquinas de estado puras, testadas com relógio falso
       (incluindo "o ócio adia o lembrete").
 - [ ] `storage/db.py`: `habit_event`, `meta` e migração v1.

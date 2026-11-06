@@ -82,6 +82,12 @@ Escureci a primária clara para `#0D7F74` (4,88:1) e atualizei o Design Brief. M
 - Antes da primeira decisão da rede (~10 s) o pet usa um olhar "neutro", que não é um dos 5 humores.
 - `pulso` sem argumentos agora abre o app (antes imprimia a ajuda; `pulso --help` continua existindo).
 
+- **Barra de abas escondida** enquanto houver só a aba "Pet" (o título da janela já é "Pulso"); volta com a etapa 5.
+- **Teste de uso do dono (2026-11-06):** o pet passou por todos os humores; a janela e as legendas foram aprovadas.
+  Pedido novo, para a etapa 6: rever os tempos de descanso e água e registrar se o dono fez ou recusou.
+  Ideia do dono: a recusa/omissão **acumula**; com muita pendência o pet fica nervoso e preso nesse humor até o
+  dono admitir que fez a pausa ou bebeu água (detalhes e pontos em aberto no plano, etapa 6).
+
 ## Medições
 - Piloto de 60 s (app real, sensores reais, pasta de dados temporária): **0,10% de CPU** (da máquina inteira) e
   **149 MB de RAM**. Metas do PRD §4: < 3% e < 200 MB.
