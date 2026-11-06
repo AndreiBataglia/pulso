@@ -32,6 +32,7 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]  # os testes de interface reaproveitam ajudantes de tests/test_controller.py
 markers = ["slow: testes de aprendizado (cerca de 1 minuto); pule com -m 'not slow'"]
 
 [tool.ruff]
