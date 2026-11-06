@@ -28,14 +28,15 @@ BLINK_S = 0.16
 BURST_S = 0.9
 
 
-def _look(eye, happy, curve, mouth_open, brow, z, drop, zzz, bounce) -> dict[str, float]:
+def _look(eye, happy, curve, mouth_open, brow, z, drop, zzz, bounce, shake=0) -> dict[str, float]:
     return dict(
         eye=eye, happy=happy, curve=curve, mouth_open=mouth_open, brow=brow,
-        z=z, drop=drop, zzz=zzz, bounce=bounce,
+        z=z, drop=drop, zzz=zzz, bounce=bounce, shake=shake,
     )  # fmt: skip
 
 
 # Números de cada expressão. `happy`: olho em arco (^). `brow`: sobrancelha inclinada.
+# `shake`: tremor leve do rosto (só o nervoso).
 LOOKS: dict[str, dict[str, float]] = {
     "neutro": _look(0.8, 0, 0.3, 0, 0, 0, 0, 0, 0),
     "arrependido": _look(0.5, 0, -0.4, 0, 0, 0, 0, 0, 0),  # reação à bronca
@@ -44,9 +45,13 @@ LOOKS: dict[str, dict[str, float]] = {
     "entediado": _look(0.4, 0, 0, 0, 0, 0, 0, 0, 0),
     "sonolento": _look(0.22, 0, 0.1, 0, 0, 1, 0, 0, 0),
     "preocupado": _look(0.9, 0, -0.5, 0, 1, 0, 1, 0, 0),
+    # Nervoso (pendência de hábito): o "preocupado" com olhos mais arregalados e um leve tremor.
+    "nervoso": _look(1.0, 0, -0.5, 0, 1, 0, 1, 0, 0, shake=1),
     SLEEPING: _look(0.0, 0, 0.15, 0, 0, 0, 0, 1, 0),
 }
-_LOOK_COLOR = dict(MOOD_COLORS, neutro=MOOD_COLORS["entediado"], arrependido="#A3B1C6")
+_LOOK_COLOR = dict(
+    MOOD_COLORS, neutro=MOOD_COLORS["entediado"], arrependido="#A3B1C6", nervoso="#FF9B7A"
+)
 REACTION_S = 2.5  # quanto tempo dura a reação ao carinho/bronca
 
 
@@ -216,8 +221,9 @@ class PetWidget(QWidget):
         color = QColor(*(int(round(c)) for c in self._color))
         bounce = -abs(math.sin(self._t * 5.0)) * height * 0.04 * look["bounce"]
         tilt = 0.0 if self.sleeping else math.sin(self._t * 0.7) * 2.0
+        tremor = math.sin(self._t * 47.0) * width * 0.004 * look["shake"]  # trêmulo, sem exagero
         p.save()
-        p.translate(face.center().x(), face.center().y() + bounce)
+        p.translate(face.center().x() + tremor, face.center().y() + bounce)
         p.rotate(tilt)
         self._draw_eyes(p, color, width, height, look)
         self._draw_mouth(p, color, width, height, look)

@@ -35,6 +35,28 @@ MOOD_PHRASES: dict[str, tuple[str, ...]] = {
 }
 
 
+# Hábitos (F07/F08): tom de quem cuida, sem culpa nem bronca (Design Brief §8).
+ASK_WATER = "Psiu! Um gole d'água? 💧"
+ASK_BREAK = "Já faz um bom tempo de foco. Que tal descansar um pouquinho? ☕"
+BACK_TO_WORK = "O descanso acabou! Vamos voltar com calma?"
+DRANK = "Que bom! Obrigado por se cuidar. 💧"
+RESTED = "Descansar faz bem. Aproveita!"
+LATER_AGAIN = "Tudo bem, eu lembro de novo daqui a pouco."
+NO_PROBLEM = "Tá bem. É só porque eu gosto de você."
+IN_TRAY = "Continuo aqui na bandeja. Clique no meu ícone para me abrir; para sair de vez, use Sair."
+RELAXED = "Ufa, agora estou mais tranquilo. Obrigado!"
+
+
+def nervous_meaning(reason: str | None) -> str:
+    """O que o rosto nervoso quer dizer, dizendo o motivo (aparece sob o rosto)."""
+    what = reason or "hábito"
+    return f"Nervoso: ficaram lembretes de {what} sem resposta. Me conta quando fizer."
+
+
+def nervous_phrase(reason: str | None) -> str:
+    return f"Tô inquieto... ficou {reason or 'um cuidado'} pendente. Quando fizer, me avisa?"
+
+
 def mood_phrase(mood: str, rng: random.Random | None = None) -> str:
     """Uma frase do humor (sorteada, para o pet não repetir sempre a mesma)."""
     options = MOOD_PHRASES[mood]

@@ -70,3 +70,13 @@ def test_janela_oculta_nao_anima(pet):
     assert pet.animating
     pet.hide()
     assert not pet.animating
+
+
+def test_nervoso_e_preocupado_com_olhos_mais_arregalados_e_tremor(pet):
+    assert LOOKS["nervoso"]["eye"] > LOOKS["preocupado"]["eye"]
+    assert LOOKS["nervoso"]["shake"] > 0 and LOOKS["preocupado"]["shake"] == 0
+    pet.set_mood("nervoso")
+    for _ in range(40):
+        pet.advance(0.033)
+    assert pet._look["shake"] == pytest.approx(1.0, abs=0.01)
+    assert pet._look["brow"] == pytest.approx(1.0, abs=0.01)  # a sobrancelha de preocupado

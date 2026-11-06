@@ -15,7 +15,7 @@ from pulso.storage.brain_store import AutoSaver
 from pulso.ui.brain_tab import BRAIN_PREFERRED, HELP, SOURCE_COLORS, BrainTab, HelpButton
 from pulso.ui.main_window import MainWindow
 from pulso.ui.theme import MOOD_COLORS
-from tests.test_controller import FRAME, SpyEngine
+from tests.test_controller import FRAME, SpyEngine, make_habits
 
 
 @pytest.fixture
@@ -29,6 +29,7 @@ def parts(qapp, tmp_path):
         MoodDecoder(engine.groups),
         RewardRules(clock),
         AutoSaver(engine, tmp_path / "c.npz", 1, clock),
+        make_habits(clock),
     )
     window = MainWindow(controller, clock, tick_ms=3_600_000, rng=random.Random(1))
     yield window, controller, clock

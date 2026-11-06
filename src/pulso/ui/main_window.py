@@ -8,6 +8,8 @@ Conceitos de Qt usados aqui:
 """
 
 import random
+from collections.abc import Callable
+from dataclasses import replace
 
 from PySide6.QtCore import QRectF, QSize, Qt, QTimer
 from PySide6.QtGui import (
@@ -21,6 +23,7 @@ from PySide6.QtGui import (
     QShortcut,
 )
 from PySide6.QtWidgets import (
+    QApplication,
     QHBoxLayout,
     QLabel,
     QMainWindow,
@@ -32,10 +35,15 @@ from PySide6.QtWidgets import (
 
 from pulso.clock import Clock
 from pulso.controller import PetController
+from pulso.habits import kinds
+from pulso.habits.pomodoro import Phase
+from pulso.storage.autostart import Autostart
+from pulso.storage.config import Settings
 from pulso.ui import phrases
 from pulso.ui.brain_tab import BRAIN_MINIMUM, BRAIN_PREFERRED, BrainTab
 from pulso.ui.pet_widget import PetWidget
 from pulso.ui.theme import LIGHT, Palette
+from pulso.ui.tray import Tray
 
 WELCOME_HOLD_S = 30.0  # a fala de boas-vindas não é trocada por humores antes disto
 ICON_PX = 20
@@ -95,6 +103,16 @@ class PetTab(QWidget):
         self.pause.setObjectName("pause")
         self.pause.setIconSize(QSize(ICON_PX, ICON_PX))
         self.pause.setFixedHeight(self.care.sizeHint().height())  # mesma altura dos vizinhos
+        # Hábitos: "Bebi" e "Fiz a pausa" ficam sempre à mão (o Pulso não vê o copo); "Depois" e
+        # "Hoje não" só aparecem enquanto um lembrete espera resposta.
+        self.drink = QPushButton("💧 Bebi")
+        self.rested = QPushButton("☕ Fiz a pausa")
+        self.later = QPushButton("Depois")
+        self.decline = QPushButton("Hoje não")
+        self.pomodoro_label = QLabel()
+        self.pomodoro_label.setObjectName("caption")
+        self.pomodoro_toggle = QPushButton()
+        self.pomodoro_skip = QPushButton("Pular")
 
         row = QHBoxLayout()
         row.setSpacing(8)
@@ -104,6 +122,29 @@ class PetTab(QWidget):
         row.addWidget(self.pause)  # ao lado dos demais, só o ícone
         row.addStretch()
 
+        habits = QHBoxLayout()
+        habits.setSpacing(8)
+        habits.addStretch()
+        habits.addWidget(self.drink)
+        habits.addWidget(self.rested)
+        habits.addStretch()
+        # Linha própria (só durante um lembrete): quatro botões juntos deixariam a janela larga.
+        self.ask_row = QWidget()
+        asking = QHBoxLayout(self.ask_row)
+        asking.setContentsMargins(0, 0, 0, 0)
+        asking.setSpacing(8)
+        asking.addStretch()
+        asking.addWidget(self.later)
+        asking.addWidget(self.decline)
+        asking.addStretch()
+        pomodoro = QHBoxLayout()
+        pomodoro.setSpacing(8)
+        pomodoro.addStretch()
+        pomodoro.addWidget(self.pomodoro_label)
+        pomodoro.addWidget(self.pomodoro_toggle)
+        pomodoro.addWidget(self.pomodoro_skip)
+        pomodoro.addStretch()
+
         layout = QVBoxLayout(self)
         layout.setContentsMargins(16, 16, 16, 16)
         layout.setSpacing(8)
@@ -112,7 +153,25 @@ class PetTab(QWidget):
         layout.addWidget(self.pet, stretch=11)
         layout.addWidget(self.speech, stretch=2)
         layout.addLayout(row)
+        layout.addLayout(habits)
+        layout.addWidget(self.ask_row)
+        layout.addLayout(pomodoro)
+        self.show_asking(None)
+        self.show_pomodoro("🍅 Pomodoro parado", "🍅 Iniciar", skippable=False)
         self.show_paused(False)
+
+    def show_asking(self, asking: str | None) -> None:
+        """Os botões "Depois" e "Hoje não" só existem com um lembrete esperando resposta."""
+        self.ask_row.setVisible(asking is not None)
+
+    def ask_row_height(self) -> int:
+        """Quanto a linha "Depois/Hoje não" acrescenta à janela (botão + espaçamento)."""
+        return self.decline.sizeHint().height() + self.layout().spacing()
+
+    def show_pomodoro(self, text: str, toggle: str, skippable: bool) -> None:
+        self.pomodoro_label.setText(text)
+        self.pomodoro_toggle.setText(toggle)
+        self.pomodoro_skip.setEnabled(skippable)
 
     def show_paused(self, paused: bool) -> None:
         # Sem aviso constante: o selo só aparece quando há algo a dizer (observação pausada).
@@ -141,10 +200,22 @@ class MainWindow(QMainWindow):
         tick_ms: int = 1000,
         rng: random.Random | None = None,
         palette: Palette = LIGHT,
+        tray: Tray | None = None,
+        settings: Settings | None = None,
+        save_settings: Callable[[Settings], None] = lambda settings: None,
+        autostart: Autostart | None = None,
     ) -> None:
         super().__init__()
         self.setWindowTitle("Pulso")
         self._controller = controller
+        self._tray = tray  # bandeja e avisos do Windows (None = sem eles)
+        self._settings = settings or Settings()
+        self._save_settings = save_settings
+        self._autostart = autostart  # None = sem a opção "Iniciar com o Windows"
+        self._quitting = False  # "Sair" de verdade (o X só esconde, se houver bandeja)
+        self._told_tray = False  # já avisou, nesta sessão, que ficou na bandeja?
+        self._was_nervous = False
+        self._ask_space = False  # a linha "Depois/Hoje não" está contada no tamanho da janela?
         self._clock = clock
         self._rng = rng or random.Random()
         self._hold_until = clock.now() + WELCOME_HOLD_S if first_run else 0.0
@@ -167,10 +238,25 @@ class MainWindow(QMainWindow):
         self.pet_tab.care.clicked.connect(lambda: self._owner_click(+1))
         self.pet_tab.scold.clicked.connect(lambda: self._owner_click(-1))
         self.pet_tab.pause.clicked.connect(self.toggle_pause)
+        tab = self.pet_tab
+        for button, action in (
+            (tab.drink, "drink"),
+            (tab.rested, "rest"),
+            (tab.pomodoro_skip, "skip"),
+        ):
+            button.clicked.connect(lambda _=False, a=action: self.answer_habit(a))
+        tab.later.clicked.connect(lambda: self.answer_habit(self._ask_action("later")))
+        tab.decline.clicked.connect(lambda: self.answer_habit(self._ask_action("decline")))
+        tab.pomodoro_toggle.clicked.connect(self.toggle_pomodoro)
 
         self._say(phrases.WELCOME if first_run else phrases.GREETING, force=True)
-        self._show_mood(controller.mood)
+        self._show_mood(controller.shown_mood)
+        self._refresh_habits()
         self._fit_to_minimum()
+        self._controller.habits.water.set_enabled(self._settings.water_enabled)
+        if self._settings.always_on_top:
+            self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, True)
+        self._setup_tray()
 
         self._timer = QTimer(self)
         self._timer.setInterval(tick_ms)
@@ -210,12 +296,108 @@ class MainWindow(QMainWindow):
     def tick(self) -> None:
         """Uma volta do laço (o `QTimer` chama; os testes também)."""
         result = self._controller.tick()
+        self._on_habit_tick(self._controller.tick_habits())  # também pausado: é independente
+        self._refresh_habits()
         if result is None:  # pausado: o controlador não leu nada
             return
         self.brain_tab.refresh()  # não faz nada se escondida ou congelada
-        self._show_mood(result.mood)
-        if result.mood_changed and result.mood is not None:
+        self._sync_mood()
+        if result.mood_changed and result.mood is not None and not self._was_nervous:
             self._say(phrases.mood_phrase(result.mood, self._rng))
+
+    # ---- hábitos (pomodoro e água) -----------------------------------------------------------
+
+    _SHOWN = {
+        kinds.SHOW_WATER: phrases.ASK_WATER,
+        kinds.SHOW_BREAK: phrases.ASK_BREAK,
+        kinds.SHOW_BACK: phrases.BACK_TO_WORK,
+    }
+    _REPLIES = {
+        kinds.WATER_DRUNK: phrases.DRANK,
+        kinds.BREAK_DONE: phrases.RESTED,
+        kinds.WATER_SNOOZED: phrases.LATER_AGAIN,
+        kinds.BREAK_SNOOZED: phrases.LATER_AGAIN,
+        kinds.WATER_DECLINED: phrases.NO_PROBLEM,
+        kinds.BREAK_DECLINED: phrases.NO_PROBLEM,
+    }
+
+    def _on_habit_tick(self, tick) -> None:
+        for signal in tick.shown:
+            text = self._SHOWN[signal]
+            self._say(text, force=True)
+            if self._tray is not None:
+                self._tray.notify(text)
+        if tick.recorded:  # uma omissão pode ter deixado o pet nervoso
+            self._sync_mood()
+
+    def _ask_action(self, base: str) -> str:
+        """ "Depois"/"Hoje não" valem para o lembrete que está na tela (água primeiro)."""
+        return f"{'water' if self._controller.habits.asking == 'water' else 'break'}_{base}"
+
+    def answer_habit(self, action: str) -> None:
+        """O dono respondeu a um lembrete (ou tocou em "Bebi"/"Fiz a pausa")."""
+        kind = self._controller.answer_habit(action)
+        text = self._REPLIES.get(kind)
+        if text is not None and not self._controller.habits.nervous:
+            self._say(text, force=True)
+        self._refresh_habits()
+        self._sync_mood()
+
+    def toggle_pomodoro(self) -> None:
+        pomodoro = self._controller.habits.pomodoro
+        if not pomodoro.running:
+            pomodoro.start()
+        elif pomodoro.paused:
+            pomodoro.resume()
+        elif pomodoro.phase in (Phase.FOCUS, Phase.BREAK):
+            pomodoro.pause()
+        self._refresh_habits()
+
+    def _refresh_habits(self) -> None:
+        """Atualiza o contador do pomodoro e os botões dos lembretes."""
+        habits = self._controller.habits
+        pomodoro = habits.pomodoro
+        left = f"{int(pomodoro.remaining_s) // 60:02d}:{int(pomodoro.remaining_s) % 60:02d}"
+        paused = " (pausado)" if pomodoro.paused else ""
+        toggle = "Continuar" if pomodoro.paused else "Pausar"
+        if pomodoro.phase is Phase.FOCUS:
+            text = f"🍅 Foco {left}{paused}"
+        elif pomodoro.phase is Phase.BREAK:
+            kind = "longo" if pomodoro.long_break else "curto"
+            text = f"🍅 Descanso {kind} {left}{paused}"
+        elif pomodoro.phase is Phase.ASKING:
+            text = "🍅 Hora de descansar"
+        else:
+            text, toggle = "🍅 Pomodoro parado", "🍅 Iniciar"
+        self.pet_tab.show_pomodoro(text, toggle, skippable=pomodoro.running)
+        self.pet_tab.pomodoro_toggle.setEnabled(pomodoro.phase is not Phase.ASKING)
+        self.pet_tab.show_asking(habits.asking)
+        self._make_room_for_asking(habits.asking is not None)
+
+    def _make_room_for_asking(self, asking: bool) -> None:
+        """A janela cresce uma linha enquanto um lembrete espera resposta e volta depois."""
+        if asking == self._ask_space:
+            return
+        self._ask_space = asking
+        delta = self.pet_tab.ask_row_height() * (1 if asking else -1)
+        self._pet_minimum = QSize(self._pet_minimum.width(), self._pet_minimum.height() + delta)
+        if self._pet_size.isValid():  # tamanho a restaurar ao voltar do Cérebro
+            self._pet_size.setHeight(self._pet_size.height() + delta)
+        if self.tabs.currentWidget() is self.pet_tab:
+            self.setMinimumSize(self._pet_minimum)
+            self.resize(self.width(), self.height() + delta)
+
+    def _sync_mood(self) -> None:
+        """Põe no rosto o humor que vale agora ("nervoso" vence o da rede) e fala na virada."""
+        habits = self._controller.habits
+        nervous = habits.nervous
+        if not self._controller.paused:
+            self._show_mood(self._controller.shown_mood)
+        if nervous and not self._was_nervous:
+            self._say(phrases.nervous_phrase(habits.nervous_reason), force=True)
+        elif self._was_nervous and not nervous:
+            self._say(phrases.RELAXED, force=True)
+        self._was_nervous = nervous
 
     # ---- botões ------------------------------------------------------------------------------
 
@@ -229,7 +411,7 @@ class MainWindow(QMainWindow):
     def toggle_pause(self) -> None:
         if self._controller.paused:
             self._controller.resume()
-            self._show_mood(self._controller.mood)
+            self._show_mood(self._controller.shown_mood)
             self._say(phrases.RESUMED, force=True)
         else:
             self._controller.pause()
@@ -242,6 +424,8 @@ class MainWindow(QMainWindow):
         self.pet_tab.pet.set_mood(mood)
         if mood == phrases.SLEEPING:
             meaning = phrases.MEANING_SLEEPING
+        elif mood == "nervoso":
+            meaning = phrases.nervous_meaning(self._controller.habits.nervous_reason)
         else:
             meaning = phrases.MOOD_MEANINGS.get(mood, phrases.MEANING_NEW)
         self.pet_tab.caption.setText(meaning)
@@ -257,9 +441,113 @@ class MainWindow(QMainWindow):
             self._hold_until = 0.0
         self.pet_tab.speech.setText(text)
 
+    # ---- bandeja e opções de janela ----------------------------------------------------------
+
+    def _setup_tray(self) -> None:
+        """Monta o menu da bandeja (T05). Itens que mudam de texto são atualizados ao abrir."""
+        tray = self._tray
+        if tray is None:
+            return
+        tray.on_click(self.bring_to_front)  # clicar no aviso traz o pet para a frente
+        tray.on_open(self.bring_to_front)
+        tray.add_action("Mostrar o Pulso", self.bring_to_front)
+        tray.menu.addSeparator()
+        self._act_front = tray.add_action(
+            "Sempre à frente", self.set_always_on_top, True, self._settings.always_on_top
+        )
+        self._act_water = tray.add_action(
+            "Lembrete de água", self.set_water_enabled, True, self._settings.water_enabled
+        )
+        self._act_autostart = None
+        if self._autostart is not None:
+            self._act_autostart = tray.add_action(
+                "Iniciar com o Windows", self.set_autostart, True, self._autostart.enabled()
+            )
+        tray.menu.addSeparator()
+        self._act_pause = tray.add_action("Pausar observação", self.toggle_pause)
+        pomodoro = tray.add_submenu("Pomodoro")
+        self._act_pomodoro = tray.add_action("Iniciar", self.toggle_pomodoro, menu=pomodoro)
+        self._act_skip = tray.add_action(
+            "Pular fase", lambda: self.answer_habit("skip"), menu=pomodoro
+        )
+        tray.menu.addSeparator()
+        tray.add_action("Sair do Pulso", self.quit_app)
+        tray.menu.aboutToShow.connect(self._refresh_tray_menu)
+        self._refresh_tray_menu()
+        tray.show()
+
+    def _refresh_tray_menu(self) -> None:
+        pomodoro = self._controller.habits.pomodoro
+        self._act_pause.setText(
+            "Retomar observação" if self._controller.paused else "Pausar observação"
+        )
+        if not pomodoro.running:
+            label = "Iniciar"
+        elif pomodoro.paused:
+            label = "Continuar"
+        else:
+            label = "Pausar"
+        self._act_pomodoro.setText(label)
+        self._act_pomodoro.setEnabled(pomodoro.phase is not Phase.ASKING)
+        self._act_skip.setEnabled(pomodoro.running)
+        if self._act_autostart is not None:  # o registro do Windows é a fonte da verdade
+            self._act_autostart.setChecked(self._autostart.enabled())
+
+    def set_always_on_top(self, on: bool) -> None:
+        """Liga ou desliga "sempre à frente" e guarda a escolha."""
+        self._settings = replace(self._settings, always_on_top=on)
+        self._save_settings(self._settings)
+        was_visible = self.isVisible()  # trocar a flag esconde a janela, então olhe antes
+        self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, on)
+        if was_visible:
+            self.show()
+
+    def set_water_enabled(self, on: bool) -> None:
+        """Liga ou desliga o lembrete de água e guarda a escolha."""
+        self._settings = replace(self._settings, water_enabled=on)
+        self._save_settings(self._settings)
+        self._controller.habits.water.set_enabled(on)
+        self._refresh_habits()
+
+    def set_autostart(self, on: bool) -> None:
+        """Liga ou desliga "Iniciar com o Windows". Se o Windows recusar, avisa e desfaz o ✔."""
+        try:
+            self._autostart.set_enabled(on)
+        except OSError:
+            self._act_autostart.setChecked(not on)
+            self._say("Não consegui mudar o início com o Windows.", force=True)
+
+    def quit_app(self) -> None:
+        """Sair de verdade: guarda o cérebro, tira o ícone da bandeja e encerra o programa."""
+        self._quitting = True
+        self.close()
+        app = QApplication.instance()
+        if app is not None:
+            app.quit()
+
+    def prepare_to_quit(self) -> None:
+        """O Windows está encerrando a sessão: não pode ficar "só escondido" no X."""
+        self._quitting = True
+
+    def bring_to_front(self) -> None:
+        """Mostra a janela do pet (ao clicar numa notificação)."""
+        self.tabs.setCurrentWidget(self.pet_tab)
+        self.showNormal()
+        self.raise_()
+        self.activateWindow()
+
     # ---- fechar ------------------------------------------------------------------------------
 
     def closeEvent(self, event: QCloseEvent) -> None:  # noqa: N802 (nome do Qt)
+        if not self._quitting and self._tray is not None and self._tray.available:
+            event.ignore()  # o X não encerra: o pet segue na bandeja, com os avisos
+            self.hide()
+            if not self._told_tray:
+                self._told_tray = True
+                self._tray.notify(phrases.IN_TRAY)
+            return
         self._timer.stop()
         self._controller.shutdown()  # guarda o cérebro
+        if self._tray is not None:
+            self._tray.dispose()
         super().closeEvent(event)
