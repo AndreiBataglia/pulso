@@ -1,0 +1,76 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "Anel.dc.html": {
+      "h": 640,
+      "title": "B · Anel do foco",
+      "w": 360,
+      "x": 440,
+      "y": 0
+    },
+    "CicloD.dc.html": {
+      "h": 640,
+      "title": "D · Ciclo completo (foco por presença, reunião, casual)",
+      "w": 2120,
+      "x": 3800,
+      "y": 0
+    },
+    "Contextual.dc.html": {
+      "h": 640,
+      "title": "C · Só o que importa agora (3 estados)",
+      "w": 1160,
+      "x": 880,
+      "y": 0
+    },
+    "EstadosD.dc.html": {
+      "h": 640,
+      "title": "D · Lembrete, descanso e volta",
+      "w": 1160,
+      "x": 2560,
+      "y": 0
+    },
+    "Hibrido.dc.html": {
+      "h": 640,
+      "title": "D · Organização do A, estilo do B",
+      "w": 360,
+      "x": 2120,
+      "y": 0
+    },
+    "Main.dc.html": {
+      "h": 640,
+      "title": "A · Cartões empilhados",
+      "w": 360,
+      "x": 0,
+      "y": 0
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-11-06T17:36:49.921Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "view": "canvas"
+  },
+  "notes": {
+    "titulo": {
+      "kind": "title1",
+      "maxW": 3720,
+      "text": "Pulso: três direções para os botões",
+      "w": 240,
+      "x": 0,
+      "y": -260
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Anel.dc.html",
+    "Contextual.dc.html",
+    "Hibrido.dc.html",
+    "EstadosD.dc.html",
+    "CicloD.dc.html"
+  ],
+  "pages": [],
+  "title": "Pulso — layouts da janela"
+}

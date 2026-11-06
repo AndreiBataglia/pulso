@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Pulso D: ciclo completo</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#3CC6B5}a:hover{color:#7FE3D6}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="width: 2120px; height: 640px; display: flex; gap: 40px; font-family: 'Segoe UI', system-ui, sans-serif; color: #E6EDF3">
+
+  <!-- Diagrama do ciclo -->
+  <div style="width: 520px; height: 640px; box-sizing: border-box; background: #16181D; padding: 16px 0 16px; display: flex; flex-direction: column; gap: 10px">
+    <span style="font-size: 12px; font-weight: 600; color: #9198A1; letter-spacing: 0.6px; padding: 0 16px">CICLO DO FOCO · MODO PROFISSIONAL</span>
+    <svg width="520" height="490" viewBox="0 0 520 490" role="img" aria-label="Diagrama de estados do foco por presença">
+      <defs>
+        <marker id="seta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0 0L10 5L0 10z" fill="#9198A1"></path>
+        </marker>
+      </defs>
+      <g font-family="Segoe UI, system-ui, sans-serif" text-anchor="middle">
+        <!-- caixas -->
+        <rect x="185" y="20" width="150" height="44" rx="22" fill="#20232A" stroke="#A3B1C6"></rect>
+        <text x="260" y="38" font-size="13" font-weight="600" fill="#E6EDF3">Aguardando</text>
+        <text x="260" y="54" font-size="10" fill="#9198A1">app aberto, ninguém mexeu</text>
+
+        <rect x="185" y="120" width="150" height="44" rx="22" fill="#20232A" stroke="#3CC6B5" stroke-width="2"></rect>
+        <text x="260" y="138" font-size="13" font-weight="600" fill="#E6EDF3">Foco</text>
+        <text x="260" y="154" font-size="10" fill="#9198A1">parado &lt; 5 min ainda conta</text>
+
+        <rect x="15" y="120" width="150" height="44" rx="22" fill="#20232A" stroke="#7FD1FF"></rect>
+        <text x="90" y="138" font-size="13" font-weight="600" fill="#E6EDF3">Reunião</text>
+        <text x="90" y="154" font-size="10" fill="#9198A1">foco pausado, sem pergunta</text>
+
+        <rect x="355" y="120" width="150" height="44" rx="22" fill="#20232A" stroke="#A3B1C6"></rect>
+        <text x="430" y="138" font-size="13" font-weight="600" fill="#E6EDF3">Ausente</text>
+        <text x="430" y="154" font-size="10" fill="#9198A1">foco para no último gesto</text>
+
+        <rect x="355" y="250" width="150" height="44" rx="22" fill="#20232A" stroke="#3CC6B5"></rect>
+        <text x="430" y="268" font-size="13" font-weight="600" fill="#E6EDF3">O que foi?</text>
+        <text x="430" y="284" font-size="10" fill="#9198A1">4 respostas → Foco</text>
+
+        <rect x="185" y="250" width="150" height="44" rx="22" fill="#20232A" stroke="#FFB347"></rect>
+        <text x="260" y="268" font-size="13" font-weight="600" fill="#E6EDF3">Lembrete</text>
+        <text x="260" y="284" font-size="10" fill="#9198A1">a rede escolhe o momento</text>
+
+        <rect x="185" y="390" width="150" height="44" rx="22" fill="#20232A" stroke="#B59CE6"></rect>
+        <text x="260" y="408" font-size="13" font-weight="600" fill="#E6EDF3">Descansando</text>
+        <text x="260" y="424" font-size="10" fill="#9198A1">mexer não encerra</text>
+
+        <rect x="355" y="390" width="150" height="44" rx="22" fill="#20232A" stroke="#B59CE6"></rect>
+        <text x="430" y="408" font-size="13" font-weight="600" fill="#E6EDF3">+N min além</text>
+        <text x="430" y="424" font-size="10" fill="#9198A1">conta o excesso</text>
+
+        <!-- setas -->
+        <g fill="none" stroke="#9198A1" stroke-width="1.5" marker-end="url(#seta)">
+          <path d="M260 64V118"></path>
+          <path d="M185 134H167"></path>
+          <path d="M165 152H183"></path>
+          <path d="M335 140H353"></path>
+          <path d="M430 164V248"></path>
+          <path d="M355 258L302 167"></path>
+          <path d="M250 164V248"></path>
+          <path d="M270 248V166"></path>
+          <path d="M260 294V388"></path>
+          <path d="M335 412H353"></path>
+          <path d="M185 418H174V178H198V166"></path>
+          <path d="M430 434V466H174V420"></path>
+        </g>
+        <!-- rótulos -->
+        <g font-size="10" fill="#9198A1">
+          <text x="300" y="96" text-anchor="start">1ª entrada</text>
+          <text x="176" y="110">mic em uso</text>
+          <text x="176" y="182">mic livre</text>
+          <text x="345" y="110">parado &gt; 5 min</text>
+          <text x="438" y="212" text-anchor="start">voltou</text>
+          <text x="242" y="198" text-anchor="end">↓ 50 min (+ até 15)</text>
+          <text x="242" y="228" text-anchor="end">↑ Prorrogar 5 · Hoje não</text>
+          <text x="252" y="338" text-anchor="end">Pausar agora</text>
+          <text x="252" y="352" text-anchor="end">ou saiu da mesa (= aceitou)</text>
+          <text x="345" y="452">fim, ainda fora</text>
+          <text x="300" y="482">fim do descanso → Foco na 1ª entrada</text>
+        </g>
+      </g>
+    </svg>
+    <div style="display: flex; flex-direction: column; gap: 6px; padding: 0 16px; font-size: 12px; color: #9198A1; line-height: 1.4">
+      <span><b style="color: #E6EDF3">Casual:</b> não conta foco nem chama para pausa; só a água.</span>
+      <span><b style="color: #E6EDF3">Escudo (observação pausada):</b> tudo para, presença incluída.</span>
+    </div>
+  </div>
+
+  <!-- Foco revisado -->
+  <div style="width: 360px; height: 640px; box-sizing: border-box; background: #16181D; display: flex; flex-direction: column; padding: 0 16px 16px; gap: 12px">
+    <nav style="display: flex; align-items: center; gap: 4px; height: 48px; border-bottom: 1px solid #2B2F37">
+      <button style="background: none; border: none; border-bottom: 2px solid #3CC6B5; color: #E6EDF3; font-size: 14px; font-weight: 600; padding: 12px 10px; margin-bottom: -1px">Pulso</button>
+      <button style="background: none; border: none; color: #9198A1; font-size: 14px; padding: 12px 10px">Jogo</button>
+      <button style="background: none; border: none; color: #9198A1; font-size: 14px; padding: 12px 10px">Cérebro</button>
+      <div style="flex-grow: 1"></div>
+      <button aria-label="Pausar observação" style="width: 36px; height: 36px; border-radius: 18px; border: none; background: none; color: #9198A1; display: flex; align-items: center; justify-content: center">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"></path><path d="M10 9v6M14 9v6"></path></svg>
+      </button>
+      <button aria-label="Ajustes" style="width: 36px; height: 36px; border-radius: 18px; border: none; background: none; color: #9198A1; display: flex; align-items: center; justify-content: center">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"></path></svg>
+      </button>
+    </nav>
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <span style="font-size: 12px; font-weight: 600; color: #3CC6B5; letter-spacing: 0.6px">FOCO · COMEÇOU SOZINHO 9:12</span>
+      <button style="height: 28px; padding: 0 12px; border-radius: 14px; border: 1px solid #353A44; background: #1B1E24; color: #E6EDF3; font-size: 12px">Profissional</button>
+    </div>
+    <div style="height: 196px; display: flex; align-items: center; justify-content: center">
+      <div style="position: relative; width: 196px; height: 196px">
+        <svg width="196" height="196" viewBox="0 0 196 196" aria-hidden="true" style="position: absolute; left: 0; top: 0">
+          <circle cx="98" cy="98" r="92" fill="none" stroke="#2B2F37" stroke-width="7"></circle>
+          <circle cx="98" cy="98" r="92" fill="none" stroke="#3CC6B5" stroke-width="7" stroke-linecap="round" stroke-dasharray="578" stroke-dashoffset="250" transform="rotate(-90 98 98)"></circle>
+        </svg>
+        <div style="position: absolute; left: 16px; top: 16px; width: 164px; height: 164px; border-radius: 82px; background: #0E1014; display: flex; align-items: center; justify-content: center; gap: 34px">
+          <div style="width: 24px; height: 34px; border-radius: 12px; background: #7BD389"></div>
+          <div style="width: 24px; height: 34px; border-radius: 12px; background: #7BD389"></div>
+        </div>
+      </div>
+    </div>
+    <div style="background: #20232A; border-radius: 16px; padding: 10px 14px; font-size: 13px; line-height: 1.45; text-align: center">Estamos no foco há 28 min. Lá pelas 10:00 eu te chamo para a pausa.</div>
+    <section style="background: #20232A; border-radius: 16px; padding: 12px 12px 12px 18px; display: flex; align-items: center; gap: 10px">
+      <div style="display: flex; flex-direction: column; flex-grow: 1">
+        <span style="font-size: 12px; color: #9198A1">Foco · 2 de 4</span>
+        <span style="font-size: 34px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.1">21:42</span>
+      </div>
+      <button style="height: 44px; padding: 0 16px; border-radius: 22px; border: none; background: #3CC6B5; color: #0E1014; font-size: 14px; font-weight: 600">Pausar agora</button>
+      <button aria-label="Pular fase" style="width: 44px; height: 44px; border-radius: 22px; border: 1px solid #353A44; background: none; color: #9198A1; display: flex; align-items: center; justify-content: center">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M5 5l9 7-9 7z"></path><path d="M18 5v14"></path></svg>
+      </button>
+    </section>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+      <button style="height: 48px; border-radius: 24px; border: 1px solid #2B2F37; background: #1B1E24; color: #E6EDF3; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F28C8C" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg>Carinho</button>
+      <button style="height: 48px; border-radius: 24px; border: 1px solid #2B2F37; background: #1B1E24; color: #E6EDF3; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7FD1FF" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12l-1.5 16h-9z"></path><path d="M7 10h10"></path></svg>Bebi</button>
+    </div>
+    <div style="flex-grow: 1"></div>
+    <div style="display: flex; justify-content: space-between; font-size: 12px; color: #9198A1">
+      <span>contente</span><span>4 copos · 2 focos hoje</span>
+    </div>
+  </div>
+
+  <!-- Reunião -->
+  <div style="width: 360px; height: 640px; box-sizing: border-box; background: #16181D; display: flex; flex-direction: column; padding: 0 16px 16px; gap: 12px">
+    <nav style="display: flex; align-items: center; gap: 4px; height: 48px; border-bottom: 1px solid #2B2F37">
+      <button style="background: none; border: none; border-bottom: 2px solid #3CC6B5; color: #E6EDF3; font-size: 14px; font-weight: 600; padding: 12px 10px; margin-bottom: -1px">Pulso</button>
+      <button style="background: none; border: none; color: #9198A1; font-size: 14px; padding: 12px 10px">Jogo</button>
+      <button style="background: none; border: none; color: #9198A1; font-size: 14px; padding: 12px 10px">Cérebro</button>
+    </nav>
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <span style="font-size: 12px; font-weight: 600; color: #7FD1FF; letter-spacing: 0.6px">EM REUNIÃO</span>
+      <button style="height: 28px; padding: 0 12px; border-radius: 14px; border: 1px solid #353A44; background: #1B1E24; color: #E6EDF3; font-size: 12px">Profissional</button>
+    </div>
+    <div style="height: 196px; display: flex; align-items: center; justify-content: center">
+      <div style="position: relative; width: 196px; height: 196px">
+        <svg width="196" height="196" viewBox="0 0 196 196" aria-hidden="true" style="position: absolute; left: 0; top: 0">
+          <circle cx="98" cy="98" r="92" fill="none" stroke="#2B2F37" stroke-width="7"></circle>
+          <circle cx="98" cy="98" r="92" fill="none" stroke="#7FD1FF" stroke-width="7" stroke-linecap="round" stroke-dasharray="6 14" opacity="0.7"></circle>
+        </svg>
+        <div style="position: absolute; left: 16px; top: 16px; width: 164px; height: 164px; border-radius: 82px; background: #0E1014; display: flex; align-items: center; justify-content: center; gap: 34px">
+          <div style="width: 24px; height: 30px; border-radius: 12px; background: #7FD1FF"></div>
+          <div style="width: 24px; height: 30px; border-radius: 12px; background: #7FD1FF"></div>
+        </div>
+      </div>
+    </div>
+    <div style="background: #20232A; border-radius: 16px; padding: 10px 14px; font-size: 13px; line-height: 1.45; text-align: center">Microfone em uso: pausei o foco. Quando a reunião acabar, eu continuo de onde parou.</div>
+    <section style="background: #20232A; border-radius: 16px; padding: 12px 18px; display: flex; flex-direction: column; opacity: 0.6">
+      <span style="font-size: 12px; color: #9198A1">Foco pausado · 2 de 4</span>
+      <span style="font-size: 34px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.1">21:42</span>
+    </section>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+      <button style="height: 48px; border-radius: 24px; border: 1px solid #2B2F37; background: #1B1E24; color: #E6EDF3; font-size: 13px">Carinho</button>
+      <button style="height: 48px; border-radius: 24px; border: 1px solid #2B2F37; background: #1B1E24; color: #E6EDF3; font-size: 13px">Bebi</button>
+    </div>
+    <div style="flex-grow: 1"></div>
+    <div style="display: flex; justify-content: space-between; font-size: 12px; color: #9198A1">
+      <span>reunião há 25 min</span><span>não conta nem penaliza</span>
+    </div>
+  </div>
+
+  <!-- Casual -->
+  <div style="width: 360px; height: 640px; box-sizing: border-box; background: #16181D; display: flex; flex-direction: column; padding: 0 16px 16px; gap: 12px">
+    <nav style="display: flex; align-items: center; gap: 4px; height: 48px; border-bottom: 1px solid #2B2F37">
+      <button style="background: none; border: none; border-bottom: 2px solid #3CC6B5; color: #E6EDF3; font-size: 14px; font-weight: 600; padding: 12px 10px; margin-bottom: -1px">Pulso</button>
+      <button style="background: none; border: none; color: #9198A1; font-size: 14px; padding: 12px 10px">Jogo</button>
+      <button style="background: none; border: none; color: #9198A1; font-size: 14px; padding: 12px 10px">Cérebro</button>
+    </nav>
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <span style="font-size: 12px; font-weight: 600; color: #A3B1C6; letter-spacing: 0.6px">MODO CASUAL</span>
+      <button style="height: 28px; padding: 0 12px; border-radius: 14px; border: 1px solid #3CC6B5; background: #1B1E24; color: #E6EDF3; font-size: 12px">Casual</button>
+    </div>
+    <div style="height: 196px; display: flex; align-items: center; justify-content: center">
+      <div style="width: 164px; height: 164px; border-radius: 82px; background: #0E1014; display: flex; align-items: center; justify-content: center; gap: 34px">
+        <div style="width: 24px; height: 34px; border-radius: 12px; background: #7BD389"></div>
+        <div style="width: 24px; height: 34px; border-radius: 12px; background: #7BD389"></div>
+      </div>
+    </div>
+    <div style="background: #20232A; border-radius: 16px; padding: 10px 14px; font-size: 13px; line-height: 1.45; text-align: center">Modo casual: não conto foco nem te chamo para pausa. Só lembro da água.</div>
+    <section style="background: #20232A; border-radius: 16px; padding: 12px 12px 12px 18px; display: flex; align-items: center; gap: 10px">
+      <div style="display: flex; flex-direction: column; flex-grow: 1">
+        <span style="font-size: 12px; color: #9198A1">Água · próximo lembrete</span>
+        <span style="font-size: 34px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.1">35 min</span>
+      </div>
+    </section>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+      <button style="height: 48px; border-radius: 24px; border: 1px solid #2B2F37; background: #1B1E24; color: #E6EDF3; font-size: 13px">Carinho</button>
+      <button style="height: 48px; border-radius: 24px; border: 1px solid #2B2F37; background: #1B1E24; color: #E6EDF3; font-size: 13px">Bebi</button>
+    </div>
+    <div style="flex-grow: 1"></div>
+    <span style="font-size: 12px; color: #9198A1; text-align: center">Troque o modo aqui em cima ou pela bandeja.</span>
+  </div>
+
+  <!-- Volta do descanso com excesso -->
+  <div style="width: 360px; height: 640px; box-sizing: border-box; background: #16181D; display: flex; flex-direction: column; padding: 0 16px 16px; gap: 12px">
+    <nav style="display: flex; align-items: center; gap: 4px; height: 48px; border-bottom: 1px solid #2B2F37">
+      <button style="background: none; border: none; border-bottom: 2px solid #3CC6B5; color: #E6EDF3; font-size: 14px; font-weight: 600; padding: 12px 10px; margin-bottom: -1px">Pulso</button>
+      <button style="background: none; border: none; color: #9198A1; font-size: 14px; padding: 12px 10px">Jogo</button>
+      <button style="background: none; border: none; color: #9198A1; font-size: 14px; padding: 12px 10px">Cérebro</button>
+    </nav>
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <span style="font-size: 12px; font-weight: 600; color: #B59CE6; letter-spacing: 0.6px">VOLTOU DO DESCANSO</span>
+      <button style="height: 28px; padding: 0 12px; border-radius: 14px; border: 1px solid #353A44; background: #1B1E24; color: #E6EDF3; font-size: 12px">Profissional</button>
+    </div>
+    <div style="height: 196px; display: flex; align-items: center; justify-content: center">
+      <div style="position: relative; width: 196px; height: 196px">
+        <svg width="196" height="196" viewBox="0 0 196 196" aria-hidden="true" style="position: absolute; left: 0; top: 0">
+          <circle cx="98" cy="98" r="92" fill="none" stroke="#B59CE6" stroke-width="7"></circle>
+        </svg>
+        <div style="position: absolute; left: 16px; top: 16px; width: 164px; height: 164px; border-radius: 82px; background: #0E1014; display: flex; align-items: center; justify-content: center; gap: 34px">
+          <div style="width: 24px; height: 34px; border-radius: 12px; background: #7BD389"></div>
+          <div style="width: 24px; height: 34px; border-radius: 12px; background: #7BD389"></div>
+        </div>
+      </div>
+    </div>
+    <div style="background: #20232A; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 8px">
+      <span style="font-size: 15px; font-weight: 600; text-align: center">Descansou 10 min + 6 além. Tudo certo!</span>
+      <span style="font-size: 12px; color: #9198A1; text-align: center">Pausa no horário: +1 ponto. O excesso só fica anotado.</span>
+    </div>
+    <div style="background: #20232A; border-radius: 16px; padding: 10px 14px; font-size: 13px; line-height: 1.45; text-align: center">O foco volta sozinho quando você mexer.</div>
+    <div style="flex-grow: 1"></div>
+    <div style="display: flex; justify-content: space-between; font-size: 12px; color: #9198A1">
+      <span>prorrogou 0× hoje</span><span>4 pontos</span>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2120,"height":640}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

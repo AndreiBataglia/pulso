@@ -172,7 +172,20 @@
 - **Sem bronca.** O botão Bronca sai (bronca sem ação do Pulso não ensina nada); o Carinho só reage, não ensina.
 - **Aba "Pet" vira "Pulso".**
 - **Sensor de interação (nível B):** segundos com entrada no último minuto (0–60) por `GetLastInputInfo`, sem *hook*
-  e sem ler teclas. O foco começa sozinho ao abrir o app (opção em Ajustes, ligada por padrão) e conta a partir dali.
+  e sem ler teclas.
+- **Foco contínuo por presença (decidido em 2026-11-06, substitui "o foco começa ao clicar Iniciar"):** o foco é
+  medido o tempo todo pela presença (teclado e mouse somados). A 1ª entrada abre o foco; parado menos que a tolerância
+  (5 min) ainda conta; acima disso o foco para no último gesto e a volta pergunta "o que foi?". O botão Iniciar sai: no
+  cartão fica **Pausar agora** (adianta o descanso) e pular fase; o "Pausa" da grade sai (grade com Carinho e Bebi).
+  Ciclo completo no quadro "D · Ciclo completo" do canvas.
+- **Modos Profissional (padrão) e Casual:** pílula no topo da aba Pulso e no menu da bandeja, gravado em Ajustes. Casual
+  não conta foco nem chama para pausa; só a água.
+- **Reunião pausa o foco:** microfone em uso por outro app (metadado do Windows, sem capturar som) pausa o ciclo; não
+  conta nem penaliza e não gera "o que foi?". Cobre Teams no app ou no navegador.
+- **Câmera e microfone nunca são sensores de presença** (seria capturar imagem ou som: fora do nível B). Só se lê *se*
+  o microfone está em uso por outro programa.
+- **Sair durante o lembrete = pausa aceita no horário** (soma ponto). Mexer durante o descanso não o encerra; só o botão
+  "Voltar ao foco antes". Fim do descanso ainda fora: conta "+N min além" e o foco volta na 1ª entrada.
 - **Pergunta na volta:** depois de um tempo parado durante o foco (padrão 5 min, ajustável), ao voltar o balão
   pergunta *o que foi*: **Pausa** (conta como pausa feita, mesmo parcial; se passou do tempo avisa "+N min além da
   pausa"), **Refeição** (ausência necessária: conta como descanso longo, sem excesso nem penalidade), **Necessidade**
@@ -193,19 +206,29 @@
 
 - [x] (2026-11-06) Desenhar no canvas os estados do D: lembrete, descansando e "o que foi?" (artifact privado
       "Pulso — layouts da janela").
-- [ ] `sensors/`: interação por minuto, com sensor falso nos testes; pausa de privacidade para também este sensor.
-- [ ] Humor por regras (`mood_rules.py`), com o motivo no balão; testes por regra.
-- [ ] Pomodoro: início automático, tolerância de inatividade, pergunta na volta e as 4 categorias; migração v3 do banco
-      (categoria e durações da pausa; `break_extended`).
-- [ ] Rede: 2 grupos novos, janela de decisão de 15 min, recompensas; teste de aprendizado com várias sementes.
-- [ ] Interface: aba Pulso, layout D, anel do foco, sem Bronca, Prorrogar, placar do dia.
-- [ ] **Identidade do app no Windows (pedido do dono):** hoje a barra de tarefas mostra o ícone do Python porque o
+- [x] (2026-11-06) Quadro "D · Ciclo completo": diagrama de estados, foco revisado, reunião, casual e volta com excesso.
+
+**Ordem das fatias (decidida em 2026-11-06):** a lógica nova e a janela D chegam **juntas** à `main` (fatias 2 e 3
+num PR só, ou dois que só entram juntos), para o app em uso nunca ficar meio velho, meio novo.
+- [x] **Fatia 1 (2026-11-06):** aba "Pet" → "Pulso", botão Bronca removido (o Carinho só reage), `--minimizado` e
+      `AppUserModelID`.
+- [ ] **Fatia 2, núcleo do ciclo (sem tela nova):** `sensors/` com presença e "microfone em uso" (sensor falso nos
+      testes; a pausa de privacidade para os dois); máquina de estados do ciclo (Aguardando, Foco, Ausente, O que foi?,
+      Lembrete, Descansando, +N min, Reunião) e modos; tolerância; as 4 categorias; migração v3 do banco (categoria e
+      durações da pausa; `break_extended`). Testes roteirizados com relógio e sensor falsos.
+- [ ] **Fatia 3, janela D ligada ao ciclo:** todas as telas de uma vez (anel do foco, pílula de modo, Pausar agora,
+      Prorrogar, "o que foi?", reunião, casual, placar do dia); o pomodoro antigo sai no mesmo passo.
+- [ ] **Fatia 4:** humor por regras (`mood_rules.py`), com o motivo no balão; testes por regra.
+- [ ] **Fatia 5:** rede com 2 grupos novos, janela de decisão de 15 min, recompensas; teste de aprendizado com várias
+      sementes.
+- [~] **Identidade do app no Windows (pedido do dono) — `AppUserModelID` `AndreiBataglia.Pulso` feito na fatia 1; falta
+      conferir a barra de tarefas com o app do dono e decidir a opção `Qt.Tool`:** hoje a barra de tarefas mostra o ícone do Python porque o
       processo é o `pythonw.exe` e o Windows agrupa pelo executável. Definir o `AppUserModelID` próprio
       (`SetCurrentProcessExplicitAppUserModelID`, ex.: `AndreiBataglia.Pulso`) e usar o ícone do Pulso na janela, no atalho
       e na bandeja. Como o pet vive na bandeja: o X já esconde a janela (e o botão da barra some com ela); avaliar também
       **não mostrar na barra de tarefas enquanto a janela está aberta** (opção em Ajustes, `Qt.Tool`; custo: perde o botão
       de minimizar), com a bandeja como único ponto de volta.
-- [ ] **Abrir só na bandeja ao iniciar com o Windows (visto no teste real de 2026-11-06: a janela veio aberta):** novo
+- [x] (fatia 1, 2026-11-06; chave antiga migrada sozinha ao abrir, só se já estava ligada) **Abrir só na bandeja ao iniciar com o Windows (visto no teste real de 2026-11-06: a janela veio aberta):** novo
       argumento `--minimizado`, gravado pela chave `Run` (`storage/autostart.py`); `ui/app.py` só chama `window.show()`
       sem ele. Quem já ligou a opção precisa desligar e ligar de novo para a chave ser reescrita (ou migrar a chave no
       primeiro início). Teste: o comando gravado contém o argumento e a janela não é mostrada com ele.
@@ -215,7 +238,8 @@
       a pasta de dados e a migração do que já existe em `%LOCALAPPDATA%\Pulso`. Testar em máquina sem Python.
 - [ ] Docs: PRD, TRD, App Flow, Design Brief, Esquema e diário `etapa-07.md`.
 - **Pronto quando:** em teste roteirizado a rede aprende a adiar quando o dono costuma recusar na hora e a lembrar quando
-  costuma aceitar; o rosto sempre tem um motivo dizível; a pergunta na volta registra as 4 categorias.
+  costuma aceitar; o rosto sempre tem um motivo dizível; a pergunta na volta registra as 4 categorias; o foco começa e
+  para só pela presença, e a reunião o pausa sem pergunta.
 
 ## Etapa 8 — Saúde, ajustes, bandeja e atalho (F09, F10, atalho de F02)
 **Objetivo:** o programa completo do MVP.
@@ -261,4 +285,5 @@
 | 2026-11-06 | Etapa 6: hábitos (pomodoro, água, pendência cumulativa e rosto nervoso) implementados; falta o uso real e a bandeja (etapa 7) |
 | 2026-11-06 | Nova etapa 7 "O momento certo" (humor por regras, rede decide quando lembrar, pergunta na volta, Prorrogar, layout D); saúde/atalho viram etapa 8 |
 | 2026-11-06 | Instalador (`.exe`) e identidade do app no Windows (ícone próprio, sem "Python" na barra) entram na etapa 7 |
+| 2026-11-06 | Etapa 7: foco contínuo por presença (sem Iniciar), modos Profissional/Casual, reunião pelo microfone em uso pausa o foco, câmera e microfone nunca como sensor; fatias 2 e 3 (ciclo + janela D) entram juntas |
 | 2026-11-06 | Etapa 2 concluída (custo medido: 1,6 ms por segundo real, sem thread); contrato `Engine` cresce por etapas |
