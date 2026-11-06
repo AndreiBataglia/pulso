@@ -1,0 +1,42 @@
+# Pulso
+
+[![CI](https://github.com/AndreiBataglia/pulso/actions/workflows/ci.yml/badge.svg)](https://github.com/AndreiBataglia/pulso/actions/workflows/ci.yml)
+
+**Status: em construção (etapa 0).**
+
+## English
+
+Pulso is a Windows desktop companion driven by a small spiking neural network
+(leaky integrate-and-fire neurons with reward-modulated STDP, written in plain numpy).
+It learns your rhythm from coarse signals only, and helps with a Pomodoro timer and water reminders.
+
+## Português
+
+Pulso é um companheiro de desktop para Windows, movido por uma pequena rede neural de pulso
+(neurônios LIF com R-STDP, em numpy puro). Ele aprende o seu ritmo a partir de sinais grosseiros
+e ajuda com pomodoro e lembrete de água. O projeto também é um diário de aprendizado: cada etapa
+explica os conceitos usados em `docs/diario/`.
+
+## Privacidade
+
+Os sensores leem apenas metadados: CPU, RAM, hora, ociosidade e o **nome do processo** em primeiro plano.
+O título da janela, o conteúdo da tela e as teclas **nunca** são lidos. Existe uma pausa de
+privacidade que desliga os sensores. Dados de sensor não são gravados em disco nem no log.
+
+## Instalação (desenvolvimento)
+
+```powershell
+python -m venv .venv
+.venv\Scripts\activate
+pip install -e ".[dev]"
+pulso --version
+pytest
+```
+
+## Documentação
+
+Veja [`docs/README.md`](docs/README.md): PRD, TRD, fluxo, design, dados e plano de implementação.
+
+## Licença
+
+[MIT](LICENSE)
