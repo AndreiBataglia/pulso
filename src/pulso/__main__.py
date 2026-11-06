@@ -93,7 +93,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--fake-sensors",
         action="store_true",
-        help="com --print-brain: usa o roteiro falso em vez de ler o PC",
+        help="usa o roteiro falso em vez de ler o PC (com --print-brain ou com a janela)",
     )
     parser.add_argument(
         "--max-seconds", type=int, default=None, help="com --print-brain: para depois de N segundos"
@@ -105,8 +105,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.print_brain:
         _print_brain(args.fake_sensors, args.max_seconds)
         return 0
-    parser.print_help()
-    return 0
+    from pulso.ui.app import run  # importado aqui: o Qt só carrega se a janela for aberta
+
+    return run(fake_sensors=args.fake_sensors)
 
 
 if __name__ == "__main__":
