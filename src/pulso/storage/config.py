@@ -1,0 +1,111 @@
+"""Preferências do dono (`config.toml`): o que a janela, a bandeja e os Ajustes deixam mudar.
+
+Leitura com `tomllib` (biblioteca padrão). A escrita é feita à mão: são poucos valores (booleanos
+e minutos inteiros), então não vale uma dependência só para isso. Valor ausente, de tipo errado ou
+fora do intervalo volta ao padrão, com aviso no log: um arquivo editado errado nunca impede o
+Pulso de abrir. "Iniciar com o Windows" não fica aqui: o registro do Windows é a fonte da
+verdade (`storage/autostart.py`).
+"""
+
+import logging
+import os
+import tomllib
+from dataclasses import dataclass, fields
+from pathlib import Path
+
+from pulso.habits.kinds import HabitConfig
+
+log = logging.getLogger(__name__)
+
+CONFIG_FILE = "config.toml"
+
+
+@dataclass(frozen=True)
+class Settings:
+    always_on_top: bool = True  # a janela fica sobre as outras (o pet precisa ser visto)
+    water_enabled: bool = True  # lembrete de água ligado
+    auto_rules: bool = False  # recompensas automáticas por processo/ócio (hábitos valem sempre)
+    focus_min: int = 50  # tempos do pomodoro e da água, em minutos
+    break_min: int = 10
+    long_break_min: int = 20
+    water_interval_min: int = 60
+
+
+# Seção do TOML de cada campo.
+_SECTIONS = {
+    "always_on_top": "window",
+    "water_enabled": "habits",
+    "auto_rules": "habits",
+    "focus_min": "habits",
+    "break_min": "habits",
+    "long_break_min": "habits",
+    "water_interval_min": "habits",
+}
+# Intervalo aceito (mínimo, máximo) dos tempos, em minutos.
+RANGES = {
+    "focus_min": (5, 180),
+    "break_min": (1, 60),
+    "long_break_min": (1, 120),
+    "water_interval_min": (10, 240),
+}
+
+
+def _valid(name: str, value, default) -> bool:
+    if isinstance(default, bool):
+        return isinstance(value, bool)
+    if isinstance(value, bool) or not isinstance(value, int):
+        return False
+    low, high = RANGES[name]
+    return low <= value <= high
+
+
+def habit_config(settings: Settings) -> HabitConfig:
+    """Os tempos dos hábitos com o que o dono escolheu (o resto fica no padrão)."""
+    return HabitConfig(
+        focus_min=settings.focus_min,
+        break_min=settings.break_min,
+        long_break_min=settings.long_break_min,
+        water_interval_min=settings.water_interval_min,
+    )
+
+
+def load_settings(path: Path) -> Settings:
+    """Lê as preferências; qualquer problema vira o valor padrão."""
+    defaults = Settings()
+    try:
+        with open(path, "rb") as f:
+            data = tomllib.load(f)
+    except FileNotFoundError:
+        return defaults
+    except (OSError, tomllib.TOMLDecodeError) as exc:
+        log.warning("config.toml ilegível (%s); usando os padrões", type(exc).__name__)
+        return defaults
+    values = {}
+    for field in fields(Settings):
+        section = data.get(_SECTIONS[field.name], {})
+        value = section.get(field.name) if isinstance(section, dict) else None
+        if _valid(field.name, value, getattr(defaults, field.name)):
+            values[field.name] = value
+        elif value is not None:
+            log.warning("config.toml: %s inválido; usando o padrão", field.name)
+    return Settings(**{**defaults.__dict__, **values})
+
+
+def save_settings(path: Path, settings: Settings) -> None:
+    """Grava de forma atômica (arquivo temporário e `os.replace`), criando a pasta."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lines: list[str] = []
+    for section in dict.fromkeys(_SECTIONS.values()):
+        lines.append(f"[{section}]")
+        for field in fields(Settings):
+            if _SECTIONS[field.name] == section:
+                value = getattr(settings, field.name)
+                lines.append(f"{field.name} = {str(value).lower()}")  # True → true; 50 → 50
+        lines.append("")
+    tmp = path.with_name(path.name + ".tmp")
+    try:
+        tmp.write_text("\n".join(lines), encoding="utf-8")
+        os.replace(tmp, path)
+    finally:
+        tmp.unlink(missing_ok=True)

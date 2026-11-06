@@ -13,7 +13,7 @@ from pulso.storage.brain_store import AutoSaver
 from pulso.ui import phrases
 from pulso.ui.app import build_controller
 from pulso.ui.main_window import MainWindow
-from tests.test_controller import FRAME, SpyEngine
+from tests.test_controller import FRAME, SpyEngine, make_habits
 
 MOODS = ("animado", "contente", "entediado", "sonolento", "preocupado")
 
@@ -27,6 +27,7 @@ def _controller(clock, path):
         MoodDecoder(engine.groups),
         RewardRules(clock),
         AutoSaver(engine, path, 1, clock),
+        make_habits(clock),
     )
     return controller, sensor, engine
 
@@ -204,6 +205,6 @@ def test_barra_de_abas_aparece_com_o_cerebro_e_o_titulo_continua_pulso(env, qapp
     window.show()
     qapp.processEvents()
     tabs = window.tabs
-    assert [tabs.tabText(i) for i in range(tabs.count())] == ["Pet", "Cérebro"]
+    assert [tabs.tabText(i) for i in range(tabs.count())] == ["Pet", "Jogo", "Cérebro"]
     assert tabs.tabBar().isVisible()
     assert window.windowTitle() == "Pulso"

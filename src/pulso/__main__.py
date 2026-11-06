@@ -77,6 +77,28 @@ def _print_brain(fake_sensors: bool, max_seconds: int | None) -> None:
         print("\nParado.")
 
 
+def _create_shortcut() -> int:
+    """Cria o ícone do Pulso e o atalho no Menu Iniciar."""
+    from PySide6.QtGui import QGuiApplication
+
+    from pulso.storage.paths import data_dir
+    from pulso.storage.shortcut import create_shortcut, start_menu_shortcut
+    from pulso.ui.tray import pulso_icon
+
+    app = QGuiApplication([])  # o Qt só desenha pixmaps com um aplicativo criado
+    icon = data_dir() / "pulso.ico"
+    icon.parent.mkdir(parents=True, exist_ok=True)
+    pulso_icon().pixmap(64, 64).save(str(icon), "ICO")
+    try:
+        lnk = create_shortcut(start_menu_shortcut(), icon=icon if icon.exists() else None)
+    except OSError as error:
+        print(error)
+        return 1
+    print(f"Atalho criado no Menu Iniciar: {lnk}")
+    del app
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="pulso", description="Pulso, o companheiro de desktop.")
     parser.add_argument("--version", action="version", version=f"pulso {__version__}")
@@ -98,7 +120,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--max-seconds", type=int, default=None, help="com --print-brain: para depois de N segundos"
     )
+    parser.add_argument(
+        "--criar-atalho",
+        action="store_true",
+        help="cria o atalho 'Pulso' no Menu Iniciar (para abrir de novo depois de sair)",
+    )
     args = parser.parse_args(argv)
+    if args.criar_atalho:
+        return _create_shortcut()
     if args.print_sensors:
         _print_sensors()
         return 0

@@ -63,30 +63,55 @@ erDiagram
 |--------|------|-------------|--------|--------------------|
 | id | INTEGER | sim | auto | Chave primária |
 | ts | TEXT | sim | agora | Data e hora local, formato ISO 8601 |
-| kind | TEXT | sim | — | Um de: `water_drunk`, `water_snoozed`, `pomodoro_focus_done`, `pomodoro_break_done`, `pomodoro_skipped`, `break_streak_end` |
+| kind | TEXT | sim | — | Um de: `water_drunk`, `water_snoozed`, `water_declined`, `water_ignored`, `pomodoro_focus_done`, `pomodoro_break_done`, `break_snoozed`, `break_declined`, `break_ignored`, `pomodoro_skipped`, `break_streak_end` |
 | value | INTEGER | não | NULL | Dado extra; em `break_streak_end` são os minutos de trabalho seguidos antes da pausa |
 
 - **Índice:** `ts` (consultas de "hoje" e "últimos 7 dias").
-- **A mudar na etapa 6 (decisão do dono, 2026-11-06):** separar **fiz / adiei / recusei / ignorei** para água e pausa
-  (novos `kind`, ex.: `water_declined`, `water_ignored`, `break_declined`, `break_ignored`; `CHECK` e migração v1
-  atualizados). A **pendência cumulativa** que deixa o pet nervoso não é guardada: é calculada a partir destes
-  eventos (recusas e omissões desde o último "fiz").
+- **Feito na etapa 6 (decisão do dono, 2026-11-06):** **fiz / adiei / recusei / ignorei** para água e pausa. "Fiz" =
+  `water_drunk` e `pomodoro_break_done`; `pomodoro_skipped` é o dono pulando a fase pelo painel (não é recusa).
+  A **pendência cumulativa** que deixa o pet nervoso não é guardada: é calculada destes eventos (recusas e omissões
+  depois do último "fiz" **do mesmo hábito**; água e pausa são separadas). `break_streak_end` só é gravado na etapa 7.
 - `CHECK (kind IN (...))` garante os valores permitidos.
+
+### game_result (migração v2)
+**Para quê:** o placar dos jogos (jokenpô e par ou ímpar), do ponto de vista do pet.
+
+| Coluna | Tipo | Observação |
+|---|---|---|
+| `id` | INTEGER PK | |
+| `ts` | TEXT | ISO local |
+| `game` | TEXT | `CHECK` em `rps`, `evenodd` |
+| `result` | TEXT | `CHECK` em `won`, `lost`, `draw` |
+
+Só o resultado: nada de sensor. O placar do dia é um `GROUP BY result` desde a meia-noite local.
 
 ### meta
 **Para quê:** chave e valor do próprio banco, como `schema_version`.
 
 ## 5. `config.toml` (padrões)
+> **Hoje (etapa 6)** o arquivo guarda, em `[window]` e `[habits]`: `always_on_top`, `water_enabled`, `auto_rules`
+> (padrão `false`), `focus_min` (50), `break_min` (10), `long_break_min` (20) e `water_interval_min` (60), editáveis em
+> **Ajustes**. Tempo fora do intervalo (`storage/config.py`, `RANGES`) ou de tipo errado volta ao padrão. O bloco
+> abaixo é o desenho completo previsto.
+
 ```toml
 [pomodoro]
-focus_min = 25
-break_min = 5
-long_break_min = 15
+focus_min = 50              # decidido em 2026-11-06 (antes 25/5/15); revisar com o uso real
+break_min = 10
+long_break_min = 20
 cycles_before_long = 4
+break_snooze_min = 5        # "depois" na pergunta do descanso
 
 [water]
-interval_min = 45
+enabled = true             # o dono pode desligar o lembrete (hoje gravado em [habits] water_enabled)
+interval_min = 60
 snooze_min = 10
+ignore_after_min = 5        # sem resposta depois disto, o lembrete vira "ignorei"
+
+[habits]
+refuse_points = 2           # pendência: recusei=2, ignorei=1, depois=0; só "fiz" zera
+ignore_points = 1
+nervous_at = 3              # com esta pendência (ou mais) o pet fica nervoso
 
 [privacy]
 pause_hotkey = "Ctrl+Alt+P"
@@ -103,7 +128,10 @@ rule_reward_weight = 0.3
 "chrome.exe" = "navegador"
 
 [system]
-start_with_windows = false
+start_with_windows = false   # não é lido do arquivo: o registro do Windows é a fonte da verdade
+
+[window]
+always_on_top = true        # o pet fica sobre as outras janelas (decidido pelo dono em 2026-11-06)
 ```
 - Cada campo tem limites (ex.: `focus_min` entre 5 e 120). Um valor inválido volta ao padrão, com aviso no log.
 
@@ -116,7 +144,7 @@ start_with_windows = false
 
 ## 7. Migrações, backup e dados iniciais
 - **Primeiro uso:** cria a pasta, o `config.toml` com os padrões, um `pulso.db` vazio
-  (`schema_version = 1`) e uma rede nova a partir da semente.
+  (`schema_version = 2`) e uma rede nova a partir da semente.
 - **Migrações:** `storage/db.py` aplica scripts em ordem pelo `schema_version`. O `.npz` usa `format_version`:
   uma mudança no formato exige uma função de conversão ou um "recomeçar com backup".
 - **Backup:** basta copiar a pasta `%LOCALAPPDATA%\Pulso\`.

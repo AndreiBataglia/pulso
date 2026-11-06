@@ -28,14 +28,17 @@ BLINK_S = 0.16
 BURST_S = 0.9
 
 
-def _look(eye, happy, curve, mouth_open, brow, z, drop, zzz, bounce) -> dict[str, float]:
+def _look(
+    eye, happy, curve, mouth_open, brow, z, drop, zzz, bounce, shake=0, angry=0
+) -> dict[str, float]:
     return dict(
         eye=eye, happy=happy, curve=curve, mouth_open=mouth_open, brow=brow,
-        z=z, drop=drop, zzz=zzz, bounce=bounce,
+        z=z, drop=drop, zzz=zzz, bounce=bounce, shake=shake, angry=angry,
     )  # fmt: skip
 
 
 # Números de cada expressão. `happy`: olho em arco (^). `brow`: sobrancelha inclinada.
+# `shake`: tremor leve do rosto (nervoso e bravo). `angry`: sobrancelha inclinada para baixo.
 LOOKS: dict[str, dict[str, float]] = {
     "neutro": _look(0.8, 0, 0.3, 0, 0, 0, 0, 0, 0),
     "arrependido": _look(0.5, 0, -0.4, 0, 0, 0, 0, 0, 0),  # reação à bronca
@@ -44,9 +47,26 @@ LOOKS: dict[str, dict[str, float]] = {
     "entediado": _look(0.4, 0, 0, 0, 0, 0, 0, 0, 0),
     "sonolento": _look(0.22, 0, 0.1, 0, 0, 1, 0, 0, 0),
     "preocupado": _look(0.9, 0, -0.5, 0, 1, 0, 1, 0, 0),
+    # Nervoso (pendência de hábito): o "preocupado" com olhos mais arregalados e um leve tremor.
+    "nervoso": _look(1.0, 0, -0.5, 0, 1, 0, 1, 0, 0, shake=1),
+    # Bravo (perdeu o jogo): olhos estreitos, sobrancelha para baixo, boca virada e tremor.
+    "bravo": _look(0.6, 0, -0.6, 0, 0, 0, 0, 0, 0, shake=0.6, angry=1),
     SLEEPING: _look(0.0, 0, 0.15, 0, 0, 0, 0, 1, 0),
+    # Atividades (o dono aceitou a pausa ou bebeu água): descansando = olhos fechados e sorriso
+    # calmo, respirando; bebendo = olhos em arco, contente, com um copo esvaziando.
+    "descansando": _look(0.0, 0, 0.5, 0, 0, 0, 0, 1, 0),
+    "bebendo": _look(0.9, 1, 0.8, 0, 0, 0, 0, 0, 0),
 }
-_LOOK_COLOR = dict(MOOD_COLORS, neutro=MOOD_COLORS["entediado"], arrependido="#A3B1C6")
+_LOOK_COLOR = dict(
+    MOOD_COLORS,
+    neutro=MOOD_COLORS["entediado"],
+    arrependido="#A3B1C6",
+    nervoso="#FF9B7A",
+    bravo="#FF6B6B",
+    descansando=MOOD_COLORS["sonolento"],
+    bebendo="#7FD1FF",
+)
+DRINK_S = 15.0  # quanto o pet "bebe" depois do "Bebi"
 REACTION_S = 2.5  # quanto tempo dura a reação ao carinho/bronca
 
 
@@ -81,6 +101,9 @@ class PetWidget(QWidget):
         self._gaze_x = 0.0
         self._reaction: tuple[str, float] | None = None  # (aparência, instante em que acaba)
         self._bursts: list[tuple[str, float]] = []  # (emoji, instante em que nasceu)
+        self._activity: str | None = None  # "descansando" ou "bebendo" (sobre o humor da rede)
+        self._drink_until = 0.0
+        self._countdown: str | None = None  # texto da contagem regressiva do descanso
         self._last_frame = time.monotonic()
         self._timer = QTimer(self)
         self._timer.setInterval(FRAME_MS)
@@ -109,14 +132,39 @@ class PetWidget(QWidget):
 
     @property
     def shown(self) -> str:
-        """A aparência em uso agora: a reação, se houver uma, senão o humor-alvo."""
-        return self._reaction[0] if self._reaction else self._target
+        """A aparência em uso agora: reação, depois pausa de privacidade, atividade, humor."""
+        if self._reaction:
+            return self._reaction[0]
+        if self.sleeping:  # a pausa de privacidade vence a atividade
+            return self._target
+        return self._activity or self._target
 
-    def react(self, look: str) -> None:
+    @property
+    def activity(self) -> str | None:
+        return self._activity
+
+    def rest(self, countdown: str | None) -> None:
+        """Descanso do pomodoro: o pet descansa e mostra a contagem (`None` = acabou o descanso)."""
+        if countdown is None:
+            if self._activity == "descansando":
+                self._activity = None
+        elif self._activity != "bebendo":  # beber (15 s) não é interrompido pelo relógio
+            self._activity = "descansando"
+        self._countdown = countdown
+        self._ensure_timer()
+        self.update()
+
+    def drink(self) -> None:
+        """O dono bebeu água: o pet bebe por `DRINK_S` segundos, com o copo esvaziando."""
+        self._activity = "bebendo"
+        self._drink_until = self._t + DRINK_S
+        self._ensure_timer()
+
+    def react(self, look: str, seconds: float = REACTION_S) -> None:
         """Reação curta (carinho → "contente", bronca → "arrependido"): depois, volta ao humor."""
         if look not in LOOKS:
             raise ValueError(f"aparência desconhecida: {look!r}")
-        self._reaction = (look, self._t + REACTION_S)
+        self._reaction = (look, self._t + seconds)
         self._ensure_timer()
 
     def burst(self, emoji: str) -> None:
@@ -131,6 +179,8 @@ class PetWidget(QWidget):
         """Anda `dt` segundos de animação (separado do relógio: os testes controlam o tempo)."""
         self._t += dt
         k = 1.0 - math.exp(-dt / SETTLE_S)
+        if self._activity == "bebendo" and self._t >= self._drink_until:
+            self._activity = "descansando" if self._countdown else None
         if self._reaction and self._t >= self._reaction[1]:
             self._reaction = None  # a reação acabou: o rosto volta ao humor
         for key, value in LOOKS[self.shown].items():
@@ -216,13 +266,18 @@ class PetWidget(QWidget):
         color = QColor(*(int(round(c)) for c in self._color))
         bounce = -abs(math.sin(self._t * 5.0)) * height * 0.04 * look["bounce"]
         tilt = 0.0 if self.sleeping else math.sin(self._t * 0.7) * 2.0
+        if self.shown == "descansando":  # respira devagar
+            bounce += math.sin(self._t * 1.3) * height * 0.012
+            tilt = 0.0
+        tremor = math.sin(self._t * 47.0) * width * 0.004 * look["shake"]  # trêmulo, sem exagero
         p.save()
-        p.translate(face.center().x(), face.center().y() + bounce)
+        p.translate(face.center().x() + tremor, face.center().y() + bounce)
         p.rotate(tilt)
         self._draw_eyes(p, color, width, height, look)
         self._draw_mouth(p, color, width, height, look)
         p.restore()
         self._draw_extras(p, face, look)
+        self._draw_activity(p, face)
         self._draw_bursts(p, face)
         p.end()
 
@@ -246,6 +301,13 @@ class PetWidget(QWidget):
                     p.setBrush(_alpha(color, open_weight))
                     rect = QRectF(cx - eye_w / 2, cy - eye_h / 2, eye_w, eye_h)
                     p.drawRoundedRect(rect, eye_w / 2, eye_w / 2)
+            if look["angry"] > 0.01:  # sobrancelha para baixo no meio (bravo)
+                p.setPen(_line_pen(_alpha(color, look["angry"]), width * 0.022))
+                y0 = cy - eye_h_max * 0.75
+                p.drawLine(
+                    QPointF(cx - side * eye_w / 2, y0 + height * 0.05),  # dentro, mais baixa
+                    QPointF(cx + side * eye_w / 2, y0 - height * 0.015),
+                )
             if look["brow"] > 0.01:  # sobrancelha inclinada para o centro (preocupado)
                 p.setPen(_line_pen(_alpha(color, look["brow"]), width * 0.02))
                 y0 = cy - eye_h_max * 0.75
@@ -288,6 +350,31 @@ class PetWidget(QWidget):
             if weight > 0.02:
                 p.setPen(_alpha(QColor("white"), weight))
                 p.drawText(QPointF(x, y + float_y), emoji)
+
+    def _draw_activity(self, p: QPainter, face: QRectF) -> None:
+        """Copo esvaziando (bebendo) e a contagem regressiva do descanso, sobre o rosto."""
+        if self.sleeping:
+            return
+        if self._activity == "bebendo":
+            left = min(max((self._drink_until - self._t) / DRINK_S, 0.0), 1.0)
+            gw, gh = face.width() * 0.13, face.height() * 0.26
+            gx = face.right() - gw * 1.7
+            gy = face.bottom() - gh * 1.3
+            water = QRectF(gx + 2, gy + gh * (1 - left) + 1, gw - 4, gh * left - 2)
+            p.setPen(Qt.PenStyle.NoPen)
+            p.setBrush(QColor(127, 209, 255, 200))
+            p.drawRect(water)
+            p.setPen(_line_pen(QColor(220, 235, 245), face.width() * 0.012))
+            p.setBrush(Qt.BrushStyle.NoBrush)
+            p.drawRoundedRect(QRectF(gx, gy, gw, gh), 3, 3)
+        if self._countdown and self._activity == "descansando":
+            font = QFont("Segoe UI")
+            font.setPixelSize(max(int(face.height() * 0.11), 9))
+            p.setFont(font)
+            p.setPen(_alpha(QColor("white"), 0.75))
+            top = face.bottom() - face.height() * 0.2
+            box = QRectF(face.left(), top, face.width(), face.height() * 0.14)
+            p.drawText(box, Qt.AlignmentFlag.AlignCenter, self._countdown)
 
     def _draw_bursts(self, p: QPainter, face: QRectF) -> None:
         font = QFont("Segoe UI Emoji")

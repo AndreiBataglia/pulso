@@ -7,7 +7,13 @@ Duas fontes, que somam:
   `rules_weight`, menor que o do dono: o dono sempre pesa mais):
   - ócio longo e o pet está **sonolento** → +;
   - o dono **volta** do ócio e o pet está **animado** → +;
-  - mais de 90 min **sem pausa** e o pet está **preocupado** → +.
+  - mais de 90 min **sem pausa** e o pet está **preocupado** → +;
+  - **hábitos:** beber água / fazer a pausa → +; recusar → −; ignorar o lembrete → − (menor).
+    Estes vêm do próprio dono, então pesam como ele (`habit_weight`) e valem sempre.
+
+As regras por processo/ócio (as três primeiras) são palpites sobre o que o dono sente, que ele
+nunca confirma: no app ficam **desligadas por padrão** (`auto_enabled`) e o dono pode ligá-las em
+Ajustes. Hábito, carinho e bronca são respostas dele e continuam sempre valendo.
 
 Cada regra tem um intervalo mínimo entre disparos (`cooldown_s`), senão ela "gritaria" a cada
 segundo em que a condição continua valendo. Cliques repetidos do dono em poucos segundos também são
@@ -16,16 +22,30 @@ ignorados (`click_filter_s`): quem clica 5 vezes seguidas por impaciência vale 
 O tempo vem de um `Clock` injetado (nunca `time.time()`), então os testes controlam as horas.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from pulso.clock import Clock
+from pulso.habits import kinds
 from pulso.sensors.base import SensorFrame
+
+# Hábitos (F07/F08): atendido +, dispensado −. "Depois" e os avisos valem 0. Quem ignora o pet
+# desagrada menos do que quem o recusa de cara, por isso −0,5 contra −1.
+HABIT_VALUES = {
+    kinds.WATER_DRUNK: 1.0,
+    kinds.BREAK_DONE: 1.0,
+    kinds.WATER_DECLINED: -1.0,
+    kinds.BREAK_DECLINED: -1.0,
+    kinds.WATER_IGNORED: -0.5,
+    kinds.BREAK_IGNORED: -0.5,
+}
 
 
 @dataclass(frozen=True)
 class RewardConfig:
     owner_weight: float = 1.0
     rules_weight: float = 0.3
+    habit_weight: float = 1.0  # hábito é resposta do dono: pesa como carinho e bronca
+    auto_enabled: bool = True  # (o app começa com False; os testes antigos das regras seguem)
     long_idle_s: float = 300.0  # 5 min parado já conta como "ócio longo"
     returned_window_s: float = 60.0  # por quanto tempo a "volta" pode ser premiada
     no_break_s: float = 90 * 60.0  # 90 min sem pausa
@@ -54,11 +74,19 @@ class RewardRules:
         self._last_click = now
         return (1.0 if sign > 0 else -1.0) * self.cfg.owner_weight
 
+    def habit(self, kind: str) -> float:
+        """Recompensa de um evento de hábito (0.0 para os que não contam), com `habit_weight`."""
+        return HABIT_VALUES.get(kind, 0.0) * self.cfg.habit_weight
+
+    def set_auto(self, on: bool) -> None:
+        """Liga ou desliga as regras automáticas por processo/ócio (Ajustes)."""
+        self.cfg = replace(self.cfg, auto_enabled=on)
+
     # ---- regras automáticas ------------------------------------------------------------------
 
     def evaluate(self, frame: SensorFrame, mood: str | None) -> float:
         """Chamado a cada leitura. Devolve a recompensa automática desta volta (0.0 na maioria)."""
-        if not frame.valid:  # leitura falhou: nada a concluir
+        if not frame.valid or not self.cfg.auto_enabled:  # leitura falhou ou regras desligadas
             return 0.0
         now = self._clock.now()
         c = self.cfg

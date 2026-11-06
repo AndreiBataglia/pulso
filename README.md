@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/AndreiBataglia/pulso/actions/workflows/ci.yml/badge.svg)](https://github.com/AndreiBataglia/pulso/actions/workflows/ci.yml)
 
-**Status: em construção (etapa 5 concluída: sensores, rede que aprende, o pet na janela e a aba que mostra o cérebro ao vivo; faltam os hábitos).**
+**Status: em construção (etapa 6 implementada: sensores, rede que aprende, o pet na janela, a aba do cérebro e os hábitos (pomodoro e água); faltam a saúde, os ajustes e a bandeja).**
 
 ![Os seis rostos do Pulso: animado, contente, entediado, sonolento, preocupado e dormindo](docs/img/humores.png)
 
@@ -35,7 +35,10 @@ python -m venv .venv
 pip install -e ".[dev]"
 pulso --version
 pytest
+pulso --criar-atalho   # cria o atalho "Pulso" no Menu Iniciar (para abrir de novo depois de sair)
 ```
+
+Para sair de vez: botão direito no ícone da bandeja → **Sair do Pulso**. O X da janela só manda para a bandeja.
 
 ## Documentação
 

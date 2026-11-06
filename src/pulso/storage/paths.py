@@ -12,6 +12,7 @@ from platformdirs import user_data_dir
 
 ENV_DATA_DIR = "PULSO_DATA_DIR"
 BRAIN_FILE = "cerebro.npz"
+DB_FILE = "pulso.db"
 
 
 def data_dir() -> Path:

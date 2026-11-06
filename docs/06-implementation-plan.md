@@ -121,31 +121,42 @@
 ## Etapa 6 — Hábitos: pomodoro e água (F07, F08)
 **Objetivo:** o Pulso cuida do dono.
 **Depende de:** Etapa 4 (a 5 não é necessária)
-- [ ] **Revisar antes de codar (pedido do dono, 2026-11-06):** (a) os tempos de foco, descanso e água, olhando o uso
-      real; (b) como o Pulso **sabe se o dono fez ou recusou** a pausa e a água. Hoje o esquema só tem `water_drunk`/
-      `water_snoozed` e `pomodoro_break_done`/`pomodoro_skipped`: falta separar **fiz**, **depois**, **recusei** e
-      **ignorei** (não respondeu), o que muda o `CHECK` de `habit_event.kind`, a migração v1, as recompensas e o
-      resumo de saúde (F09). Decidir com o dono e atualizar PRD F07/F08 e o esquema antes de implementar.
-- [ ] **Pendência cumulativa (decidido pelo dono, 2026-11-06):** recusar ou ignorar lembretes de pausa/água acumula;
-      só "fiz" zera. Com pendência alta o pet fica **nervoso e preso nesse humor** até o dono admitir que fez. Regra,
-      não rede (como o resto dos hábitos). A definir com o dono antes de codar:
-      - a conta: pontos por recusa/ignorar, limite do "nervoso", e se a pendência esfria sozinha com o tempo;
-      - **botão sempre disponível** "Bebi" / "Fiz a pausa" (o Pulso não vê o copo: sem ele o dono não tem como se
-        explicar), mesmo sem lembrete na tela;
-      - a pendência **não conta** com a observação pausada nem com o dono ocioso/longe do PC;
-      - tom do Design Brief §8: nervoso sem culpa nem bronca, e a legenda diz o motivo ("3 lembretes de água sem
-        resposta");
-      - ajuste para desligar ou suavizar (F10), para o pet não virar uma fonte de estresse;
-      - a pendência é **calculada a partir de `habit_event`** (sobrevive a fechar o app);
-      - o rosto "nervoso" (hoje só existe "preocupado") e como ele vence o humor da rede enquanto houver pendência.
-- [ ] `habits/pomodoro.py` e `habits/water.py`: máquinas de estado puras, testadas com relógio falso
-      (incluindo "o ócio adia o lembrete").
-- [ ] `storage/db.py`: `habit_event`, `meta` e migração v1.
-- [ ] Interface: contador do pomodoro, balão Bebi/Depois e notificação do Windows (`QSystemTrayIcon`).
-- [ ] Eventos de hábito → recompensas (atendido +, dispensado −).
-- [ ] Teste: o pomodoro não afeta a pausa de privacidade e vice-versa.
-- [ ] Diário: máquinas de estado, relógio injetável e por que os hábitos são regras e não rede (e o que muda
+- [x] (2026-11-06) **Revisão antes de codar (pedido do dono):** (a) tempos: foco 50 min, descanso 10 (longo 20 a cada 4
+      ciclos), água a cada 60 min; (b) como o Pulso sabe se o dono fez ou recusou: **fiz** (Bebi / Fiz a pausa),
+      **depois** (adia 10 min a água, 5 min o descanso), **recusei** ("Hoje não") e **ignorei** (5 min sem resposta, só
+      contados com o dono presente e a observação ligada). Novos `kind` (`water_declined`, `water_ignored`,
+      `break_snoozed`, `break_declined`, `break_ignored`) no `CHECK` e na migração v1; PRD F07/F08 e doc 05 atualizados.
+- [x] (2026-11-06) **Pendência cumulativa:** recusei = 2, ignorei = 1, depois = 0; o pet fica **nervoso com 3 ou mais** e só
+      o "fiz" zera (não esfria sozinha). A pendência é **calculada de `habit_event`** (sobrevive a fechar o app) e é
+      **separada para água e pausa** (cada "fiz" zera só o seu hábito; nervoso se qualquer um passar do limite).
+      Botão "💧 Bebi" e "☕ Fiz a pausa" sempre visíveis na aba Pet; rosto nervoso = "preocupado" com olhos mais
+      arregalados e leve tremor, que **vence o humor da rede** até o dono admitir (a rede segue decidindo por baixo);
+      a legenda diz o motivo ("ficaram lembretes de água sem resposta"). Suavizar/desligar o nervoso fica para a
+      etapa 7 (F10); até lá o nervoso sempre age.
+- [x] (2026-11-06) `habits/reminder.py` (lembrete que pergunta e espera, comum à água e ao descanso), `habits/water.py` e
+      `habits/pomodoro.py`: máquinas de estado puras, testadas com relógio falso (inclusive "o ócio adia o lembrete").
+      `habits/coach.py` junta as máquinas ao banco e calcula o nervoso.
+- [x] (2026-11-06) `storage/db.py`: `habit_event`, `meta` e migração v1 (recusa banco de versão mais nova).
+- [x] (2026-11-06) Interface: contador do pomodoro (Iniciar / Pausar / Continuar / Pular), balão do lembrete com
+      Bebi · Depois · Hoje não (a linha "Depois/Hoje não" só existe durante o lembrete e a janela cresce uma linha)
+      e notificação do Windows (`ui/notifier.py`, `QSystemTrayIcon`).
+- [x] (2026-11-06) Eventos de hábito → recompensas: atendido +1, recusei −1, ignorei −0,5, depois 0 (× peso das regras,
+      0,3). Com a observação pausada o evento é anotado, mas a rede não aprende.
+- [x] (2026-11-06) Teste: o pomodoro não afeta a pausa de privacidade e vice-versa (`tests/habits/`, `tests/ui/test_habits_ui.py`).
+- [x] (2026-11-06) Diário: máquinas de estado, relógio injetável e por que os hábitos são regras e não rede (e o que muda
       no F12).
+- [x] (2026-11-06) **Adiantado da etapa 7, a pedido do dono:** o pet não pode depender de abrir e clicar. `ui/tray.py` (ícone sempre
+      visível, menu e avisos), **X da janela → esconde na bandeja** (com aviso na 1ª vez) e **Sair do Pulso** encerra de
+      verdade; **Sempre à frente** (padrão: ligado), **Lembrete de água** e **Iniciar com o Windows** ligáveis no menu
+      (`storage/config.py` guarda os dois primeiros em `config.toml`; o início com o Windows é a chave `Run` do usuário,
+      `storage/autostart.py`); pomodoro iniciar/pausar/pular também pelo menu da bandeja.
+- [x] (2026-11-06, a pedido do dono) **Recompensa e rotina:** as regras por processo/ócio ficam **desligadas por padrão**
+      (`RewardConfig.auto_enabled`); hábito passa a pesar como o dono (`habit_weight` 1,0, antes 0,3). Tela de **Ajustes**
+      (⚙ na barra de abas e "Ajustes…" na bandeja) com foco, descansos, intervalo da água e o interruptor das regras;
+      aplica sem reiniciar. **Aba Jogo:** jokenpô e par ou ímpar (`game.py`), rosto **bravo** novo, placar em
+      `game_result` (migração v2). O pet também descansa (com contagem no rosto) ao aceitar a pausa e bebe ao "Bebi".
+- [ ] **Falta (dono):** uso real do J04 (a notificação do Windows aparecer de fato, os tempos 50/10/60 no dia a dia), o
+      "Iniciar com o Windows" de verdade (reiniciar e ver o pet abrir) e o fim de sessão do Windows com o pet aberto.
 - **Pronto quando:** os critérios de F07 e F08 passam e a J04 funciona de ponta a ponta.
 
 ## Etapa 7 — Saúde, ajustes, bandeja e atalho (F09, F10, atalho de F02)
@@ -154,10 +165,11 @@
 - [ ] `health_tab.py`: hoje e últimos 7 dias, com o aviso de "não é orientação médica".
 - [ ] `storage/config.py` (TOML, padrões, limites) e `settings_dialog.py`, incluindo "Recomeçar cérebro" com
       backup.
-- [ ] `tray.py`: menu, ícones por estado, fechar → bandeja, Sair → salva.
+- [x] (2026-11-06, adiantado na etapa 6) `tray.py`: menu, fechar → bandeja, Sair → salva. **Falta:** ícones por estado (normal,
+      pausado, descanso).
 - [ ] `hotkey.py`: `RegisterHotKey` e `WM_HOTKEY` no Qt. **Validar** (TRD §13); se falhar, plano B com thread
       de mensagens.
-- [ ] Iniciar com o Windows (atalho na pasta Inicializar).
+- [x] (2026-11-06, adiantado na etapa 6) Iniciar com o Windows (chave `Run` do usuário, em vez do atalho na pasta Inicializar).
 - [ ] Diário: privacidade por desenho (o que o Pulso nunca vê) e como o atalho global funciona sem *keylogger*.
 - **Pronto quando:** os critérios de F02, F09 e F10 passam por completo.
 
@@ -166,6 +178,8 @@
 - [ ] README final: capturas e GIF, instalação, "como funciona o cérebro" (diagrama), privacidade, roteiro
       (F12+) e link para o diário.
 - [ ] Rodar 1 semana no uso real e registrar no diário se a meta de aprendizado do PRD §4 foi atingida.
+- [ ] Instalador: executável (PyInstaller) na *release*, com o atalho do Menu Iniciar e o "iniciar com o Windows" já
+      resolvidos (decidido em 2026-11-06: fica para o projeto consolidado; até lá vale `pip install -e` + `pulso --criar-atalho`).
 - [ ] Tag `v1.0.0` e *release* no GitHub com notas.
 
 ## Riscos e pontos de atenção
@@ -185,4 +199,6 @@
 | 2026-11-05 | Versão inicial |
 | 2026-11-05 | Etapa 0 concluída: repositório `AndreiBataglia/pulso`, PR #1 com CI verde, tag `v0.0.0` |
 | 2026-11-06 | Etapa 5: o rodapé mostra o custo por volta de 1 s (não por passo); o mapa de pesos ganhou o modo "só o que mudou" |
+| 2026-11-06 | Adiantado da etapa 7 (pedido do dono): bandeja com menu, X → bandeja, Sair, sempre à frente, iniciar com o Windows e interruptor da água |
+| 2026-11-06 | Etapa 6: hábitos (pomodoro, água, pendência cumulativa e rosto nervoso) implementados; falta o uso real e a bandeja (etapa 7) |
 | 2026-11-06 | Etapa 2 concluída (custo medido: 1,6 ms por segundo real, sem thread); contrato `Engine` cresce por etapas |
