@@ -39,6 +39,9 @@ HABIT_VALUES = {
     kinds.BREAK_IGNORED: -0.5,
 }
 
+SNOOZE_STEP = 0.25  # cada prorrogação do mesmo lembrete pesa mais 0,25 ...
+SNOOZE_MAX_STEPS = 4  # ... até −1,0
+
 
 @dataclass(frozen=True)
 class RewardConfig:
@@ -74,9 +77,16 @@ class RewardRules:
         self._last_click = now
         return (1.0 if sign > 0 else -1.0) * self.cfg.owner_weight
 
-    def habit(self, kind: str) -> float:
-        """Recompensa de um evento de hábito (0.0 para os que não contam), com `habit_weight`."""
-        return HABIT_VALUES.get(kind, 0.0) * self.cfg.habit_weight
+    def habit(self, kind: str, postponements: int = 1) -> float:
+        """Recompensa de um evento de hábito (0.0 para os que não contam), com `habit_weight`.
+
+        Prorrogar o lembrete de pausa pesa mais a cada vez (−0,25, −0,5, −0,75, até −1,0, o peso
+        de uma recusa); `postponements` é quantas vezes o lembrete atual já foi prorrogado."""
+        if kind == kinds.BREAK_SNOOZED:
+            value = -SNOOZE_STEP * min(max(postponements, 1), SNOOZE_MAX_STEPS)
+        else:
+            value = HABIT_VALUES.get(kind, 0.0)
+        return value * self.cfg.habit_weight
 
     def set_auto(self, on: bool) -> None:
         """Liga ou desliga as regras automáticas por processo/ócio (Ajustes)."""

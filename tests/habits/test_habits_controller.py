@@ -140,12 +140,12 @@ def test_dono_longe_segura_o_lembrete_de_agua(parts):  # noqa: F811
     assert not controller.habits.water.asking
 
 
-def test_nervoso_vence_o_humor_da_rede_ate_o_dono_dizer_que_fez(parts):  # noqa: F811
+def test_nervoso_vence_o_resto_ate_o_dono_dizer_que_fez(parts):  # noqa: F811
     controller, _, _, clock, _ = parts
-    for _ in range(10):  # a rede já decidiu um humor
+    for _ in range(10):  # a rede já decidiu um humor, mas o rosto segue as regras
         controller.tick()
         clock.advance(1)
-    assert controller.shown_mood == controller.mood
+    assert controller.shown_mood == "neutro"
     _reaches_water_prompt(controller, clock)
     controller.answer_habit("water_decline")  # 2
     clock.advance(60 * MIN)
@@ -155,4 +155,19 @@ def test_nervoso_vence_o_humor_da_rede_ate_o_dono_dizer_que_fez(parts):  # noqa:
     assert controller.shown_mood == "nervoso"
     assert controller.mood != "nervoso"  # a rede segue decidindo; só o rosto é vencido
     controller.answer_habit("drink")
-    assert controller.shown_mood == controller.mood
+    assert controller.shown_mood == "contente"  # cumpriu: bebeu água hoje
+    assert controller.verdict.cause == "water_done"
+
+
+def test_cada_prorrogacao_do_mesmo_lembrete_pesa_mais_na_rede(parts):  # noqa: F811
+    controller, _, engine, clock, _ = parts
+    controller.tick()
+    controller.tick_habits()
+    clock.advance(50 * MIN)
+    controller.tick_habits()
+    assert controller.habits.cycle.phase is Phase.REMINDER
+    controller.answer_habit("postpone")
+    clock.advance(5 * MIN)
+    controller.tick_habits()
+    controller.answer_habit("postpone")
+    assert engine.rewards == [pytest.approx(-0.25), pytest.approx(-0.5)]

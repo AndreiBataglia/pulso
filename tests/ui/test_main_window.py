@@ -89,11 +89,11 @@ def test_pausar_grava_o_cerebro_e_fechar_tambem(env):
     assert path.exists()
 
 
-def test_o_laco_muda_o_humor_do_pet_e_a_fala(env):
+def test_o_laco_mantem_o_rosto_das_regras_e_a_fala(env):
     window, *_ = env
     for _ in range(10):
         window.tick()
-    assert window.pet_tab.pet.target in MOODS
+    assert window.pet_tab.pet.target == window._controller.verdict.mood
     assert window.pet_tab.speech.text() != ""
 
 
@@ -136,10 +136,11 @@ def test_arquivo_ruim_avisa_e_nao_e_apagado(tmp_path):
 def test_rosto_explica_o_humor_embaixo(env):
     window, *_ = env
     tab = window.pet_tab
-    assert tab.caption.text() == phrases.MEANING_NEW
+    assert tab.caption.text() == phrases.mood_meaning(window._controller.verdict)
     for _ in range(10):
         window.tick()
-    assert tab.caption.text() == phrases.MOOD_MEANINGS[tab.pet.target]
+    assert tab.pet.target == "neutro"
+    assert "nada pendente" in tab.caption.text()
     assert phrases.MEANING_HINT in tab.pet.toolTip()
 
 
@@ -147,7 +148,7 @@ def test_nenhum_texto_usa_o_emoji_de_olho(env):
     window, *_ = env
     tab = window.pet_tab
     textos = [tab.pause.toolTip(), tab.badge.text(), tab.care.text()]
-    textos += [phrases.WELCOME, phrases.PAUSED, *phrases.MOOD_MEANINGS.values()]
+    textos += [phrases.WELCOME, phrases.PAUSED, phrases.MEANING_HINT]
     assert not any("👁" in t for t in textos)
 
 

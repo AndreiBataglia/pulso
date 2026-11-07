@@ -156,6 +156,16 @@ class HabitStore:
         ).fetchone()
         return int(row[0])
 
+    def on_time_breaks_today(self) -> int:
+        """Pausas feitas hoje **sem prorrogar** o lembrete (refeição não conta: não é pausa)."""
+        start = self._now().replace(hour=0, minute=0, second=0, microsecond=0)
+        row = self._conn.execute(
+            "SELECT COUNT(*) FROM habit_event WHERE kind = ? AND ts >= ? "
+            "AND COALESCE(value, 0) = 0 AND COALESCE(category, 'pause') != 'meal'",
+            (kinds.BREAK_DONE, start.isoformat(timespec="seconds")),
+        ).fetchone()
+        return int(row[0])
+
     def pending(self, group: str, refuse_points: int, ignore_points: int) -> int:
         """Pendência de `group` ("water" ou "break"): pontos das recusas e omissões **depois** do
         último "fiz". Só o "fiz" zera; "depois" vale 0."""

@@ -181,6 +181,10 @@ class HabitCoach:
     def breaks_today(self) -> int:
         return self.store.count_today(kinds.BREAK_DONE)
 
+    def on_time_breaks_today(self) -> int:
+        """Pausas de hoje feitas sem prorrogar o lembrete."""
+        return self.store.on_time_breaks_today()
+
     def postponed_today(self) -> int:
         return self.store.count_today(kinds.BREAK_SNOOZED)
 

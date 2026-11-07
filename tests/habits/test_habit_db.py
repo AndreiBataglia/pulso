@@ -149,3 +149,14 @@ def test_a_pendencia_nao_esfria_com_o_tempo_e_sobrevive_ao_reabrir(tmp_path):
     later = HabitStore(open_db(path), now=lambda: now + timedelta(days=3))
     assert later.pending("water", 2, 1) == 2
     later.close()
+
+
+def test_pausas_no_horario_de_hoje_ignoram_prorrogadas_refeicao_e_ontem(store):
+    store.record(kinds.BREAK_DONE, 0, kinds.CAT_PAUSE)  # no horário
+    store.record(kinds.BREAK_DONE, None, None)  # sem categoria (banco antigo): vale
+    store.record(kinds.BREAK_DONE, 2, kinds.CAT_PAUSE)  # prorrogou duas vezes: não vale
+    store.record(kinds.BREAK_DONE, 0, kinds.CAT_MEAL)  # refeição: não é pausa
+    store.clock[0] -= timedelta(days=1)
+    store.record(kinds.BREAK_DONE, 0, kinds.CAT_PAUSE)  # ontem
+    store.clock[0] += timedelta(days=1)
+    assert store.on_time_breaks_today() == 2

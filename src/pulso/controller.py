@@ -26,6 +26,7 @@ from pulso.brain.encoding import encode
 from pulso.brain.engine import BrainSnapshot, Engine
 from pulso.brain.rewards import RewardRules
 from pulso.clock import Clock
+from pulso.habits import mood_rules
 from pulso.habits.coach import HabitCoach, HabitTick
 from pulso.habits.focus_cycle import Mode
 from pulso.habits.kinds import Presence
@@ -92,10 +93,25 @@ class PetController:
         return self._decoder.mood
 
     @property
-    def shown_mood(self) -> str | None:
-        """O humor que o rosto mostra: "nervoso" enquanto houver pendência de hábito, que vence o
-        humor da rede até o dono dizer que fez; senão, o humor da rede."""
-        return "nervoso" if self.habits.nervous else self._decoder.mood
+    def verdict(self) -> mood_rules.MoodVerdict:
+        """O humor do rosto e o porquê, por regras claras (`habits/mood_rules.py`). A rede não
+        escolhe a cara: ela decide o momento do lembrete."""
+        habits = self.habits
+        return mood_rules.decide(
+            mood_rules.MoodInputs(
+                nervous_reason=habits.nervous_reason,
+                postponements=habits.cycle.postponements,
+                idle_s=self._idle,
+                sleepy_after_s=habits.cfg.away_idle_s,
+                on_time_breaks=habits.on_time_breaks_today(),
+                cups=habits.cups_today(),
+            )
+        )
+
+    @property
+    def shown_mood(self) -> str:
+        """O humor que o rosto mostra agora."""
+        return self.verdict.mood
 
     def tick(self) -> TickResult | None:
         """Uma volta de 1 s. Pausado → `None`: não lê o sensor, não simula, não aprende."""
@@ -163,7 +179,7 @@ class PetController:
         if self.paused:  # o Pulso "dorme": o evento fica anotado, mas a rede não aprende nada
             return
         for kind in recorded:
-            value = self._rules.habit(kind)
+            value = self._rules.habit(kind, self.habits.cycle.postponements)
             if value != 0.0:
                 self._deliver(value, "regra")  # hábito é regra, não rede: mesma cor na aba Cérebro
 

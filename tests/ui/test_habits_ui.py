@@ -296,3 +296,24 @@ def test_modo_casual_troca_o_cartao_pela_agua_e_volta(env):
     window.toggle_mode()
     assert tab.speech.text() == phrases.PROFESSIONAL_ON
     assert controller.habits.mode is Mode.PROFESSIONAL
+
+
+def test_prorrogar_de_novo_deixa_preocupado_e_o_balao_diz_o_motivo(env):
+    window, controller, clock, _ = env
+    _reach_reminder(window, clock)
+    window.pet_tab.postpone.click()
+    assert window.pet_tab.pet.target == "preocupado"
+    assert "1 vez" in window.pet_tab.caption.text()
+    _tick(window, clock, 5 * MIN)  # o lembrete volta
+    window.pet_tab.postpone.click()
+    assert "2 vezes" in window.pet_tab.speech.text()
+    assert "2 vezes" in window.pet_tab.caption.text()
+
+
+def test_muito_tempo_sem_mexer_deixa_sonolento_com_o_motivo(env):
+    window, controller, clock, _ = env
+    controller._loop._sensor._script = [dataclasses.replace(FRAME, idle_seconds=8 * MIN)]
+    _casual(window, controller)
+    window.tick()
+    assert window.pet_tab.pet.target == "sonolento"
+    assert "8 min" in window.pet_tab.caption.text()
