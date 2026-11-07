@@ -5,6 +5,8 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.7.0] - 2026-11-07
+
 ### Adicionado
 - **Etapa 7 (fatias 2 e 3):** ciclo do foco por presença (`FocusCycle`: aguardando, foco, ausente, "o que foi?", lembrete, descanso, além do descanso, reunião), modos Profissional e Casual, sensor de reunião (microfone em uso por outro programa, sem capturar som), migração v3 do banco (categoria e resumo da pausa em segundos).
 - Janela nova: anel do foco no rosto, pílula de modo, um painel por fase, **Pausar agora · Prorrogar 5 min · Hoje não**, "o que foi?", reunião, casual e placar do dia. Bandeja com "Modo casual" e submenu "Foco". Ajustes com modo e tolerância de ausência.

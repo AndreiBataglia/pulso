@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pulso"
-version = "0.0.1"
+version = "0.7.0"
 description = "Companheiro de desktop com rede neural de pulso (LIF + R-STDP em numpy)."
 readme = "README.md"
 requires-python = ">=3.12"
