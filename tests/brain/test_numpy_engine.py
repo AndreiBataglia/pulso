@@ -29,10 +29,11 @@ def test_scenario_makes_a_decision_every_10_seconds():
 
 
 def test_mood_changes_when_the_sensor_script_changes():
-    # Com pesos sorteados (ainda sem aprender) o humor depende da semente, mas na maioria delas o
-    # contexto muda a decisão. Medido: 8 de 10 sementes; exigimos 6 para não ser frágil.
+    # Com pesos sorteados (ainda sem aprender) a decisão depende da semente; com só 2 grupos, uma
+    # parte delas escolhe o mesmo para todos os contextos. Medido: 5 de 10 sementes mudam de
+    # decisão; exigimos 3 para não ser frágil.
     changed = sum(len(set(run_scenario(seed))) >= 2 for seed in range(10))
-    assert changed >= 6
+    assert changed >= 3
 
 
 def test_wiring_is_sparse_and_signed():

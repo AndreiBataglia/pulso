@@ -171,3 +171,69 @@ def test_cada_prorrogacao_do_mesmo_lembrete_pesa_mais_na_rede(parts):  # noqa: F
     controller.tick_habits()
     controller.answer_habit("postpone")
     assert engine.rewards == [pytest.approx(-0.25), pytest.approx(-0.5)]
+
+
+# ---- a rede decide o momento do lembrete (fatia 5) ----------------------------------------------
+
+
+def _to_waiting(controller, clock, wait=True):
+    """Foco vencido com a rede dizendo `esperar` (ou `lembrar`, com `wait=False`)."""
+    controller._decoder.mood = "esperar" if wait else "lembrar"
+    controller.tick()
+    controller.tick_habits()  # 1ª entrada: abre o foco
+    clock.advance(51 * MIN)
+    return controller.tick_habits()
+
+
+def test_rede_esperar_segura_o_lembrete_e_lembrar_solta(parts):  # noqa: F811
+    controller, _, _, clock, _ = parts
+    tick = _to_waiting(controller, clock)
+    assert kinds.SHOW_BREAK not in tick.shown and controller.habits.cycle.waiting_for_net
+    controller._decoder.mood = "lembrar"
+    assert kinds.SHOW_BREAK in controller.tick_habits().shown
+
+
+def test_sem_treino_a_rede_manda_lembrar(parts):  # noqa: F811
+    controller, *_ = parts
+    assert controller.wants_to_remind  # (sem treino, a rede age como o app sempre agiu)
+
+
+def test_aceitar_o_lembrete_recompensa_a_rede_na_hora(parts):  # noqa: F811
+    controller, _, engine, clock, _ = parts
+    tick = _to_waiting(controller, clock, wait=False)
+    assert kinds.SHOW_BREAK in tick.shown
+    controller.answer_habit("take_break")
+    assert engine.rewards == [pytest.approx(1.0)]
+
+
+def test_aceitar_nao_grava_nada_no_banco(parts):  # noqa: F811
+    controller, _, _, clock, _ = parts
+    _to_waiting(controller, clock, wait=False)
+    tick = controller.answer_habit("take_break")
+    assert tick.recorded == () and tick.rewarded == (kinds.BREAK_ACCEPTED,)
+
+
+def test_lembrete_forcado_inverte_o_sinal_da_resposta(parts):  # noqa: F811
+    controller, _, engine, clock, _ = parts
+    _to_waiting(controller, clock)  # rede: esperar
+    clock.advance(16 * MIN)
+    assert kinds.SHOW_BREAK in controller.tick_habits().shown
+    assert controller.habits.cycle.reminder_forced
+    controller.answer_habit("take_break")  # aceitou: esperar foi erro
+    assert engine.rewards == [pytest.approx(-1.0)]
+
+
+def test_lembrete_forcado_recusado_reforca_o_esperar(parts):  # noqa: F811
+    controller, _, engine, clock, _ = parts
+    _to_waiting(controller, clock)
+    clock.advance(16 * MIN)
+    controller.tick_habits()
+    controller.answer_habit("break_decline")
+    assert engine.rewards == [pytest.approx(1.0)]
+
+
+def test_lembrete_normal_recusado_pune_a_rede(parts):  # noqa: F811
+    controller, _, engine, clock, _ = parts
+    _to_waiting(controller, clock, wait=False)
+    controller.answer_habit("break_decline")
+    assert engine.rewards == [pytest.approx(-1.0)]

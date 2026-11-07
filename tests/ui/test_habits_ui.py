@@ -341,3 +341,12 @@ def test_rodape_mostra_a_agua_em_ml_e_litros(env):
     assert "750 ml" in window.pet_tab.footer_right.text()
     window.pet_tab.drink.click()
     assert "1 L" in window.pet_tab.footer_right.text()
+
+
+def test_foco_vencido_com_a_rede_esperando_explica_na_tela(env):
+    window, controller, clock, _ = env
+    controller._decoder.mood = "esperar"
+    _tick(window, clock, 1)
+    _tick(window, clock, 50 * MIN)
+    assert window.pet_tab.timer_value.text() == "00:00"
+    assert "esperando a hora de avisar" in window.pet_tab.timer_caption.text()

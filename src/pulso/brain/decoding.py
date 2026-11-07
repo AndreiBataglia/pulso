@@ -7,6 +7,9 @@ pulsos de cada grupo nesse intervalo. O grupo que mais pulsou vence.
 isso, dois grupos quase empatados fariam o Pulso trocar de cara a cada decisão. A palavra vem de
 "ficar para trás": o estado atual tem uma vantagem, como o termostato que só liga 1 grau acima do
 ponto em que desliga.
+
+**Reserva (`fallback`):** se a rede calar ou empatar, vence o humor de reserva. No Pulso é o
+"lembrar": uma rede sem treino lembra da pausa na hora, como o app já fazia antes da rede decidir.
 """
 
 import numpy as np
@@ -21,9 +24,13 @@ class MoodDecoder:
         window_steps: int = WINDOW_STEPS,
         margin: float = 0.25,
         initial: str | None = None,
+        fallback: str | None = None,
     ) -> None:
         if initial is not None and initial not in moods:
             raise ValueError(f"humor inicial desconhecido: {initial!r}")
+        if fallback is not None and fallback not in moods:
+            raise ValueError(f"humor de reserva desconhecido: {fallback!r}")
+        self._fallback = fallback  # quem vence quando a rede cala ou empata (sem informação)
         self.moods = list(moods)
         self.mood: str | None = initial  # humor atual (None até a primeira decisão com pulsos)
         self._window_steps = window_steps
@@ -51,6 +58,10 @@ class MoodDecoder:
 
     def _decide(self, window: np.ndarray) -> str | None:
         best = int(np.argmax(window))
+        fb = self._fallback
+        if fb is not None and window[self.moods.index(fb)] == window[best]:
+            self.mood = fb  # rede muda ou empatada: age como se não houvesse rede
+            return self.mood
         if window[best] == 0:  # rede muda: sem informação, mantém o humor atual
             return self.mood
         challenger = self.moods[best]

@@ -24,7 +24,7 @@ from pulso.clock import Clock
 
 log = logging.getLogger(__name__)
 
-FORMAT_VERSION = 1
+FORMAT_VERSION = 2  # v2 (fatia 5): dois grupos de saída, lembrar × esperar
 ENGINE_NAME = "numpy_lif_rstdp"
 AUTOSAVE_INTERVAL_S = 300.0  # a cada 5 min
 

@@ -59,3 +59,23 @@ def test_window_sums_the_whole_interval():
 def test_unknown_initial_mood_is_rejected():
     with pytest.raises(ValueError):
         MoodDecoder(MOODS, initial="z")
+
+
+def test_fallback_wins_when_the_network_is_silent():
+    decoder = MoodDecoder(MOODS, initial="b", fallback="a")
+    assert feed(decoder, [0, 0, 0]) == "a"  # rede muda: vence a reserva, não o humor anterior
+
+
+def test_fallback_wins_a_tie_without_needing_a_margin():
+    decoder = MoodDecoder(MOODS, margin=0.25, initial="b", fallback="a")
+    assert feed(decoder, [4, 4, 1]) == "a"
+
+
+def test_fallback_still_loses_to_a_clear_winner():
+    decoder = MoodDecoder(MOODS, margin=0.25, initial="a", fallback="a")
+    assert feed(decoder, [1, 9, 1]) == "b"
+
+
+def test_unknown_fallback_is_refused():
+    with pytest.raises(ValueError):
+        MoodDecoder(MOODS, fallback="z")

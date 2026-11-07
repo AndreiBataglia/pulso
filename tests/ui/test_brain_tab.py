@@ -14,7 +14,7 @@ from pulso.sensors.fake import ScriptedSensor
 from pulso.storage.brain_store import AutoSaver
 from pulso.ui.brain_tab import BRAIN_PREFERRED, HELP, SOURCE_COLORS, BrainTab, HelpButton
 from pulso.ui.main_window import MainWindow
-from pulso.ui.theme import MOOD_COLORS
+from pulso.ui.theme import DECISION_COLORS
 from tests.test_controller import FRAME, SpyEngine, make_habits
 
 
@@ -55,16 +55,16 @@ def _count_snapshots(controller):
     return calls
 
 
-def test_desenha_os_pulsos_de_cada_camada_com_a_cor_do_humor(parts, qapp):
+def test_desenha_os_pulsos_de_cada_camada_com_a_cor_da_decisao(parts, qapp):
     window, controller, _ = parts
     _show(window, qapp)
     for _ in range(5):
         window.tick()
     tab = window.brain_tab
     assert _points(tab, "entrada") > 0 and _points(tab, "oculta_exc") > 0
-    assert sum(_points(tab, m) for m in MOOD_COLORS if m != "dormindo") > 0
-    saida = tab._scatters["animado"].opts["brush"].color().name().upper()
-    assert saida == MOOD_COLORS["animado"].upper()  # a cor do grupo é a do humor
+    assert sum(_points(tab, m) for m in DECISION_COLORS) > 0
+    saida = tab._scatters["lembrar"].opts["brush"].color().name().upper()
+    assert saida == DECISION_COLORS["lembrar"].upper()  # a cor do grupo é a da decisão
     x = tab._scatters["entrada"].getData()[0]
     assert x.min() >= -2.0 and x.max() <= 0.0  # tempo de rede, 0 = agora
 

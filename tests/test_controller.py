@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from pulso.brain.decoding import MoodDecoder
-from pulso.brain.numpy_engine import NumpyEngine
+from pulso.brain.numpy_engine import REMIND, NumpyEngine
 from pulso.brain.rewards import RewardRules
 from pulso.clock import FakeClock
 from pulso.controller import PetController
@@ -42,8 +42,8 @@ def parts(tmp_path):
     path = tmp_path / "cerebro.npz"
     saver = AutoSaver(engine, path, seed=1, clock=clock)
     controller = PetController(
-        sensor, clock, engine, MoodDecoder(engine.groups), RewardRules(clock), saver,
-        make_habits(clock),
+        sensor, clock, engine, MoodDecoder(engine.groups, initial=REMIND, fallback=REMIND),
+        RewardRules(clock), saver, make_habits(clock),
     )  # fmt: skip
     return controller, sensor, engine, clock, path
 
@@ -56,7 +56,7 @@ def test_tick_le_o_sensor_e_decide_o_humor_a_cada_10_voltas(parts):
         clock.advance(1)
     assert sensor.calls == 10
     assert all(r is not None for r in results)
-    assert controller.mood in ("animado", "contente", "entediado", "sonolento", "preocupado")
+    assert controller.mood in ("lembrar", "esperar")
     assert results[-1].mood == controller.mood
 
 
@@ -120,8 +120,8 @@ def test_leitura_invalida_nao_derruba_o_laco(tmp_path):
     sensor = ScriptedSensor([RuntimeError("falhou"), FRAME])
     saver = AutoSaver(engine, tmp_path / "c.npz", 1, clock)
     controller = PetController(
-        sensor, clock, engine, MoodDecoder(engine.groups), RewardRules(clock), saver,
-        make_habits(clock),
+        sensor, clock, engine, MoodDecoder(engine.groups, initial=REMIND, fallback=REMIND),
+        RewardRules(clock), saver, make_habits(clock),
     )  # fmt: skip
     assert controller.tick() is not None  # leitura "desconhecida", sem exceção
     assert controller.tick() is not None
@@ -152,4 +152,4 @@ def test_o_custo_do_passo_e_medido_e_o_snapshot_sai_do_motor(parts):
     controller.tick()
     assert 0.0 < controller.step_cost_ms < 20.0  # orçamento do TRD §5.1
     assert controller.snapshot().spikes.shape[1] == 100  # 100 ms de rede por volta
-    assert controller.mood_counts().shape == (5,)
+    assert controller.mood_counts().shape == (2,)

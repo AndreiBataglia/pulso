@@ -95,7 +95,7 @@ projeto_tamagotchi/
 │   │   ├── numpy_engine.py # LIF + R-STDP em numpy
 │   │   ├── encoding.py     # SensorFrame → vetor de taxas de pulso
 │   │   ├── decoding.py     # contagem por grupo → humor (com histerese)
-│   │   └── rewards.py      # regras automáticas + recompensa do dono → dopamina
+│   │   └── rewards.py      # recompensa do dono e dos hábitos → dopamina
 │   ├── habits/
 │   │   ├── kinds.py        # tipos de evento, presença do dono e HabitConfig
 │   │   ├── reminder.py     # lembrete que pergunta e espera (adiar, recusar, ignorar)
@@ -136,7 +136,7 @@ projeto_tamagotchi/
 |--------|-----------|------|------------|
 | Entrada | 63 | Geradores de Poisson (não são LIF) | Cada sensor normalizado em [0, 1] vira taxa de 0–100 Hz. Categoria e faixa de hora usam grupos *one-hot* (um grupo por valor) |
 | Oculta | 100 | LIF (80 excitatórios + 20 inibitórios) | Conexões esparsas (~20%) |
-| Saída | 50 | LIF, 5 grupos de 10 (um por humor) | Inibição lateral entre os grupos (o mais forte "cala" os outros) |
+| Saída | 50 | LIF, 2 grupos de 10 (**lembrar** × **esperar**) | Inibição lateral entre os grupos (o mais forte "cala" os outros) |
 
 - **LIF:** τm = 20 ms, V repouso = −65 mV, limiar = −50 mV, reset = −65 mV, refratário = 2 ms, Euler com
   dt = 1 ms.
@@ -190,7 +190,7 @@ class Engine(Protocol):
 - **Não há segredos:** sem chaves, sem login, sem rede.
 - `config.toml` na pasta de dados (`%LOCALAPPDATA%\Pulso\`) guarda: intervalos do pomodoro e da água, tabela de
   categorias extra, atalho de pausa, pesos das recompensas, tamanho da rede e iniciar com o Windows.
-- Hoje a tela de Ajustes edita foco, descansos, intervalo da água e as regras automáticas (`SettingsDialog`).
+- Hoje a tela de Ajustes edita foco, descansos, intervalo da água, modo e ausência (`SettingsDialog`).
 - Os valores padrão ficam em `storage/config.py`. Um arquivo ausente ou inválido volta ao padrão, com aviso
   no log.
 - Variável `PULSO_DATA_DIR` para trocar a pasta de dados (usada nos testes e em demonstrações).

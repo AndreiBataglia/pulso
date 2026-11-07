@@ -31,7 +31,7 @@ from PySide6.QtWidgets import (
 from pulso.brain.engine import BrainSnapshot
 from pulso.clock import Clock
 from pulso.controller import PetController
-from pulso.ui.theme import LIGHT, MOOD_COLORS, Palette
+from pulso.ui.theme import DECISION_COLORS, LIGHT, Palette
 
 VOLTAGE_MS = 500  # o potencial mostra só o final do registro: em 2 s os picos viram uma parede
 DOPAMINE_WINDOW_S = 600.0  # o gráfico de dopamina mostra os últimos 10 min reais
@@ -45,10 +45,10 @@ HELP = {
         "Raster de pulsos: cada ponto é um pulso (disparo) de um neurônio. Cada linha é um "
         "neurônio; o tempo corre da esquerda para a direita.\n\n"
         "Cinza = entrada (os sensores virando pulsos) · azul = oculta excitatória · "
-        "vermelho = oculta inibitória · cores dos humores = a saída.\n\n"
+        "vermelho = oculta inibitória · âmbar e cinza-azulado = a saída (lembrar e esperar).\n\n"
         "O tempo é o da rede, que simula 100 ms a cada segundo real: o trecho mostrado "
-        "costura vários segundos reais. Quando a rede aprende, o grupo do humor "
-        "recompensado passa a pulsar mais nos contextos parecidos."
+        "costura vários segundos reais. Quando a rede aprende, o grupo da decisão "
+        "recompensada passa a pulsar mais nos contextos parecidos."
     ),
     "voltage": (
         "Potencial de membrana de 3 neurônios: o neurônio acumula carga a cada pulso que "
@@ -57,20 +57,22 @@ HELP = {
     ),
     "dopamine": (
         "Dopamina: cada barra é uma recompensa entregue à rede (últimos 10 min). Verde-água = "
-        "carinho ou resposta do dono; âmbar = regra automática (ex.: voltou do ócio).\n\n"
+        "carinho ou resposta do dono; âmbar = resposta a um lembrete (pausa, água).\n\n"
         "Acima de zero reforça o que a rede fez há pouco; abaixo, desfaz. A barra é o "
         "'erro de previsão' (recompensa − o que já se esperava): recompensas repetidas "
         "vão ficando menores, porque deixam de ser surpresa."
     ),
     "mood": (
-        "Palpite da rede: quantos pulsos cada grupo de saída deu na última janela de decisão "
-        "(10 s). O rosto do Pulso NÃO segue este gráfico: ele segue regras claras (pendência, "
-        "prorrogação, tempo parado, cumpriu). A rede segue aprendendo com as suas respostas; "
-        "na próxima fatia, estes grupos passam a decidir o momento de lembrar."
+        "Lembrar × esperar: quantos pulsos cada grupo de saída deu na última janela de decisão "
+        '(10 s). Quando o foco acaba, o Pulso só avisa da pausa enquanto "lembrar" vence; se '
+        '"esperar" vence, ele espera (no máximo 15 min, depois avisa de qualquer jeito). '
+        "Aceitar o lembrete reforça o que a rede decidiu; prorrogar ou recusar enfraquece. O "
+        "rosto do Pulso NÃO segue este gráfico: ele segue regras claras (pendência, prorrogação, "
+        "tempo parado, cumpriu)."
     ),
     "weights": (
         "Pesos da camada oculta → saída: cada quadrado é uma sinapse (horizontal = neurônio "
-        "oculto; vertical = neurônio de saída, agrupados por humor). Mais claro = sinapse "
+        "oculto; vertical = neurônio de saída, agrupados por decisão). Mais claro = sinapse "
         "mais forte.\n\n"
         "Marque 'Mostrar só o que mudou' para ver a diferença em relação a quando o app "
         "abriu: verde-água = ficou mais forte, vermelho = ficou mais fraca. É aqui que o "
@@ -158,7 +160,7 @@ class BrainTab(QWidget):
             ("raster", "Raster de pulsos", self.raster, 5),
             ("voltage", "Potencial dos neurônios", self.voltage, 4),
             ("dopamine", "Dopamina", self.dopamine, 3),
-            ("mood", "Palpite da rede (pulsos por grupo)", self.mood, 4),
+            ("mood", "Lembrar × esperar (pulsos por grupo)", self.mood, 4),
             ("weights", "Pesos oculta → saída", self.weights, 5),
         ):
             row = self._heading(label, HELP[key])
@@ -200,8 +202,8 @@ class BrainTab(QWidget):
         self.raster.getAxis("left").setTicks([[]])  # neurônios sem número: o que importa é a camada
         self.raster.setYRange(0, 1, padding=0)
         self._scatters: dict[str, pg.ScatterPlotItem] = {}
-        for key in (*LAYER_COLORS, *MOOD_COLORS):
-            color = LAYER_COLORS.get(key) or MOOD_COLORS[key]
+        for key in (*LAYER_COLORS, *DECISION_COLORS):
+            color = LAYER_COLORS.get(key) or DECISION_COLORS[key]
             item = pg.ScatterPlotItem(size=2, pen=None, brush=pg.mkBrush(color), pxMode=True)
             self.raster.addItem(item)
             self._scatters[key] = item
@@ -230,12 +232,14 @@ class BrainTab(QWidget):
         self.dopamine.addItem(self._dopamine_bars)
 
     def _build_mood(self) -> None:
-        moods = list(MOOD_COLORS)[:5]  # os 5 humores da rede ("dormindo" não é da rede)
-        self.mood.invertY(True)  # o primeiro humor fica em cima
+        moods = list(DECISION_COLORS)  # os 2 grupos da rede: lembrar × esperar
+        self.mood.invertY(True)  # o primeiro grupo fica em cima
         self.mood.getAxis("left").setTicks([list(enumerate(moods))])
         self.mood.setYRange(-0.6, len(moods) - 0.4, padding=0)
         self._mood_names = moods
-        self._mood_bars = pg.BarGraphItem(x0=0, y=np.arange(len(moods)), height=0.6, width=[0] * 5)
+        self._mood_bars = pg.BarGraphItem(
+            x0=0, y=np.arange(len(moods)), height=0.6, width=[0] * len(moods)
+        )
         self.mood.addItem(self._mood_bars)
 
     def _build_weights(self) -> None:
@@ -332,7 +336,7 @@ class BrainTab(QWidget):
             y=np.arange(len(counts)),
             height=0.6,
             width=counts,
-            brushes=[pg.mkBrush(MOOD_COLORS[m]) for m in snap.groups],
+            brushes=[pg.mkBrush(DECISION_COLORS[m]) for m in snap.groups],
         )
 
     def _draw_weights(self, snap: BrainSnapshot) -> None:

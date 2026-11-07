@@ -9,8 +9,8 @@
 
 **Status: em construção.** Já funcionam: os sensores, a rede que aprende, o Pulso na janela, a aba do cérebro,
 hábitos (foco por presença, pausas e água), bandeja do Windows, ajustes e um jogo. A etapa 7 (*O momento certo*)
-está em andamento: o ciclo do foco e a janela nova já existem; faltam o humor por regras e a rede decidir *quando*
-lembrar. Depois vêm a aba de saúde, o atalho global e o instalador.
+está quase pronta: o ciclo do foco, a janela nova, o humor por regras e a rede decidindo *quando* lembrar já existem.
+Depois vêm a aba de saúde, o atalho global e o instalador.
 
 ## English
 
@@ -54,13 +54,17 @@ O foco é **criar rotina sem ser chato**. O Pulso pergunta, você responde; ele 
 ## A rede de pulso
 
 O Pulso aprende com o que **você** faz e responde, não com palpites: cada carinho, *Bebi*, pausa feita ou *Hoje não*
-vira um sinal de recompensa (dopamina) para a rede. Existem também recompensas automáticas, que tentam adivinhar se
-você se cuidou olhando só o nome do programa em uso e o tempo parado. Como são palpites que você nunca confirma, elas
-vêm **desligadas** e só funcionam se você ligá-las em Ajustes.
+vira um sinal de recompensa (dopamina) para a rede. Não há mais recompensas automáticas por palpite (nome do
+programa, tempo parado): a rede só aprende com o que você confirma.
+
+**O que a rede decide:** quando o foco acaba, a rede escolhe entre **lembrar** (avisar da pausa já) e **esperar** (mais
+um pouco, no máximo 15 min; depois o aviso toca de qualquer jeito). Ela decide a cada 10 s, olhando o contexto do
+momento (hora, programa, tempo parado). Aceitar o lembrete reforça o que ela decidiu; prorrogar ou recusar enfraquece.
+Uma rede sem treino lembra na hora, como o app sempre fez. O rosto do Pulso não depende dela: segue regras claras.
 
 ![Os seis rostos do Pulso: animado, contente, entediado, sonolento, preocupado e nervoso (e dormindo, quando a observação está pausada)](docs/img/humores.png)
 
-A aba **Cérebro** mostra a rede por dentro: raster de pulsos, potenciais, dopamina, humor e mapa de pesos.
+A aba **Cérebro** mostra a rede por dentro: raster de pulsos, potenciais, dopamina, a decisão lembrar × esperar e mapa de pesos.
 
 ![A aba Cérebro: raster de pulsos, potenciais, dopamina, humor e mapa de pesos (roteiro de sensores falso)](docs/img/cerebro.png)
 
@@ -94,8 +98,8 @@ flowchart TD
 
     S["Sensores (nível B)<br/>CPU, RAM, hora, ociosidade,<br/>nome do processo"] --> E["Codificador<br/>vira taxas de pulso"]
     E --> N["Rede de pulso<br/>LIF + R-STDP"]
-    N --> D["Humor da rede<br/>só na aba Cérebro"]
-    D -. "fatia 5: decide o<br/>momento do lembrete" .-> L["Lembrete de pausa"]
+    N --> D["Decisão da rede<br/>lembrar × esperar"]
+    D -- "decide o momento<br/>(teto de 15 min)" --> L["Lembrete de pausa"]
 
     A["Suas respostas<br/>Bebi e Pausa feita +1 · Hoje não −1<br/>ignorou −0,5 · prorrogar −0,25 a −1"] -- dopamina --> N
     A -. "Bebi e Pausa feita<br/>zeram a pendência" .-> R1
@@ -103,8 +107,9 @@ flowchart TD
 
 - **As regras decidem o rosto**, nesta ordem: pendência → nervoso; lembrete prorrogado → preocupado; parado há 5 min
   ou mais → sonolento; pausa no horário ou copo hoje → contente; senão neutro.
-- **A rede continua aprendendo** com o que **você** responde (setas de dopamina), mas hoje o humor dela só aparece na
-  aba Cérebro. Na fatia 5 ela passa a decidir *quando* lembrar.
+- **A rede não escolhe o rosto.** Ela aprende com o que **você** responde (setas de dopamina) e decide *quando*
+  lembrar da pausa: aceitar o lembrete reforça a decisão, prorrogar ou recusar enfraquece. Se o lembrete só tocou
+  porque passaram 15 min, a resposta vale ao contrário (aceitar = esperar foi erro).
 - **Nervoso** nasce de recusar ou ignorar lembretes; só um *fiz* zera a pendência (*depois* vale 0). O balão diz o
   motivo: água, pausa ou as duas.
 - **Prorrogar pesa mais a cada vez** na recompensa da rede: −0,25, −0,5, −0,75 e −1,0.
@@ -112,7 +117,7 @@ flowchart TD
 - **Refeição e necessidade** (a pergunta "o que foi?") nunca somam pendência, e a rede só aprende com pausa e foco.
 
 *In English:* the window has one panel per phase (focus, break reminder, rest, "what happened?" after an absence,
-meeting, casual mode). The network learns from your own answers; the process-based guesses are off by default.
+meeting, casual mode). The network learns from your own answers and decides when to remind you of a break (remind vs. wait, 15 min cap); the process-based guesses were removed.
 A microphone in use by another program pauses focus without penalty. Timers, mode and the away tolerance are
 configurable in Settings, the companion lives in the tray, and a small rock-paper-scissors / odds-and-evens game
 changes only its face, never the network.
@@ -121,7 +126,7 @@ changes only its face, never the network.
 
 > Resumo por versão. O detalhe está no [`CHANGELOG.md`](CHANGELOG.md) e, com os conceitos explicados, em [`docs/diario/`](docs/diario/).
 
-### Etapa 7 · O momento certo *(em andamento, PR #10)*
+### Etapa 7 · O momento certo *(quase pronta; falta a tag v0.7.0)*
 - **Foco por presença:** o ciclo abre sozinho quando você mexe no PC (sem botão *Iniciar*), com anel de andamento no rosto.
 - **Pausar agora · Prorrogar 5 min · Hoje não**, e o placar do dia no rodapé (pausas, prorrogações, copos, focos).
 - **"O que foi?"** na volta de uma ausência: pausa, refeição, necessidade ou foco sem mexer.
@@ -129,13 +134,16 @@ changes only its face, never the network.
 - **Modos Profissional e Casual**, pela pílula da janela ou pelo menu da bandeja.
 - **Janela nova** (direção D do design): um painel por fase, aba **Pulso** (antes "Pet") e **sem o botão Bronca**.
 - **Ajustes** ganharam modo e "parado por mais de (min)". O banco migrou para o esquema v3 (categoria e resumo das pausas).
-- Saiu o pomodoro antigo. *Vem a seguir:* humor por regras explicáveis e a rede decidindo *quando* lembrar.
+- Saiu o pomodoro antigo. O rosto segue **regras explicáveis**, com o motivo na legenda.
+- **A rede decide o momento do lembrete da pausa** (lembrar × esperar, no máximo 15 min). Aceitar o lembrete a recompensa
+  na hora. Saíram as recompensas automáticas por processo e a opção em Ajustes. O `cerebro.npz` antigo é guardado como
+  `cerebro.recusado-*` e a rede recomeça (você verá um aviso na primeira abertura).
 
 ### v0.6.0 · Hábitos, bandeja, ajustes e jogo
 - Pomodoro e lembrete de água com notificação do Windows; recusar ou ignorar soma pendência e deixa o Pulso nervoso.
 - Bandeja do Windows (o X esconde o Pulso), iniciar com o Windows, sempre à frente e atalho no Menu Iniciar.
 - Aba **Ajustes** com os tempos; aba **Jogo** (jokenpô e par ou ímpar, só muda o rosto).
-- O Pulso aprende só com as suas respostas; as regras por processo ficam desligadas por padrão.
+- O Pulso aprende só com as suas respostas; as regras por processo ficavam desligadas por padrão (removidas na etapa 7).
 
 ### v0.5.0 e antes · A base
 - **v0.5.0:** aba **Cérebro** com raster, potenciais, dopamina, humor e mapa de pesos.

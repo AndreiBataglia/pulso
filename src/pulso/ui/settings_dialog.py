@@ -7,7 +7,6 @@ Só monta e devolve um `Settings` novo (`settings()`); quem grava e aplica é a 
 from dataclasses import replace
 
 from PySide6.QtWidgets import (
-    QCheckBox,
     QComboBox,
     QDialog,
     QDialogButtonBox,
@@ -53,12 +52,6 @@ class SettingsDialog(QDialog):
             spin.setValue(getattr(current, name))
             self.spins[name] = spin
             form.addRow(label, spin)
-        self.auto_rules = QCheckBox("Aprender também com o que vejo no PC")
-        self.auto_rules.setChecked(current.auto_rules)
-        self.auto_rules.setToolTip(
-            "Regras por processo e ócio (palpites sobre o seu humor). Desligado, o Pulso aprende "
-            "só com o carinho e as suas respostas aos lembretes."
-        )
         note = QLabel(
             "Os tempos novos valem já para o próximo foco, o próximo descanso e o próximo lembrete."
         )
@@ -73,7 +66,6 @@ class SettingsDialog(QDialog):
         buttons.rejected.connect(self.reject)
         layout = QVBoxLayout(self)
         layout.addLayout(form)
-        layout.addWidget(self.auto_rules)
         layout.addWidget(note)
         layout.addWidget(buttons)
 
@@ -82,7 +74,6 @@ class SettingsDialog(QDialog):
         values = {name: spin.value() for name, spin in self.spins.items()}
         return replace(
             self._current,
-            auto_rules=self.auto_rules.isChecked(),
             mode=self.mode.currentData(),
             **values,
         )

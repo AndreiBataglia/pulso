@@ -11,6 +11,8 @@ MOOD_COLORS = {
     "preocupado": "#F28C8C",
     "dormindo": "#8A8F98",
 }
+# Cor dos dois grupos de saída da rede (a decisão do momento do lembrete da pausa).
+DECISION_COLORS = {"lembrar": "#FFB347", "esperar": "#A3B1C6"}
 FACE_BACKGROUND = "#0E1014"
 
 

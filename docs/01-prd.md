@@ -9,8 +9,8 @@
 ocioso) e reage com estados de humor. O "cérebro" dele é uma **rede neural de pulso** (SNN — *spiking neural
 network*, rede em que os neurônios se comunicam por pulsos elétricos curtos, como os do cérebro) que aprende
 por **reforço**: o carinho do usuário e as respostas aos hábitos (bebi, fiz a pausa, hoje não) funcionam
-como "dopamina". As regras automáticas por processo/ócio (palpites sobre o humor) ficam **desligadas por padrão**
-(decidido em 2026-11-06) e podem ser ligadas em Ajustes.
+como "dopamina". As regras automáticas por processo/ócio (palpites sobre o humor) foram **removidas** na fatia 5 da etapa 7
+(decidido em 2026-11-07): a rede só aprende com o que o dono confirma.
 Ele também cuida de hábitos saudáveis: **foco por presença** (blocos de foco com descanso, sem botão Iniciar) e **lembrete de beber água**.
 É um projeto **público no GitHub** (licença MIT), construído em etapas documentadas para servir de material de
 aprendizado.
@@ -83,9 +83,8 @@ Uso: um usuário por instalação, roda em segundo plano o dia todo, **100% loca
   fortalecem (recompensa positiva) ou enfraquecem (negativa).
 - **Fontes de recompensa (as duas juntas):**
   - **Do dono:** botão 💚 Carinho (+1) e as respostas aos lembretes (a Bronca saiu na etapa 7).
-  - **Regras automáticas** (comportamento mínimo desde o início), por exemplo: sonolento durante ócio longo
-    (+), animado ao voltar do ócio (+), preocupado após mais de 90 min sem pausa (+), lembrete atendido (+),
-    lembrete dispensado (−).
+  - **Respostas aos hábitos:** lembrete atendido (+), prorrogado (− crescente), recusado (−), ignorado (−).
+    (As regras por processo/ócio, como "sonolento no ócio longo (+)", foram removidas em 2026-11-07.)
 - **Critérios de aceite:**
   - [ ] Num cenário simulado de teste (sem PC real), depois de N recompensas a rede passa a preferir o humor
         recompensado no contexto dado.
@@ -159,8 +158,8 @@ Uso: um usuário por instalação, roda em segundo plano o dia todo, **100% loca
 ### 5.2 Depois do MVP
 - F15 (feito, 2026-11-06) — **Jogo do dia a dia:** jokenpô e par ou ímpar com o Pulso (aba Jogo). Ganhou, ele fica contente;
   perdeu, fica bravo. Só mexe no rosto e no placar do dia, nunca na rede (o resultado é sorte e viraria ruído).
-- F16 (feito, 2026-11-06) — **Ajustes:** tempos do foco e da água, modo e tolerância de ausência e o interruptor das regras automáticas.
-- F12 — A SNN aprende **quando e como** lembrar (adiar se o dono está focado), em vez de intervalos fixos.
+- F16 (feito, 2026-11-06) — **Ajustes:** tempos do foco e da água, modo e tolerância de ausência (o interruptor das regras automáticas saiu na fatia 5).
+- F12 (feito, 2026-11-07, etapa 7 fatia 5) — A SNN aprende **quando e como** lembrar (adiar se o dono está focado), em vez de intervalos fixos.
 - F13 — Nível C de observação: ritmo de digitação e cliques (contagem, nunca as teclas).
 - F14 — Outros lembretes de hábito: descanso dos olhos 20-20-20, postura, alongamento.
 - F15 — Motor alternativo com treino offline (snnTorch/Norse, por gradiente), com modo de treino separado.

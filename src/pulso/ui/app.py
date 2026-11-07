@@ -9,7 +9,8 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication, QMessageBox
 
 from pulso.brain.decoding import MoodDecoder
-from pulso.brain.rewards import RewardConfig, RewardRules
+from pulso.brain.numpy_engine import REMIND
+from pulso.brain.rewards import RewardRules
 from pulso.clock import Clock, SystemClock
 from pulso.controller import PetController
 from pulso.habits.coach import HabitCoach
@@ -63,7 +64,7 @@ def build_controller(
         engine, seed = load_or_create(path)
         first_run = False  # o dono já conhece o Pulso; só o cérebro recomeçou
         new_brain = True
-    decoder = MoodDecoder(engine.groups)
+    decoder = MoodDecoder(engine.groups, initial=REMIND, fallback=REMIND)
     settings = settings or Settings()
     store = HabitStore(open_db(db if db is not None else path.parent / DB_FILE))
     habits = HabitCoach(clock, store, habit_config(settings), Mode(settings.mode))
@@ -72,7 +73,7 @@ def build_controller(
         clock,
         engine,
         decoder,
-        RewardRules(clock, RewardConfig(auto_enabled=settings.auto_rules)),
+        RewardRules(clock),
         AutoSaver(engine, path, seed, clock),
         habits,
         meeting,

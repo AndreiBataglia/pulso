@@ -5,11 +5,14 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.7.0] - 2026-11-07
+
 ### Adicionado
 - **Etapa 7 (fatias 2 e 3):** ciclo do foco por presença (`FocusCycle`: aguardando, foco, ausente, "o que foi?", lembrete, descanso, além do descanso, reunião), modos Profissional e Casual, sensor de reunião (microfone em uso por outro programa, sem capturar som), migração v3 do banco (categoria e resumo da pausa em segundos).
 - Janela nova: anel do foco no rosto, pílula de modo, um painel por fase, **Pausar agora · Prorrogar 5 min · Hoje não**, "o que foi?", reunião, casual e placar do dia. Bandeja com "Modo casual" e submenu "Foco". Ajustes com modo e tolerância de ausência.
 - **Aba Jogo:** jokenpô e par ou ímpar com o pet (ganhou: contente; perdeu: bravo), placar do dia em `game_result` (migração v2).
-- **Ajustes** (⚙ e menu da bandeja): tempos do pomodoro e da água e interruptor das regras automáticas, aplicados na hora.
+- **Ajustes** (⚙ e menu da bandeja): tempos do pomodoro e da água, aplicados na hora.
+- **Etapa 7 (fatia 5):** a rede decide o momento do lembrete da pausa (lembrar × esperar, teto de 15 min); aceitar o lembrete recompensa a rede na hora. Aba Cérebro com "Lembrar × esperar". As regras automáticas por processo/ócio e a opção em Ajustes foram removidas. O `cerebro.npz` antigo (formato 1) é guardado como `cerebro.recusado-*` e a rede recomeça.
 - Pet com atividades: ao aceitar a pausa ele descansa (olhos fechados, respirando) com a contagem regressiva no rosto; ao clicar em "Bebi" ele bebe por 15 s com um copo esvaziando.
 - `pulso --criar-atalho`: atalho "Pulso" no Menu Iniciar (sem console, com o rostinho como ícone) para reabrir o app depois de sair.
 - Janela do pet: botões secundários menores, pomodoro em ícones (▶ ⏸ ⏭) e dicas dos botões faladas pelo pet ao passar o mouse; ícone de pausa visível no modo escuro do Windows.
