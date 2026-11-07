@@ -164,6 +164,7 @@ Uso: um usuário por instalação, roda em segundo plano o dia todo, **100% loca
 - F14 — Outros lembretes de hábito: descanso dos olhos 20-20-20, postura, alongamento.
 - F15 — Motor alternativo com treino offline (snnTorch/Norse, por gradiente), com modo de treino separado.
 - F16 — Motor Brian2 pela mesma interface `Engine`, para comparar.
+- F20 (pedido em 2026-11-07) — **Remover o Pulso:** modo que apaga tudo que é dele (dados, início com o Windows, atalho e app), com confirmação e backup opcional. Ver doc 06, etapa 7.
 - F17 — Pulso em pixel art com animações; janela flutuante opcional.
 - F18 — Suporte a Linux/macOS (só a camada de sensores muda).
 - F19 — Fala gerada por IA local (opcional, sem depender do hub).
