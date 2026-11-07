@@ -69,5 +69,5 @@ def test_invalid_frame_is_silence():
     assert not encode(SensorFrame.unknown()).any()
 
 
-def test_engine_default_groups_are_the_moods():
-    assert DEFAULT_GROUPS == ("animado", "contente", "entediado", "sonolento", "preocupado")
+def test_engine_default_groups_are_the_decision_to_remind_or_wait():
+    assert DEFAULT_GROUPS == ("lembrar", "esperar")

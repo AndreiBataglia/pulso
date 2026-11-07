@@ -4,8 +4,8 @@ A interface só chama este objeto (uma vez por segundo `tick`, e os botões). As
 "o que acontece a cada segundo" é testada sem abrir janela.
 
 O laço de 1 s (plano da etapa 4): ler o sensor → `engine.step(encode(frame), 100)` →
-`decoder.update(counts)` → `rules.evaluate(frame, humor)` (se > 0, `engine.reward`) →
-`saver.tick()`.
+`decoder.update(counts)` → `saver.tick()`. A decisão da rede (lembrar × esperar) é lida por
+`tick_habits`, que a passa ao ciclo do foco.
 
 Os hábitos (ciclo do foco e água) andam em paralelo, por `tick_habits()`, que roda **também com a
 observação pausada**. O ciclo do foco mede a presença pela ociosidade lida do sensor; com a
@@ -24,9 +24,10 @@ import numpy as np
 from pulso.brain.decoding import MoodDecoder
 from pulso.brain.encoding import encode
 from pulso.brain.engine import BrainSnapshot, Engine
+from pulso.brain.numpy_engine import REMIND
 from pulso.brain.rewards import RewardRules
 from pulso.clock import Clock
-from pulso.habits import mood_rules
+from pulso.habits import kinds, mood_rules
 from pulso.habits.coach import HabitCoach, HabitTick
 from pulso.habits.focus_cycle import Mode
 from pulso.habits.kinds import Presence
@@ -39,6 +40,15 @@ log = logging.getLogger(__name__)
 
 STEP_MS = 100  # tempo simulado da rede por volta do laço (1 passo = 1 ms; ver numpy_engine)
 DOPAMINE_LOG_SIZE = 200  # quantas entregas de dopamina ficam na lembrança dos gráficos
+
+
+# Respostas ao lembrete da pausa: as que a rede aprende como decisão de lembrar ou esperar.
+_REMINDER_ANSWERS = (
+    kinds.BREAK_ACCEPTED,
+    kinds.BREAK_SNOOZED,
+    kinds.BREAK_DECLINED,
+    kinds.BREAK_IGNORED,
+)
 
 
 @dataclass(frozen=True)
@@ -54,9 +64,10 @@ class DopamineEvent:
 class TickResult:
     """O que mudou nesta volta. Não carrega nenhum dado de sensor (privacidade)."""
 
-    mood: str | None  # humor atual (None até a primeira decisão)
-    mood_changed: bool  # a rede decidiu um humor diferente nesta volta
-    rewarded: float  # recompensa automática aplicada (0.0 na maioria das voltas)
+    mood: str | None  # a decisão atual da rede: "lembrar" ou "esperar" (None antes da 1ª)
+    mood_changed: (
+        bool  # a rede decidiu diferente nesta volta (de lembrar para esperar, ou o inverso)
+    )
 
 
 class PetController:
@@ -93,6 +104,11 @@ class PetController:
         return self._decoder.mood
 
     @property
+    def wants_to_remind(self) -> bool:
+        """A rede decidiu que é boa hora de lembrar da pausa? Antes da 1ª decisão, sim."""
+        return self._decoder.mood in (None, REMIND)
+
+    @property
     def verdict(self) -> mood_rules.MoodVerdict:
         """O humor do rosto e o porquê, por regras claras (`habits/mood_rules.py`). A rede não
         escolhe a cara: ela decide o momento do lembrete."""
@@ -126,15 +142,8 @@ class PetController:
         self.step_cost_ms = (time.perf_counter() - started) * 1000.0
         self._decoder.update(counts)
         mood = self._decoder.mood
-        reward = self._rules.evaluate(frame, mood)
-        if reward > 0:
-            self._deliver(reward, "regra")
         self._saver.tick()
-        return TickResult(mood, before is not None and mood != before, reward)
-
-    def set_auto_rules(self, on: bool) -> None:
-        """Liga ou desliga as recompensas automáticas por processo/ócio (Ajustes)."""
-        self._rules.set_auto(on)
+        return TickResult(mood, before is not None and mood != before)
 
     def owner_reward(self, sign: int) -> bool:
         """Carinho (`sign` > 0) ou bronca (`sign` < 0). Devolve False se o clique foi ignorado
@@ -160,26 +169,32 @@ class PetController:
         meeting = (
             self._meeting is not None and self._idle is not None and self._meeting.in_meeting()
         )
-        tick = self.habits.tick(self._presence, self._idle, meeting)
-        self._reward_habits(tick.rewarded)
+        forced = self.habits.cycle.reminder_forced
+        tick = self.habits.tick(self._presence, self._idle, meeting, self.wants_to_remind)
+        self._reward_habits(tick.rewarded, forced)
         return tick
 
     def answer_habit(self, action: str) -> HabitTick:
         """Resposta do dono a uma pergunta (`habits.coach.ANSWERS`). Devolve o que foi gravado
         (vazio quando a resposta não grava nada, como "Pausar agora")."""
+        forced = self.habits.cycle.reminder_forced
         tick = self.habits.answer(action)
-        self._reward_habits(tick.rewarded)
+        self._reward_habits(tick.rewarded, forced)
         return tick
 
     def set_mode(self, mode: Mode) -> None:
         """Modo profissional ou casual (a pílula da janela e a bandeja)."""
         self.habits.set_mode(mode)
 
-    def _reward_habits(self, recorded) -> None:
+    def _reward_habits(self, recorded, forced: bool = False) -> None:
+        """`forced`: o lembrete tocou pelo teto de tempo, com a rede dizendo "esperar". Aí a
+        resposta vale ao contrário: aceitar mostra que esperar foi erro; recusar, que foi acerto."""
         if self.paused:  # o Pulso "dorme": o evento fica anotado, mas a rede não aprende nada
             return
         for kind in recorded:
             value = self._rules.habit(kind, self.habits.cycle.postponements)
+            if forced and kind in _REMINDER_ANSWERS:
+                value = -value
             if value != 0.0:
                 self._deliver(value, "regra")  # hábito é regra, não rede: mesma cor na aba Cérebro
 

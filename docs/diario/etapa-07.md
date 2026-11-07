@@ -44,3 +44,24 @@ o porquê; uma rede de pulsos aprende e surpreende, mas não sabe explicar. Por 
 - **Prorrogar pesa mais a cada vez** na recompensa da rede: −0,25, −0,5, −0,75 e −1,0 (o teto é o peso de uma recusa).
 - **Armadilha:** a chave "mudou o humor?" precisou incluir o número da prorrogação, senão a 2ª não falava.
 - **Como testar:** `pytest` (400). `tests/habits/test_mood_rules.py` tem um teste por regra e um para a prioridade.
+
+## Fatia 5 — a rede decide o momento do lembrete
+**Conceito: o que uma rede pode aprender de verdade.** Antes a rede escolhia o humor do rosto, e ninguém corrigia essa
+escolha. Agora ela decide algo que o dono confirma o tempo todo: *lembrar da pausa agora ou esperar?* Aceitar é
+recompensa, prorrogar ou recusar é punição. Dois grupos de saída (`lembrar`, `esperar`) competem por inibição lateral,
+como antes, só que com duas opções em vez de cinco.
+
+- **Crédito atrasado:** a dopamina só reforça o que disparou há pouco (cerca de 10 s). Por isso aceitar o lembrete vira
+  recompensa **na hora** (`BREAK_ACCEPTED`), não só no fim da pausa, minutos depois, quando a rede já esqueceu.
+- **Teto de 15 min:** a rede pode adiar, mas nunca esconder o lembrete. Se o teto estoura, o aviso toca e a resposta
+  vale **ao contrário**: aceitar mostra que esperar foi erro; recusar, que foi acerto. Sem isso, o aceite reforçaria o
+  próprio grupo "esperar", que era quem estava ganhando.
+- **Rede sem treino = comportamento antigo:** se a rede cala ou empata, vence "lembrar" (`MoodDecoder(fallback=…)`).
+- **Cérebro antigo:** o formato mudou (5 grupos → 2); o arquivo velho é guardado como `cerebro.recusado-*`, nunca apagado.
+- **Removido:** as 3 regras automáticas por processo/ócio e a opção em Ajustes (eram palpites que o dono nunca confirmava).
+- **Teste de aprendizado:** 3 contextos, 3 sementes que começam errando; depois de 120 rodadas a rede espera onde o dono
+  recusa e lembra onde aceita (≥ 80%), inclusive depois de salvar e reabrir.
+- **Como testar:** `pytest` (408). Ver no app: `$env:PULSO_DATA_DIR = "$env:TEMP\pulso-teste"; pulso --fake-sensors`.
+- **Ainda falta:** ver na tela real; tag v0.7.0; sensor de interação, horário de almoço, ícone da barra de tarefas,
+  instalador, "About" do GitHub, `habitos.png`.
+

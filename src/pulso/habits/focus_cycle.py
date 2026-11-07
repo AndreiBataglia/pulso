@@ -10,7 +10,8 @@ apertar nada para ele começar ou parar. Desenho: quadro "D · Ciclo completo" d
                               ▼ │                        necessidade/foco sem mexer: segue
                            REUNIÃO
 
-    FOCO ─acabou─▶ LEMBRETE ─┬─ pausar agora / saiu da mesa ─▶ DESCANSO
+    FOCO ─acabou e a rede diz "lembrar" (ou passaram 15 min)─▶ LEMBRETE
+                             ─┬─ pausar agora / saiu da mesa ─▶ DESCANSO
                              ├─ prorrogar ─▶ FOCO (+5 min)
                              └─ hoje não ─▶ FOCO (novo)
     DESCANSO ─acabou, você está aqui─▶ FOCO
@@ -42,6 +43,7 @@ from pulso.habits.kinds import HabitConfig
 ENTRY_S = 5.0  # "mexeu agora": menos que isto sem entrada
 LEAVE_S = 60.0  # no lembrete, tanto tempo sem entrada = saiu da mesa (aceitou a pausa)
 ASK_TIMEOUT_S = 120.0  # "o que foi?" sem resposta, com você presente, vale como pausa
+REMIND_WAIT_MAX_S = 15 * 60.0  # a rede adia o lembrete por até 15 min; depois ele toca
 EXCESS_GRACE_S = 30.0  # passar do descanso por menos que isto não conta como excesso
 
 
@@ -110,6 +112,8 @@ class FocusCycle:
         self._break_elapsed = 0.0
         self._excess = 0.0
         self.meal = False  # o descanso atual é uma refeição que o dono anunciou?
+        self._may_remind = True  # a rede deixa lembrar? (vale só com o foco vencido)
+        self.reminder_forced = False  # o lembrete atual tocou porque os 15 min da rede acabaram?
 
     # ---- consulta ----------------------------------------------------------------------------
 
@@ -121,6 +125,11 @@ class FocusCycle:
         if self.phase is Phase.BREAK:
             return max(self._break_planned - self._break_elapsed, 0.0)
         return 0.0
+
+    @property
+    def waiting_for_net(self) -> bool:
+        """O foco venceu e o lembrete espera a rede achar a hora (no máximo 15 min)."""
+        return self.phase is Phase.FOCUS and self._focus_counted and self._worked >= self._target
 
     @property
     def excess_s(self) -> float:
@@ -175,9 +184,12 @@ class FocusCycle:
 
     # ---- relógio -----------------------------------------------------------------------------
 
-    def tick(self, idle_s: float | None, meeting: bool = False) -> list[CycleEvent]:
+    def tick(
+        self, idle_s: float | None, meeting: bool = False, may_remind: bool = True
+    ) -> list[CycleEvent]:
         """Anda o relógio um passo. `idle_s` = segundos sem teclado nem mouse (`None` = observação
-        pausada). `meeting` = microfone em uso por outro programa."""
+        pausada). `meeting` = microfone em uso por outro programa. `may_remind` = a rede decidiu
+        que é boa hora de lembrar da pausa (com o foco vencido; ver `waiting_for_net`)."""
         now = self._clock.now()
         dt, self._last = now - self._last, now
         if self.phase is Phase.OFF or idle_s is None:
@@ -200,6 +212,7 @@ class FocusCycle:
             Phase.BREAK: self._tick_break,
             Phase.BREAK_OVER: self._tick_break_over,
         }[self.phase]
+        self._may_remind = may_remind
         return handler(idle, dt, now)
 
     def _tick_waiting(self, idle: float, dt: float, now: float) -> list[CycleEvent]:
@@ -221,6 +234,10 @@ class FocusCycle:
         if not self._focus_counted:
             self._cycles += 1
             self._focus_counted = True
+        late = self._worked - self._target
+        if not self._may_remind and late < REMIND_WAIT_MAX_S:
+            return events  # foco vencido: a rede ainda prefere esperar, até o teto de 15 min
+        self.reminder_forced = not self._may_remind
         self.long_break = self._cycles >= self._cfg.cycles_before_long
         self.phase = Phase.REMINDER
         self._unanswered_s = 0.0
@@ -244,7 +261,7 @@ class FocusCycle:
     def _tick_reminder(self, idle: float, dt: float, now: float) -> list[CycleEvent]:
         if idle >= LEAVE_S:  # saiu da mesa: aceitou a pausa, contada do último gesto
             self._begin_break(elapsed=idle)
-            return []
+            return [CycleEvent(kinds.BREAK_ACCEPTED)]
         self._unanswered_s += dt
         if self._unanswered_s >= self._cfg.ignore_after_min * 60:
             self._begin_focus()
@@ -294,6 +311,7 @@ class FocusCycle:
         if self.phase is not Phase.REMINDER:
             return []
         self.postponements += 1
+        self.reminder_forced = False
         self._target = self._worked + self._cfg.break_snooze_min * 60
         self.phase = Phase.FOCUS
         return [CycleEvent(kinds.BREAK_SNOOZED, value=self.postponements)]
@@ -379,9 +397,11 @@ class FocusCycle:
         self.postponements = 0
         self.long_break = False
         self.meal = False
+        self.reminder_forced = False
         self._unanswered_s = 0.0
 
     def _begin_break(self, elapsed: float) -> None:
+        self.reminder_forced = False
         self.phase = Phase.BREAK
         minutes = self._cfg.long_break_min if self.long_break else self._cfg.break_min
         self._break_planned = minutes * 60

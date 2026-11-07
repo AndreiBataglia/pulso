@@ -33,6 +33,10 @@ ALL_KINDS = (
     *V3_KINDS,
 )  # fmt: skip
 
+# Aceitar o lembrete da pausa não é gravado (o que vale é a pausa concluída): só recompensa a
+# rede na hora, quando ela ainda "lembra" do que decidiu.
+BREAK_ACCEPTED = "break_accepted"
+
 # Sinais que só avisam a interface (não são gravados): um lembrete acabou de aparecer.
 SHOW_WATER = "water_due"
 SHOW_BREAK = "break_due"

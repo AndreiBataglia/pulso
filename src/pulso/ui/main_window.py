@@ -663,6 +663,8 @@ class MainWindow(QMainWindow):
             caption, value = "Foco · aguardando você mexer", _mmss(habits.cfg.focus_min * 60)
         elif phase is Phase.FOCUS:
             state, color = "FOCO", c["focus"]
+            if cycle.waiting_for_net:  # foco vencido: o Pulso espera a hora certa de avisar
+                caption, value = "Foco cumprido · esperando a hora de avisar", "00:00"
         elif phase is Phase.AWAY:
             state, color, caption = "FOCO PARADO", c["idle"], "Foco parado · você está longe"
         elif phase is Phase.MEETING:
@@ -881,7 +883,6 @@ class MainWindow(QMainWindow):
         self._settings = settings
         self._save_settings(settings)
         self._controller.habits.apply_config(habit_config(settings))
-        self._controller.set_auto_rules(settings.auto_rules)
         mode = Mode(settings.mode)
         if mode is not self._controller.habits.mode:
             self._switch_mode(mode)

@@ -1,13 +1,14 @@
 """Motor da rede de pulso em numpy puro: entrada de Poisson → camada oculta → camada de saída.
 
-    entrada (Poisson) ──► oculta: 80 excitatórios + 20 inibitórios ──► saída: 5 grupos × 10
+    entrada (Poisson) ──► oculta: 80 excitatórios + 20 inibitórios ──► saída: 2 grupos × 10
                               (LIF, conexões esparsas ~20%)               (LIF, inibição lateral)
 
 - **Entrada:** não são neurônios LIF, são geradores de Poisson. Cada um dispara ao acaso, com
   probabilidade `taxa · dt` a cada passo (uma taxa de 100 Hz = 10% de chance por milissegundo).
 - **Oculta:** neurônios excitatórios empurram V para cima; os inibitórios empurram para baixo. Isso
   segura a atividade (sem eles, a rede tende a disparar toda de uma vez).
-- **Saída:** um grupo por humor. A **inibição lateral** faz cada grupo calar os outros: quem dispara
+- **Saída:** um grupo por decisão (lembrar × esperar). A **inibição lateral** faz cada grupo
+  calar os outros: quem dispara
   mais "ganha" e abafa os demais (competição *winner-take-all*).
 - **Atraso de um passo:** o pulso disparado no passo t só chega aos vizinhos no passo t+1.
 
@@ -24,7 +25,8 @@ from pulso.brain.engine import BrainSnapshot, StepResult
 from pulso.brain.lif import DT_MS, LIFParams, LIFPopulation
 from pulso.brain.plasticity import PlasticityConfig, PlasticSynapses
 
-DEFAULT_GROUPS = ("animado", "contente", "entediado", "sonolento", "preocupado")
+REMIND, WAIT = "lembrar", "esperar"  # a decisão: avisar da pausa já, ou esperar mais
+DEFAULT_GROUPS = (REMIND, WAIT)
 LOG_MS = 2000  # quanto tempo de rede os gráficos lembram (2 s de rede ≈ 20 s reais)
 SPIKE_DRAW_MV = 20.0  # só no desenho: o pulso aparece como um pico acima do limiar
 
@@ -35,7 +37,7 @@ class NetworkConfig:
 
     n_inputs: int = 63  # deve casar com `encoding.N_INPUTS` (há um teste para isso)
     groups: tuple[str, ...] = DEFAULT_GROUPS
-    group_size: int = 10  # neurônios de saída por humor
+    group_size: int = 10  # neurônios de saída por grupo
     n_hidden_e: int = 80
     n_hidden_i: int = 20
     p_connect: float = 0.2  # chance de existir cada conexão (esparsidade)

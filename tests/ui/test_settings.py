@@ -5,7 +5,7 @@ import random
 import pytest
 
 from pulso.brain.decoding import MoodDecoder
-from pulso.brain.rewards import RewardConfig, RewardRules
+from pulso.brain.rewards import RewardRules
 from pulso.clock import FakeClock
 from pulso.controller import PetController
 from pulso.sensors.fake import ScriptedSensor
@@ -21,9 +21,7 @@ MIN = 60.0
 
 def test_config_guarda_e_le_os_tempos(tmp_path):
     path = tmp_path / "config.toml"
-    mine = Settings(
-        focus_min=25, break_min=5, long_break_min=15, water_interval_min=45, auto_rules=True
-    )
+    mine = Settings(focus_min=25, break_min=5, long_break_min=15, water_interval_min=45)
     save_settings(path, mine)
     assert load_settings(path) == mine
     assert "focus_min = 25" in path.read_text(encoding="utf-8")
@@ -44,7 +42,6 @@ def test_tempo_fora_do_intervalo_ou_de_tipo_errado_volta_ao_padrao(tmp_path):
 def test_padroes_batem_com_o_plano_e_estao_dentro_dos_intervalos():
     s = Settings()
     assert (s.focus_min, s.break_min, s.long_break_min, s.water_interval_min) == (50, 10, 20, 60)
-    assert not s.auto_rules
     for name, (low, high) in RANGES.items():
         assert low <= getattr(s, name) <= high
 
@@ -58,9 +55,8 @@ def test_dialogo_devolve_o_que_esta_na_tela(qapp):
     dialog = SettingsDialog(Settings())
     dialog.spins["focus_min"].setValue(25)
     dialog.spins["water_interval_min"].setValue(30)
-    dialog.auto_rules.setChecked(True)
     result = dialog.settings()
-    assert result.focus_min == 25 and result.water_interval_min == 30 and result.auto_rules
+    assert result.focus_min == 25 and result.water_interval_min == 30
     assert result.always_on_top  # o que a tela não mexe fica como estava
     dialog.close()
 
@@ -74,7 +70,7 @@ def env(qapp, tmp_path):
         clock,
         engine,
         MoodDecoder(engine.groups),
-        RewardRules(clock, RewardConfig(auto_enabled=False)),
+        RewardRules(clock),
         AutoSaver(engine, tmp_path / "c.npz", 1, clock),
         make_habits(clock),
     )
@@ -112,22 +108,13 @@ def test_intervalo_novo_da_agua_vale_na_hora(env):
     assert controller.habits.water.asking
 
 
-def test_regras_automaticas_ligam_e_desligam_pelos_ajustes(env):
-    window, controller, _, _ = env
-    assert not controller._rules.cfg.auto_enabled
-    window.apply_settings(Settings(auto_rules=True))
-    assert controller._rules.cfg.auto_enabled
-    window.apply_settings(Settings(auto_rules=False))
-    assert not controller._rules.cfg.auto_enabled
-
-
 def test_bandeja_tem_ajustes_e_a_janela_tem_a_engrenagem(env):
     window, *_ = env
     assert window.settings_button.toolTip().startswith("Ajustes")
     assert any(a.text() == "Ajustes…" for a in window._tray.menu.actions())
 
 
-def test_o_app_comeca_com_os_tempos_do_config_e_as_regras_automaticas_desligadas(tmp_path):
+def test_o_app_comeca_com_os_tempos_do_config(tmp_path):
     from pulso.ui.app import build_controller
 
     controller, _ = build_controller(
@@ -137,11 +124,8 @@ def test_o_app_comeca_com_os_tempos_do_config_e_as_regras_automaticas_desligadas
         settings=Settings(focus_min=25),
     )
     assert controller.habits.cfg.focus_min == 25
-    assert (
-        not controller._rules.cfg.auto_enabled
-    )  # no app, os palpites por processo começam desligados
     padrao, _ = build_controller(ScriptedSensor([FRAME]), FakeClock(), tmp_path / "outro.npz")
-    assert padrao.habits.cfg.focus_min == 50 and not padrao._rules.cfg.auto_enabled
+    assert padrao.habits.cfg.focus_min == 50
 
 
 def test_modo_e_ausencia_vao_para_o_config_e_sao_validados(tmp_path):

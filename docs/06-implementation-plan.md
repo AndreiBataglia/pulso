@@ -79,8 +79,8 @@
 - [x] (2026-11-06) Rastro de elegibilidade e R-STDP. Testes:
   - sem dopamina, o peso não muda;
   - com dopamina positiva, as sinapses elegíveis sobem.
-- [x] (2026-11-06) `rewards.py`: regras automáticas (ócio longo → sonolento +, volta → animado +, mais de 90 min sem pausa →
-      preocupado +), recompensa do dono, pesos configuráveis e filtro de cliques repetidos.
+- [x] (2026-11-06) `rewards.py`: regras automáticas (removidas na etapa 7, fatia 5; ócio longo → sonolento +, volta → animado +,
+      mais de 90 min sem pausa → preocupado +), recompensa do dono, pesos configuráveis e filtro de cliques repetidos.
 - [x] (2026-11-06) `storage/paths.py` e `brain_store.py`: `.npz` com versão, gravação atômica, salvamento a cada 5 min,
       ao pausar e ao sair.
 - [x] (2026-11-06) Teste de aprendizado: num cenário roteirizado, depois de N recompensas o humor recompensado
@@ -233,11 +233,19 @@ num PR só, ou dois que só entram juntos), para o app em uso nunca ficar meio v
       pendência → nervoso, lembrete prorrogado → preocupado, parado há 5 min ou mais → sonolento, pausa no horário ou
       copo hoje → contente, senão neutro). O rosto **não segue mais a rede**; a legenda sob o rosto sempre diz o motivo e
       o balão fala na virada (a 1ª prorrogação não fala, a 2ª em diante sim). Prorrogação com peso crescente na rede
-      (−0,25, −0,5, −0,75, até −1,0). `animado` e `entediado` ficam sem uso até a fatia 5 trocar os grupos da rede. 400
+      (−0,25, −0,5, −0,75, até −1,0). `animado` e `entediado` ficaram sem uso. 400
       testes verdes, ruff limpo. Suposição minha: o peso crescente vale na recompensa da rede, não nos pontos de
       pendência (esses seguem inteiros).
-- [ ] **Fatia 5:** rede com 2 grupos novos, janela de decisão de 15 min, recompensas; teste de aprendizado com várias
-      sementes.
+- [x] **Fatia 5 (2026-11-07, sem commit):** a rede decide só o **momento do lembrete da pausa**. Grupos de saída
+      `lembrar` e `esperar` (`FORMAT_VERSION` 2; o arquivo antigo é guardado como `cerebro.recusado-*`). Decide a cada
+      10 s; rede muda ou empatada = lembrar (`MoodDecoder(fallback=…)`). `FocusCycle.tick(..., may_remind)`: com o foco
+      vencido e "esperar", o ciclo espera (`waiting_for_net`, o painel explica) por no máximo 15 min; depois toca e o
+      lembrete fica marcado `reminder_forced`. Aceitar o lembrete (pausar agora ou sair da mesa) vale `BREAK_ACCEPTED`:
+      +1 na hora, sem gravar no banco (o que o banco guarda é a pausa concluída). Lembrete forçado inverte o sinal da
+      resposta (aceitar = esperar errou; recusar = acertou). Removidas as 3 regras automáticas por processo/ócio
+      (`RewardRules.evaluate`, `auto_rules`, opção em Ajustes). Aba Cérebro com "Lembrar × esperar". Água segue por
+      intervalo fixo. Teste de aprendizado com 3 sementes: espera onde o dono recusa, lembra onde aceita. 408 testes
+      verdes, ruff limpo. Não visto na tela real. `animado`/`entediado` seguem só nos desenhos do rosto (`pet_widget`).
 - [~] **Identidade do app no Windows (pedido do dono) — `AppUserModelID` `AndreiBataglia.Pulso` feito na fatia 1; falta
       conferir a barra de tarefas com o app do dono e decidir a opção `Qt.Tool`:** hoje a barra de tarefas mostra o ícone do Python porque o
       processo é o `pythonw.exe` e o Windows agrupa pelo executável. Definir o `AppUserModelID` próprio

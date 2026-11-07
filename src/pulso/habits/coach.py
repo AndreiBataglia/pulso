@@ -23,6 +23,8 @@ DEFAULT_CUP_ML = 250  # o que um "Bebi" antigo (sem ml gravado) vale
 
 # Avisos para a interface: não são gravados.
 _SIGNALS = {kinds.SHOW_WATER, kinds.SHOW_BREAK, kinds.SHOW_BACK, kinds.SHOW_ASK_BACK}
+# Só recompensam a rede na hora (não vão para o banco).
+_REWARD_ONLY = {kinds.BREAK_ACCEPTED}
 
 # Respostas do dono que a interface pode pedir (nome → método do coach).
 ANSWERS = (
@@ -72,12 +74,17 @@ class HabitCoach:
     # ---- relógio -----------------------------------------------------------------------------
 
     def tick(
-        self, presence: Presence, idle_s: float | None = None, meeting: bool = False
+        self,
+        presence: Presence,
+        idle_s: float | None = None,
+        meeting: bool = False,
+        may_remind: bool = True,
     ) -> HabitTick:
         """Uma volta. `idle_s` = segundos sem teclado nem mouse (`None` = observação pausada: o
-        ciclo congela); `meeting` = microfone em uso por outro programa."""
+        ciclo congela); `meeting` = microfone em uso por outro programa; `may_remind` = a rede
+        decidiu que é hora de lembrar da pausa."""
         events = [CycleEvent(kind) for kind in self.water.tick(presence)]
-        events += self.cycle.tick(idle_s, meeting)
+        events += self.cycle.tick(idle_s, meeting, may_remind)
         return self._handle(events)
 
     # ---- respostas do dono -------------------------------------------------------------------
@@ -105,8 +112,9 @@ class HabitCoach:
 
     def take_break(self) -> list[CycleEvent]:
         """ "Pausar agora": começa o descanso. O que vale ponto é a pausa **concluída**."""
+        from_reminder = self.cycle.phase is Phase.REMINDER
         self.cycle.take_break()
-        return []
+        return [CycleEvent(kinds.BREAK_ACCEPTED)] if from_reminder else []
 
     def start_meal(self) -> list[CycleEvent]:
         """Botão "Refeição": descanso longo já. Só o fim dele grava (como refeição)."""
@@ -198,13 +206,15 @@ class HabitCoach:
     # ---- interno -----------------------------------------------------------------------------
 
     def _handle(self, events: list[CycleEvent]) -> HabitTick:
-        recorded = [e for e in events if e.kind not in _SIGNALS]
+        recorded = [e for e in events if e.kind not in _SIGNALS | _REWARD_ONLY]
         for e in recorded:
             self.store.record(e.kind, e.value, e.category, e.planned_s, e.actual_s, e.excess_s)
         if recorded:
             self._pending = None
         # Refeição conta como descanso longo, mas a rede só aprende com pausa e foco.
-        rewarded = tuple(e.kind for e in recorded if e.category != kinds.CAT_MEAL)
+        rewarded = tuple(e.kind for e in events if e.kind in _REWARD_ONLY) + tuple(
+            e.kind for e in recorded if e.category != kinds.CAT_MEAL
+        )
         summary = next((e for e in recorded if e.kind == kinds.BREAK_DONE), None)
         return HabitTick(
             tuple(e.kind for e in recorded),

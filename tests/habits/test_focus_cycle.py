@@ -421,3 +421,64 @@ def test_refeicao_vale_tambem_no_lembrete_e_so_nas_fases_certas(cycle, clock):
     assert not cycle.start_meal()  # já em descanso
     cycle.set_mode(Mode.CASUAL)
     assert not cycle.start_meal()
+
+
+# ---- a rede decide o momento do lembrete (fatia 5) ----------------------------------------------
+
+
+def work_waiting(cycle, clock, minutes):
+    """Trabalha `minutes` com a rede dizendo "esperar" (`may_remind=False`)."""
+    events = []
+    for _ in range(int(minutes * MIN)):
+        clock.advance(1)
+        events += cycle.tick(ACTIVE, False, False)
+    return events
+
+
+def test_rede_diz_esperar_foco_vence_sem_lembrete_mas_conta_o_foco(cycle, clock):
+    cycle.tick(ACTIVE)
+    events = work_waiting(cycle, clock, 50 + 10)
+    assert kinds_of(events) == [kinds.FOCUS_DONE]  # gravado uma vez, sem SHOW_BREAK
+    assert cycle.phase is Phase.FOCUS and cycle.waiting_for_net
+
+
+def test_quando_a_rede_muda_para_lembrar_o_lembrete_toca_na_hora(cycle, clock):
+    cycle.tick(ACTIVE)
+    work_waiting(cycle, clock, 50 + 5)
+    clock.advance(1)
+    events = cycle.tick(ACTIVE, False, True)
+    assert kinds_of(events) == [kinds.SHOW_BREAK]
+    assert cycle.phase is Phase.REMINDER and not cycle.reminder_forced
+    assert not cycle.waiting_for_net
+
+
+def test_teto_de_15_min_o_lembrete_toca_de_qualquer_jeito_e_fica_marcado_como_forcado(cycle, clock):
+    cycle.tick(ACTIVE)
+    work_waiting(cycle, clock, 50 + 14)
+    assert cycle.phase is Phase.FOCUS
+    events = work_waiting(cycle, clock, 2)
+    assert kinds.SHOW_BREAK in kinds_of(events)
+    assert cycle.phase is Phase.REMINDER and cycle.reminder_forced
+
+
+def test_a_marca_de_forcado_some_ao_responder(cycle, clock):
+    cycle.tick(ACTIVE)
+    work_waiting(cycle, clock, 50 + 16)
+    assert cycle.reminder_forced
+    cycle.postpone()
+    assert not cycle.reminder_forced
+    work_waiting(cycle, clock, 5 + 16)
+    assert cycle.reminder_forced
+    cycle.take_break()
+    assert not cycle.reminder_forced
+
+
+def test_sem_a_rede_dizer_nada_o_comportamento_antigo_vale(cycle, clock):
+    events = reach_reminder(cycle, clock)  # may_remind padrão = True
+    assert kinds.SHOW_BREAK in kinds_of(events) and not cycle.reminder_forced
+
+
+def test_sair_da_mesa_no_lembrete_tambem_e_aceitar(cycle, clock):
+    reach_reminder(cycle, clock)
+    events = idle_for(cycle, clock, 61)
+    assert kinds.BREAK_ACCEPTED in kinds_of(events)

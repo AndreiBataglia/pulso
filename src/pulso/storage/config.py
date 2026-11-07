@@ -24,7 +24,6 @@ CONFIG_FILE = "config.toml"
 class Settings:
     always_on_top: bool = True  # a janela fica sobre as outras (o Pulso precisa ser visto)
     water_enabled: bool = True  # lembrete de água ligado
-    auto_rules: bool = False  # recompensas automáticas por processo/ócio (hábitos valem sempre)
     focus_min: int = 50  # tempos do pomodoro e da água, em minutos
     break_min: int = 10
     long_break_min: int = 20
@@ -38,7 +37,6 @@ class Settings:
 _SECTIONS = {
     "always_on_top": "window",
     "water_enabled": "habits",
-    "auto_rules": "habits",
     "focus_min": "habits",
     "break_min": "habits",
     "long_break_min": "habits",

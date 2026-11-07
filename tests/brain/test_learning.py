@@ -1,9 +1,9 @@
-"""O teste que importa: o pet aprende de verdade? (F04, critério de aceite 1)
+"""O teste que importa: a rede aprende de verdade quando lembrar e quando esperar? (F04)
 
-Cenário roteirizado, sem PC real: três momentos bem diferentes do dia. Em cada um o dono dá
-carinho (+1) se o humor escolhido for o que ele quer, e bronca (−1) se não for. Começando de uma
-rede sorteada (que "opina" ao acaso), depois de N recompensas o humor recompensado tem que vencer
-na grande maioria das decisões, e sem mais recompensas, para provar que ficou guardado nos pesos.
+Cenário roteirizado, sem PC real: três momentos bem diferentes do dia. Em cada um, o dono "aceita"
+(+1) se a rede decidiu como ele costuma querer e "recusa" (−1) se não. Começando de uma rede
+sorteada (que decide ao acaso), depois de N respostas a decisão certa tem que vencer na grande
+maioria das vezes, e sem mais recompensas, para provar que ficou guardado nos pesos.
 """
 
 import numpy as np
@@ -15,17 +15,16 @@ from pulso.brain.numpy_engine import NumpyEngine
 from pulso.sensors.base import SensorFrame
 from pulso.storage import brain_store
 
-# (momento) → (leitura dos sensores, humor que o dono quer ver)
+# (momento) → (leitura dos sensores, o que o dono quer: "esperar" se costuma recusar o lembrete
+# nesse momento, "lembrar" se costuma aceitar)
 SCENARIO = {
-    "trabalhando": (SensorFrame(70, 60, 10.0, 1, "codigo", 8), "animado"),
-    "madrugada": (SensorFrame(3, 30, 23.0, 900, "video", 0), "sonolento"),
-    "conversando": (SensorFrame(20, 50, 16.0, 60, "chat", 3), "contente"),
+    "trabalhando": (SensorFrame(70, 60, 10.0, 1, "codigo", 8), "esperar"),
+    "madrugada": (SensorFrame(3, 30, 23.0, 900, "video", 0), "lembrar"),
+    "conversando": (SensorFrame(20, 50, 16.0, 60, "chat", 3), "esperar"),
 }
 TRAINING_ROUNDS = 120  # 3 decisões (e 3 recompensas) por rodada
-# Limitação conhecida: das 6 primeiras sementes testadas (1 a 6), a 3 não aprendeu em 160 rodadas
-# (a rede dela é dominada por "contente"). Por isso a lista tem 1, 2 e 4, e não 1, 2 e 3. O
-# diário da etapa 3 registra o caso.
-LEARNING_SEEDS = (1, 2, 4)
+# Sementes em que a rede sorteada começa errando (a 1 já acerta tudo antes de treinar).
+LEARNING_SEEDS = (3, 4, 6)
 
 
 def decide(engine, frame: SensorFrame) -> str:
@@ -48,7 +47,7 @@ def hit_rate(engine, repeats: int = 4) -> float:
 
 
 def train(engine, rounds: int = TRAINING_ROUNDS) -> int:
-    """Carinho no humor certo, bronca no errado. Devolve quantas recompensas foram dadas."""
+    """Recompensa na decisão certa, punição na errada. Devolve quantas recompensas foram dadas."""
     given = 0
     for _ in range(rounds):
         for frame, wanted in SCENARIO.values():
@@ -59,7 +58,7 @@ def train(engine, rounds: int = TRAINING_ROUNDS) -> int:
 
 @pytest.mark.slow
 @pytest.mark.parametrize("seed", LEARNING_SEEDS)
-def test_after_rewards_the_rewarded_mood_wins(seed):
+def test_after_rewards_the_rewarded_decision_wins(seed):
     engine = NumpyEngine(seed=seed)
     before = hit_rate(engine, repeats=2)
     train(engine)
@@ -93,8 +92,8 @@ def test_without_rewards_nothing_is_learned():
 
 
 @pytest.mark.parametrize("seed", LEARNING_SEEDS)
-def test_in_a_single_context_the_pet_settles_on_the_rewarded_mood(seed):
-    """O mecanismo básico: bronca no humor errado e carinho no certo fazem o pet se fixar nele."""
+def test_in_a_single_context_the_pet_settles_on_the_rewarded_decision(seed):
+    """O mecanismo básico: recusar a decisão errada e aceitar a certa fazem a rede se fixar nela."""
     frame, wanted = SCENARIO["trabalhando"]
     engine = NumpyEngine(seed=seed)
     moods = []

@@ -24,7 +24,7 @@ Não se aplica. O programa é de um usuário só e não abre rede. A proteção 
 ## 3. `cerebro.npz`
 | Chave | Forma | Descrição |
 |-------|-------|-----------|
-| `format_version` | escalar int | Versão do formato (começa em 1); carregador recusa versão desconhecida com aviso |
+| `format_version` | escalar int | Versão do formato (hoje 2: dois grupos de saída, lembrar × esperar); carregador recusa versão desconhecida com aviso |
 | `engine` | string | Nome do motor (`numpy_lif_rstdp`); trocar de motor não reaproveita pesos de outro |
 | `groups` | (5,) string | Ordem dos humores nos grupos de saída |
 | `w_in_hidden` | (n_in, n_hid) float64 | Pesos entrada→oculta (mecanismo plástico; congelado por padrão) |
@@ -102,8 +102,7 @@ Só o resultado: nada de sensor. O placar do dia é um `GROUP BY result` desde a
 **Para quê:** chave e valor do próprio banco, como `schema_version`.
 
 ## 5. `config.toml` (padrões)
-> **Hoje (etapa 6)** o arquivo guarda, em `[window]` e `[habits]`: `always_on_top`, `water_enabled`, `auto_rules`
-> (padrão `false`), `focus_min` (50), `break_min` (10), `long_break_min` (20) e `water_interval_min` (60), editáveis em
+> **Hoje (etapa 6)** o arquivo guarda, em `[window]` e `[habits]`: `always_on_top`, `water_enabled`, `focus_min` (50), `break_min` (10), `long_break_min` (20) e `water_interval_min` (60), editáveis em
 > **Ajustes**. Tempo fora do intervalo (`storage/config.py`, `RANGES`) ou de tipo errado volta ao padrão. O bloco
 > abaixo é o desenho completo previsto.
 
@@ -159,7 +158,7 @@ always_on_top = true        # o Pulso fica sobre as outras janelas (decidido pel
 - **Primeiro uso:** cria a pasta, o `config.toml` com os padrões, um `pulso.db` vazio
   (`schema_version = 2`) e uma rede nova a partir da semente.
 - **Migrações:** `storage/db.py` aplica scripts em ordem pelo `schema_version`. O `.npz` usa `format_version`:
-  uma mudança no formato exige uma função de conversão ou um "recomeçar com backup".
+  uma mudança no formato exige uma função de conversão ou um "recomeçar com backup". Na v1→v2 (fatia 5) a rede passou de 5 grupos para 2 e não há conversão possível: o `cerebro.npz` antigo é guardado como `cerebro.recusado-<data>.npz` (nunca apagado) e a rede recomeça.
 - **Backup:** basta copiar a pasta `%LOCALAPPDATA%\Pulso\`.
 
 ## 8. Suposições
