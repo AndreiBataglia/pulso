@@ -63,9 +63,10 @@ HELP = {
         "vão ficando menores, porque deixam de ser surpresa."
     ),
     "mood": (
-        "Humor: quantos pulsos cada grupo de saída deu na última janela de decisão (10 s). "
-        "O grupo que mais pulsa vence e vira o humor do Pulso — por isso é o que mais "
-        "muda quando a rede aprende."
+        "Palpite da rede: quantos pulsos cada grupo de saída deu na última janela de decisão "
+        "(10 s). O rosto do Pulso NÃO segue este gráfico: ele segue regras claras (pendência, "
+        "prorrogação, tempo parado, cumpriu). A rede segue aprendendo com as suas respostas; "
+        "na próxima fatia, estes grupos passam a decidir o momento de lembrar."
     ),
     "weights": (
         "Pesos da camada oculta → saída: cada quadrado é uma sinapse (horizontal = neurônio "
@@ -157,7 +158,7 @@ class BrainTab(QWidget):
             ("raster", "Raster de pulsos", self.raster, 5),
             ("voltage", "Potencial dos neurônios", self.voltage, 4),
             ("dopamine", "Dopamina", self.dopamine, 3),
-            ("mood", "Humor (pulsos por grupo)", self.mood, 4),
+            ("mood", "Palpite da rede (pulsos por grupo)", self.mood, 4),
             ("weights", "Pesos oculta → saída", self.weights, 5),
         ):
             row = self._heading(label, HELP[key])

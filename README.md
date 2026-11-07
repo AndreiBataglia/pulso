@@ -66,38 +66,50 @@ A aba **Cérebro** mostra a rede por dentro: raster de pulsos, potenciais, dopam
 
 ### Como o humor funciona
 
-O rosto mostra **um humor por vez**, e a legenda embaixo diz o que ele significa. Hoje a ordem de prioridade é:
+O rosto mostra **um humor por vez**, e a legenda embaixo diz o motivo. Quem escolhe é um conjunto de **regras
+explicáveis** (a primeira que vale ganha); a rede de pulsos não escolhe a cara:
 
 ```mermaid
 flowchart TD
-    S["Sensores (nível B)<br/>CPU, RAM, hora, ociosidade,<br/>nome do processo"] --> E["Codificador<br/>vira taxas de pulso"]
-    E --> N["Rede de pulso<br/>LIF + R-STDP"]
-    N --> D["Decodificador<br/>qual grupo disparou mais"]
-    D --> M["Humor da rede<br/>animado · contente · entediado<br/>sonolento · preocupado"]
-
-    H["Hábitos<br/>água e pausa"] --> P{"Pendência alta?<br/>recusou ou ignorou<br/>vezes demais"}
-    P -- sim --> NV["😠 Nervoso<br/>vence o humor da rede<br/>até você dizer que fez"]
-    P -- não --> M
-
     PV{"Observação<br/>pausada?"} -- sim --> Z["😴 Dormindo"]
-    PV -- não --> P
+    PV -- não --> R1
+
+    R1{"Pendência alta?<br/>recusou ou ignorou<br/>vezes demais"} -- sim --> NV["😠 Nervoso<br/>até você dizer que fez"]
+    R1 -- não --> R2{"Prorrogou o<br/>lembrete da pausa?"}
+    R2 -- sim --> PR["😟 Preocupado<br/>(conta as prorrogações)"]
+    R2 -- não --> R3{"Parado há 5 min<br/>ou mais?"}
+    R3 -- sim --> SO["😴 Sonolento"]
+    R3 -- não --> R4{"Pausa no horário<br/>ou água hoje?"}
+    R4 -- sim --> CO["🙂 Contente"]
+    R4 -- não --> NE["😐 Neutro<br/>nada pendente"]
 
     NV --> F["Rosto + legenda<br/>com o motivo"]
-    M --> F
+    PR --> F
+    SO --> F
+    CO --> F
+    NE --> F
     Z --> F
 
-    R["Suas respostas<br/>Carinho +1 · Bebi e Pausa feita +1<br/>Hoje não −1 · ignorou −0,5"] -- dopamina --> N
-    R -. "zera a pendência" .-> P
-    G["Aba Jogo"] -. "só muda o rosto, nunca a rede" .-> F
+    G["Aba Jogo"] -. "reação passageira:<br/>ganhou contente, perdeu bravo" .-> F
+
+    S["Sensores (nível B)<br/>CPU, RAM, hora, ociosidade,<br/>nome do processo"] --> E["Codificador<br/>vira taxas de pulso"]
+    E --> N["Rede de pulso<br/>LIF + R-STDP"]
+    N --> D["Humor da rede<br/>só na aba Cérebro"]
+    D -. "fatia 5: decide o<br/>momento do lembrete" .-> L["Lembrete de pausa"]
+
+    A["Suas respostas<br/>Bebi e Pausa feita +1 · Hoje não −1<br/>ignorou −0,5 · prorrogar −0,25 a −1"] -- dopamina --> N
+    A -. "Bebi e Pausa feita<br/>zeram a pendência" .-> R1
 ```
 
-- **A rede decide o humor de base**, e ela aprende com o que **você** responde (setas de dopamina).
-- **Nervoso vence a rede.** Recusar ou ignorar lembretes soma pendência; só um *fiz* a zera (*depois* vale 0). O
-  balão diz o motivo: água, pausa ou as duas.
+- **As regras decidem o rosto**, nesta ordem: pendência → nervoso; lembrete prorrogado → preocupado; parado há 5 min
+  ou mais → sonolento; pausa no horário ou copo hoje → contente; senão neutro.
+- **A rede continua aprendendo** com o que **você** responde (setas de dopamina), mas hoje o humor dela só aparece na
+  aba Cérebro. Na fatia 5 ela passa a decidir *quando* lembrar.
+- **Nervoso** nasce de recusar ou ignorar lembretes; só um *fiz* zera a pendência (*depois* vale 0). O balão diz o
+  motivo: água, pausa ou as duas.
+- **Prorrogar pesa mais a cada vez** na recompensa da rede: −0,25, −0,5, −0,75 e −1,0.
 - **Pausar a observação** põe o Pulso para dormir e congela o foco.
 - **Refeição e necessidade** (a pergunta "o que foi?") nunca somam pendência, e a rede só aprende com pausa e foco.
-- **Ainda não feito (fatia 4):** o humor passa a seguir regras explicáveis (cumpriu → contente, pendência → nervoso,
-  muito tempo sem interação → sonolento) e a rede passa a decidir *quando* lembrar (fatia 5).
 
 *In English:* the window has one panel per phase (focus, break reminder, rest, "what happened?" after an absence,
 meeting, casual mode). The network learns from your own answers; the process-based guesses are off by default.
