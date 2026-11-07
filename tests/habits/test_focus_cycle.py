@@ -383,3 +383,41 @@ def test_o_andamento_do_descanso_chega_a_1_e_depois_fica_cheio(cycle, clock):
     assert cycle.progress == pytest.approx(0.5, abs=0.01)
     idle_for(cycle, clock, 5 * MIN)
     assert cycle.progress == 1.0
+
+
+# ---- botão Refeição (ao lado do modo) -------------------------------------------------------
+
+
+def test_refeicao_anunciada_comeca_descanso_longo_e_grava_como_refeicao(cycle, clock):
+    cycle.tick(ACTIVE)  # abre o foco
+    assert cycle.start_meal() and cycle.phase is Phase.BREAK
+    assert cycle.meal and cycle.long_break and cycle.remaining_s == 20 * MIN
+    events = []
+    for _ in range(int(20 * MIN) + 1):  # o descanso acaba e o dono mexe no PC
+        clock.advance(1)
+        events += cycle.tick(ACTIVE)
+    done = [e for e in events if e.kind == kinds.BREAK_DONE]
+    assert len(done) == 1 and done[0].category == kinds.CAT_MEAL
+    assert done[0].planned_s == 20 * MIN and done[0].excess_s == 0
+    assert cycle.phase is Phase.FOCUS and not cycle.meal and cycle.focus_number == 1
+
+
+def test_refeicao_que_passa_do_tempo_nao_tem_excesso(cycle, clock):
+    cycle.tick(ACTIVE)
+    cycle.start_meal()
+    events = idle_for(cycle, clock, 25 * MIN)  # ainda longe depois dos 20 min
+    assert cycle.phase is Phase.BREAK_OVER and events == []
+    clock.advance(1)
+    (done, *_) = cycle.tick(ACTIVE)
+    assert done.category == kinds.CAT_MEAL and done.excess_s == 0
+    assert done.actual_s >= 25 * MIN
+
+
+def test_refeicao_vale_tambem_no_lembrete_e_so_nas_fases_certas(cycle, clock):
+    assert cycle.start_meal()  # aguardando
+    cycle.end_break_early()
+    reach_reminder(cycle, clock)
+    assert cycle.phase is Phase.REMINDER and cycle.start_meal() and cycle.phase is Phase.BREAK
+    assert not cycle.start_meal()  # já em descanso
+    cycle.set_mode(Mode.CASUAL)
+    assert not cycle.start_meal()

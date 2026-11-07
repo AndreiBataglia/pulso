@@ -45,7 +45,7 @@ from PySide6.QtWidgets import (
 from pulso.clock import Clock
 from pulso.controller import PetController
 from pulso.habits import kinds
-from pulso.habits.focus_cycle import Mode, Phase
+from pulso.habits.focus_cycle import MEAL_FROM, Mode, Phase
 from pulso.storage.autostart import Autostart
 from pulso.storage.config import Settings, habit_config
 from pulso.storage.db import GameStore
@@ -134,6 +134,8 @@ class PetTab(QWidget):
         self.badge = QLabel()
         self.badge.setObjectName("badge")
         self.state_label = _label("state")
+        self.meal_button = QPushButton("Refeição")
+        self.meal_button.setObjectName("pill")
         self.mode_button = QPushButton()
         self.mode_button.setObjectName("pill")
         self.pause = QPushButton()
@@ -216,6 +218,7 @@ class PetTab(QWidget):
             self.drink: "Bebi água: zera o lembrete de água.",
             self.later: "Depois: me lembra de novo em alguns minutos.",
             self.decline: "Hoje não: deixa passar (conta como recusa).",
+            self.meal_button: "Refeição: começo já um descanso longo, sem cobrança.",
             self.take_break: "Pausar agora: adianta o descanso.",
             self.pause_now: "Pausar agora: começa o descanso.",
             self.skip: "Pula a fase atual.",
@@ -239,6 +242,7 @@ class PetTab(QWidget):
         top.setSpacing(8)
         top.addWidget(self.state_label)
         top.addStretch()
+        top.addWidget(self.meal_button)
         top.addWidget(self.mode_button)
         top.addWidget(self.pause)
 
@@ -446,6 +450,7 @@ class MainWindow(QMainWindow):
             (tab.drink, "drink"),
             (tab.later, "water_later"),
             (tab.decline, "water_decline"),
+            (tab.meal_button, "start_meal"),
             (tab.take_break, "take_break"),
             (tab.pause_now, "take_break"),
             (tab.skip, "skip"),
@@ -459,7 +464,8 @@ class MainWindow(QMainWindow):
         self._hint_of: str | None = None  # a fala que a dica do botão cobriu
         self._hint: str | None = None
         for button in (
-            tab.care, tab.pause, tab.mode_button, tab.drink, tab.later, tab.decline,
+            tab.care, tab.pause, tab.mode_button, tab.meal_button, tab.drink, tab.later,
+            tab.decline,
             tab.take_break, tab.pause_now, tab.skip, tab.postpone, tab.decline_break,
             tab.end_break, *tab.away_buttons.values(),
         ):  # fmt: skip
@@ -672,6 +678,8 @@ class MainWindow(QMainWindow):
             tab.reminder_hint.setText("Pausa no horário: o Pulso aprende que acertou.")
         elif phase is Phase.BREAK:
             state = "DESCANSO LONGO" if cycle.long_break else "DESCANSANDO"
+            if cycle.meal:
+                state = "REFEIÇÃO"
             color, panel, countdown = c["rest"], "rest", left
             ring = (cycle.progress, c["rest"], False)
             tab.rest_label.setText("Mexer no computador não encerra o descanso.")
@@ -684,6 +692,7 @@ class MainWindow(QMainWindow):
         tab.set_state(state, color)
         tab.show_timer(caption, value, dim=dim, buttons=phase is Phase.FOCUS)
         tab.show_mode(habits.mode)
+        tab.meal_button.setVisible(phase in MEAL_FROM)
         if ring is None:
             tab.pet.clear_ring()
         else:
@@ -708,7 +717,11 @@ class MainWindow(QMainWindow):
         elif old is Phase.MEETING and new is Phase.FOCUS:
             self._say(phrases.MEETING_OFF)
         elif new is Phase.BREAK:
-            text = phrases.LONG_BREAK_STARTED if cycle.long_break else phrases.BREAK_STARTED
+            text = phrases.BREAK_STARTED
+            if cycle.meal:
+                text = phrases.MEAL_STARTED
+            elif cycle.long_break:
+                text = phrases.LONG_BREAK_STARTED
             self._say(text, force=True)
 
     def _sync_mood(self) -> None:

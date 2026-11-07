@@ -83,6 +83,10 @@ class CycleEvent:
     excess_s: int | None = None
 
 
+# Fases em que o dono pode anunciar uma refeição (o botão ao lado do modo).
+MEAL_FROM = (Phase.WAITING, Phase.FOCUS, Phase.AWAY, Phase.ASKING_BACK, Phase.REMINDER)
+
+
 class FocusCycle:
     def __init__(
         self, clock: Clock, cfg: HabitConfig | None = None, mode: Mode = Mode.PROFESSIONAL
@@ -105,6 +109,7 @@ class FocusCycle:
         self._break_planned = 0.0
         self._break_elapsed = 0.0
         self._excess = 0.0
+        self.meal = False  # o descanso atual é uma refeição que o dono anunciou?
 
     # ---- consulta ----------------------------------------------------------------------------
 
@@ -275,6 +280,15 @@ class FocusCycle:
             return True
         return False
 
+    def start_meal(self) -> bool:
+        """ "Refeição" (botão ao lado do modo): começa já um descanso longo, sem cobrança."""
+        if self.phase not in MEAL_FROM:
+            return False
+        self.long_break = True
+        self._begin_break(elapsed=0.0)
+        self.meal = True
+        return True
+
     def postpone(self) -> list[CycleEvent]:
         """ "Prorrogar 5 min": volta ao foco por mais `break_snooze_min`, quantas vezes quiser."""
         if self.phase is not Phase.REMINDER:
@@ -364,6 +378,7 @@ class FocusCycle:
         self._focus_counted = False
         self.postponements = 0
         self.long_break = False
+        self.meal = False
         self._unanswered_s = 0.0
 
     def _begin_break(self, elapsed: float) -> None:
@@ -374,13 +389,16 @@ class FocusCycle:
         self._excess = 0.0
 
     def _finish_break(self, excess: float, back: bool) -> list[CycleEvent]:
+        actual = round(self._break_planned + excess if excess else self._break_elapsed)
+        if self.meal:  # refeição não tem excesso: o tempo a mais é só contado em `actual_s`
+            excess = 0.0
         event = CycleEvent(
             kinds.BREAK_DONE,
-            kinds.CAT_PAUSE,
+            kinds.CAT_MEAL if self.meal else kinds.CAT_PAUSE,
             value=self.postponements,
             planned_s=round(self._break_planned),
             # com excesso, o tempo parou de correr no fim do descanso: feito = planejado + excesso
-            actual_s=round(self._break_planned + excess if excess else self._break_elapsed),
+            actual_s=actual,
             excess_s=round(excess) if excess > EXCESS_GRACE_S else 0,
         )
         if self.long_break:

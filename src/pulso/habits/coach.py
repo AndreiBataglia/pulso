@@ -25,7 +25,7 @@ _SIGNALS = {kinds.SHOW_WATER, kinds.SHOW_BREAK, kinds.SHOW_BACK, kinds.SHOW_ASK_
 # Respostas do dono que a interface pode pedir (nome → método do coach).
 ANSWERS = (
     "drink", "water_later", "water_decline",
-    "take_break", "postpone", "break_decline", "end_break_early", "skip",
+    "take_break", "start_meal", "postpone", "break_decline", "end_break_early", "skip",
     "away_pause", "away_meal", "away_need", "away_focus",
 )  # fmt: skip
 
@@ -103,6 +103,11 @@ class HabitCoach:
     def take_break(self) -> list[CycleEvent]:
         """ "Pausar agora": começa o descanso. O que vale ponto é a pausa **concluída**."""
         self.cycle.take_break()
+        return []
+
+    def start_meal(self) -> list[CycleEvent]:
+        """Botão "Refeição": descanso longo já. Só o fim dele grava (como refeição)."""
+        self.cycle.start_meal()
         return []
 
     def postpone(self) -> list[CycleEvent]:
