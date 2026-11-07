@@ -229,7 +229,13 @@ num PR só, ou dois que só entram juntos), para o app em uso nunca ficar meio v
       **Fica para depois:** horário de almoço opcional em Ajustes; pesos crescentes da prorrogação (fatia 4); humor por
       regras (fatia 4) e rede (fatia 5). A água fica escondida enquanto há pergunta do ciclo na tela (a ignorada soma 1
       ponto).
-- [ ] **Fatia 4:** humor por regras (`mood_rules.py`), com o motivo no balão; testes por regra.
+- [x] **Fatia 4 (2026-11-07, sem commit):** humor por regras em `habits/mood_rules.py` (função pura; prioridade:
+      pendência → nervoso, lembrete prorrogado → preocupado, parado há 5 min ou mais → sonolento, pausa no horário ou
+      copo hoje → contente, senão neutro). O rosto **não segue mais a rede**; a legenda sob o rosto sempre diz o motivo e
+      o balão fala na virada (a 1ª prorrogação não fala, a 2ª em diante sim). Prorrogação com peso crescente na rede
+      (−0,25, −0,5, −0,75, até −1,0). `animado` e `entediado` ficam sem uso até a fatia 5 trocar os grupos da rede. 400
+      testes verdes, ruff limpo. Suposição minha: o peso crescente vale na recompensa da rede, não nos pontos de
+      pendência (esses seguem inteiros).
 - [ ] **Fatia 5:** rede com 2 grupos novos, janela de decisão de 15 min, recompensas; teste de aprendizado com várias
       sementes.
 - [~] **Identidade do app no Windows (pedido do dono) — `AppUserModelID` `AndreiBataglia.Pulso` feito na fatia 1; falta

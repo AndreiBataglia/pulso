@@ -4,6 +4,7 @@ import pytest
 
 from pulso.brain.rewards import RewardConfig, RewardRules
 from pulso.clock import FakeClock
+from pulso.habits import kinds
 from pulso.sensors.base import SensorFrame
 
 
@@ -145,3 +146,17 @@ def test_habito_pesa_como_o_dono_e_vale_com_as_regras_desligadas():
     assert rules.habit(kinds.WATER_DRUNK) == 1.0
     assert rules.habit(kinds.BREAK_DECLINED) == -1.0
     assert rules.habit(kinds.WATER_IGNORED) == -0.5
+
+
+# ---- prorrogação com peso crescente -----------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("vez", "valor"), [(1, -0.25), (2, -0.5), (3, -0.75), (4, -1.0), (9, -1.0)]
+)
+def test_cada_prorrogacao_pesa_mais_ate_o_peso_de_uma_recusa(rules, vez, valor):
+    assert rules.habit(kinds.BREAK_SNOOZED, vez) == pytest.approx(valor)
+
+
+def test_prorrogar_nunca_pesa_mais_que_recusar(rules):
+    assert rules.habit(kinds.BREAK_SNOOZED, 99) >= rules.habit(kinds.BREAK_DECLINED)

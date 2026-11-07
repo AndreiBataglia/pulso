@@ -44,8 +44,9 @@ from PySide6.QtWidgets import (
 
 from pulso.clock import Clock
 from pulso.controller import PetController
-from pulso.habits import kinds
-from pulso.habits.focus_cycle import Mode, Phase
+from pulso.habits import kinds, mood_rules
+from pulso.habits.focus_cycle import MEAL_FROM, Mode, Phase
+from pulso.habits.mood_rules import MoodVerdict
 from pulso.storage.autostart import Autostart
 from pulso.storage.config import Settings, habit_config
 from pulso.storage.db import GameStore
@@ -134,6 +135,8 @@ class PetTab(QWidget):
         self.badge = QLabel()
         self.badge.setObjectName("badge")
         self.state_label = _label("state")
+        self.meal_button = QPushButton("Refeição")
+        self.meal_button.setObjectName("pill")
         self.mode_button = QPushButton()
         self.mode_button.setObjectName("pill")
         self.pause = QPushButton()
@@ -216,6 +219,7 @@ class PetTab(QWidget):
             self.drink: "Bebi água: zera o lembrete de água.",
             self.later: "Depois: me lembra de novo em alguns minutos.",
             self.decline: "Hoje não: deixa passar (conta como recusa).",
+            self.meal_button: "Refeição: começo já um descanso longo, sem cobrança.",
             self.take_break: "Pausar agora: adianta o descanso.",
             self.pause_now: "Pausar agora: começa o descanso.",
             self.skip: "Pula a fase atual.",
@@ -239,6 +243,7 @@ class PetTab(QWidget):
         top.setSpacing(8)
         top.addWidget(self.state_label)
         top.addStretch()
+        top.addWidget(self.meal_button)
         top.addWidget(self.mode_button)
         top.addWidget(self.pause)
 
@@ -406,7 +411,7 @@ class MainWindow(QMainWindow):
         self._autostart = autostart  # None = sem a opção "Iniciar com o Windows"
         self._quitting = False  # "Sair" de verdade (o X só esconde, se houver bandeja)
         self._told_tray = False  # já avisou, nesta sessão, que ficou na bandeja?
-        self._was_nervous = False
+        self._last_verdict: MoodVerdict | None = None  # para falar só na virada do humor
         self._layout_key: tuple[str, bool] = ("timer", False)  # painel e água na janela
         self._phase = controller.habits.cycle.phase  # para narrar só as viradas de fase
         self._colors = phase_colors(palette)
@@ -446,6 +451,7 @@ class MainWindow(QMainWindow):
             (tab.drink, "drink"),
             (tab.later, "water_later"),
             (tab.decline, "water_decline"),
+            (tab.meal_button, "start_meal"),
             (tab.take_break, "take_break"),
             (tab.pause_now, "take_break"),
             (tab.skip, "skip"),
@@ -459,13 +465,14 @@ class MainWindow(QMainWindow):
         self._hint_of: str | None = None  # a fala que a dica do botão cobriu
         self._hint: str | None = None
         for button in (
-            tab.care, tab.pause, tab.mode_button, tab.drink, tab.later, tab.decline,
+            tab.care, tab.pause, tab.mode_button, tab.meal_button, tab.drink, tab.later,
+            tab.decline,
             tab.take_break, tab.pause_now, tab.skip, tab.postpone, tab.decline_break,
             tab.end_break, *tab.away_buttons.values(),
         ):  # fmt: skip
             button.installEventFilter(self)  # a dica vira fala do Pulso, não balão do Windows
         self._say(phrases.WELCOME if first_run else phrases.GREETING, force=True)
-        self._show_mood(controller.shown_mood)
+        self._show_verdict(controller.verdict)
         self._controller.habits.water.set_enabled(self._settings.water_enabled)
         self._refresh_habits()
         self._refresh_footer()
@@ -538,8 +545,6 @@ class MainWindow(QMainWindow):
             return
         self.brain_tab.refresh()  # não faz nada se escondida ou congelada
         self._sync_mood()
-        if result.mood_changed and result.mood is not None and not self._was_nervous:
-            self._say(phrases.mood_phrase(result.mood, self._rng))
 
     # ---- hábitos (ciclo do foco e água) ------------------------------------------------------
 
@@ -574,12 +579,12 @@ class MainWindow(QMainWindow):
         tick = self._controller.answer_habit(action)
         if action == "drink":
             self.pet_tab.pet.drink()  # o Pulso bebe junto, com o copo esvaziando
+        spoke = self._sync_mood()  # a virada do humor, com o motivo, vence a resposta curta
         text = self._reply_text(action, tick)
-        if text is not None and not self._controller.habits.nervous:
+        if text is not None and not spoke:
             self._say(text, force=True)
         self._refresh_habits()
         self._refresh_footer()
-        self._sync_mood()
 
     @staticmethod
     def _reply_text(action: str, tick) -> str | None:
@@ -672,6 +677,8 @@ class MainWindow(QMainWindow):
             tab.reminder_hint.setText("Pausa no horário: o Pulso aprende que acertou.")
         elif phase is Phase.BREAK:
             state = "DESCANSO LONGO" if cycle.long_break else "DESCANSANDO"
+            if cycle.meal:
+                state = "REFEIÇÃO"
             color, panel, countdown = c["rest"], "rest", left
             ring = (cycle.progress, c["rest"], False)
             tab.rest_label.setText("Mexer no computador não encerra o descanso.")
@@ -684,6 +691,7 @@ class MainWindow(QMainWindow):
         tab.set_state(state, color)
         tab.show_timer(caption, value, dim=dim, buttons=phase is Phase.FOCUS)
         tab.show_mode(habits.mode)
+        tab.meal_button.setVisible(phase in MEAL_FROM)
         if ring is None:
             tab.pet.clear_ring()
         else:
@@ -708,20 +716,31 @@ class MainWindow(QMainWindow):
         elif old is Phase.MEETING and new is Phase.FOCUS:
             self._say(phrases.MEETING_OFF)
         elif new is Phase.BREAK:
-            text = phrases.LONG_BREAK_STARTED if cycle.long_break else phrases.BREAK_STARTED
+            text = phrases.BREAK_STARTED
+            if cycle.meal:
+                text = phrases.MEAL_STARTED
+            elif cycle.long_break:
+                text = phrases.LONG_BREAK_STARTED
             self._say(text, force=True)
 
-    def _sync_mood(self) -> None:
-        """Põe no rosto o humor que vale agora ("nervoso" vence o da rede) e fala na virada."""
-        habits = self._controller.habits
-        nervous = habits.nervous
-        if not self._controller.paused:
-            self._show_mood(self._controller.shown_mood)
-        if nervous and not self._was_nervous:
-            self._say(phrases.nervous_phrase(habits.nervous_reason), force=True)
-        elif self._was_nervous and not nervous:
-            self._say(phrases.RELAXED, force=True)
-        self._was_nervous = nervous
+    def _sync_mood(self) -> bool:
+        """Põe no rosto o humor das regras e, na virada, fala o motivo no balão. Devolve se falou.
+
+        Enquanto uma pergunta espera resposta (lembrete, "o que foi?", água), só a pendência (que
+        é grave) fala por cima; os outros humores esperam a pergunta ser respondida."""
+        if self._controller.paused:
+            return False
+        verdict = self._controller.verdict
+        self._show_verdict(verdict)
+        previous, self._last_verdict = self._last_verdict, verdict
+        if previous is not None and previous.key == verdict.key:
+            return False
+        asking = self._controller.habits.asking is not None
+        text = phrases.mood_say(verdict, previous)
+        if text is None or (asking and verdict.cause != mood_rules.PENDING):
+            return False
+        self._say(text, force=True)
+        return True
 
     # ---- botões ------------------------------------------------------------------------------
 
@@ -736,24 +755,22 @@ class MainWindow(QMainWindow):
     def toggle_pause(self) -> None:
         if self._controller.paused:
             self._controller.resume()
-            self._show_mood(self._controller.shown_mood)
+            self._show_verdict(self._controller.verdict)
             self._say(phrases.RESUMED, force=True)
         else:
             self._controller.pause()
-            self._show_mood(phrases.SLEEPING)
+            self._show_mood(phrases.SLEEPING, phrases.MEANING_SLEEPING)
             self._say(phrases.PAUSED, force=True)
         self.pet_tab.show_paused(self._controller.paused)
 
-    def _show_mood(self, mood: str | None) -> None:
+    def _show_verdict(self, verdict: MoodVerdict) -> None:
+        """Põe o humor das regras no rosto e escreve embaixo o motivo."""
+        self._show_mood(verdict.mood, phrases.mood_meaning(verdict))
+
+    def _show_mood(self, mood: str, meaning: str) -> None:
         """Põe o humor no rosto e escreve embaixo o que ele significa."""
         self.pet_tab.pet.set_mood(mood)
         self.game_tab.face.set_mood(mood)  # o rosto da aba Jogo acompanha o humor
-        if mood == phrases.SLEEPING:
-            meaning = phrases.MEANING_SLEEPING
-        elif mood == "nervoso":
-            meaning = phrases.nervous_meaning(self._controller.habits.nervous_reason)
-        else:
-            meaning = phrases.MOOD_MEANINGS.get(mood, phrases.MEANING_NEW)
         self.pet_tab.caption.setText(meaning)
         self.pet_tab.pet.setToolTip(f"{meaning}\n{phrases.MEANING_HINT}")
 

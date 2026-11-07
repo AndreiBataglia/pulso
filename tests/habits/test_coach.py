@@ -208,3 +208,12 @@ def test_observacao_pausada_congela_o_ciclo(coach, clock):
     clock.advance(30 * MIN)
     coach.tick(Presence.UNKNOWN, None)  # sem leitura: o foco não anda
     assert coach.cycle.remaining_s == pytest.approx(50 * MIN)
+
+
+def test_refeicao_pelo_botao_nao_grava_ao_comecar_e_a_rede_nao_aprende(coach, clock):
+    coach.tick(P, 0.0)  # a 1ª entrada abre o foco
+    assert coach.answer("start_meal").recorded == ()
+    assert coach.cycle.meal
+    tick = coach.answer("end_break_early")
+    assert tick.recorded == (kinds.BREAK_DONE,) and tick.rewarded == ()
+    assert _rows(coach)[-1][:2] == (kinds.BREAK_DONE, "meal")

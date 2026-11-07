@@ -252,6 +252,24 @@ def test_voltar_de_uma_ausencia_pergunta_o_que_foi(qapp, tmp_path):
     window.quit_app()
 
 
+def test_botao_refeicao_fica_ao_lado_do_modo_e_comeca_o_descanso_longo(qapp, tmp_path):
+    controller, sensor, clock = _build(tmp_path)
+    window = MainWindow(controller, clock, tick_ms=3_600_000, rng=random.Random(1))
+    window.show()
+    _tick(window, clock, 2)
+    tab = window.pet_tab
+    assert tab.meal_button.isVisible() and tab.state_label.text() == "FOCO"
+    tab.meal_button.click()
+    assert tab.state_label.text() == "REFEIÇÃO" and tab.panel == "rest"
+    assert not tab.meal_button.isVisible()
+    assert tab.speech.text() == phrases.MEAL_STARTED
+    tab.end_break.click()
+    assert tab.panel == "timer" and controller.habits.breaks_today() == 1
+    window.set_mode(Mode.CASUAL)
+    assert not tab.meal_button.isVisible()
+    window.quit_app()
+
+
 def test_reuniao_pausa_o_foco_e_o_pet_avisa(qapp, tmp_path):
     meeting = FakeMeetingSensor([False])
     controller, _, clock = _build(tmp_path, meeting)
@@ -278,3 +296,24 @@ def test_modo_casual_troca_o_cartao_pela_agua_e_volta(env):
     window.toggle_mode()
     assert tab.speech.text() == phrases.PROFESSIONAL_ON
     assert controller.habits.mode is Mode.PROFESSIONAL
+
+
+def test_prorrogar_de_novo_deixa_preocupado_e_o_balao_diz_o_motivo(env):
+    window, controller, clock, _ = env
+    _reach_reminder(window, clock)
+    window.pet_tab.postpone.click()
+    assert window.pet_tab.pet.target == "preocupado"
+    assert "1 vez" in window.pet_tab.caption.text()
+    _tick(window, clock, 5 * MIN)  # o lembrete volta
+    window.pet_tab.postpone.click()
+    assert "2 vezes" in window.pet_tab.speech.text()
+    assert "2 vezes" in window.pet_tab.caption.text()
+
+
+def test_muito_tempo_sem_mexer_deixa_sonolento_com_o_motivo(env):
+    window, controller, clock, _ = env
+    controller._loop._sensor._script = [dataclasses.replace(FRAME, idle_seconds=8 * MIN)]
+    _casual(window, controller)
+    window.tick()
+    assert window.pet_tab.pet.target == "sonolento"
+    assert "8 min" in window.pet_tab.caption.text()

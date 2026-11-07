@@ -1,6 +1,7 @@
 """As falas do Pulso: primeira pessoa, curtas e carinhosas, sem culpa (Design Brief §8)."""
 
-import random
+from pulso.habits import mood_rules
+from pulso.habits.mood_rules import MoodVerdict
 
 SLEEPING = "dormindo"  # estado de pausa; não é um humor da rede
 
@@ -13,28 +14,8 @@ PAUSED = "Tô de olhos fechados. Me acorda quando quiser."
 RESUMED = "Voltei! Que bom te ver."
 PETTED = "Hmm, que bom! Vou lembrar disso."
 
-# O que cada rosto quer dizer, para o dono nunca ter que adivinhar (aparece sob o rosto).
-MOOD_MEANINGS = {
-    "animado": "Animado: estou com energia, parece um bom momento.",
-    "contente": "Contente: está tudo tranquilo, gostei do seu ritmo.",
-    "entediado": "Entediado: está quieto por aqui, sem novidade.",
-    "sonolento": "Sonolento: o computador está parado, me deu sono.",
-    "preocupado": "Preocupado: a rede está inquieta, mas ainda não sei dizer por quê.",
-}
-MEANING_NEW = "Acordando: ainda estou te conhecendo."
 MEANING_SLEEPING = "Dormindo: a observação está pausada, não estou lendo nada."
-MEANING_HINT = "O humor vem da rede de pulsos, que aprende com o seu carinho e as suas respostas."
-
-MOOD_PHRASES: dict[str, tuple[str, ...]] = {
-    "animado": ("Bora! Tô cheio de energia!", "Que dia bom pra fazer coisas!"),
-    "contente": ("Tô bem, e você?", "Tudo tranquilo por aqui."),
-    "entediado": ("Hmm... tá quietinho por aqui.", "Será que acontece algo logo?"),
-    "sonolento": ("Que soninho...", "Ai, ai... bocejando aqui."),
-    "preocupado": (
-        "Tô meio inquieto, sem saber por quê...",
-        "Algo me deixou com a pulga atrás da orelha.",
-    ),
-}
+MEANING_HINT = "O humor segue regras claras: o que você fez, ou deixou de fazer, nos seus cuidados."
 
 
 # Hábitos (F07/F08): tom de quem cuida, sem culpa nem bronca (Design Brief §8).
@@ -53,6 +34,7 @@ RELAXED = "Ufa, agora estou mais tranquilo. Obrigado!"
 MEETING_ON = "Microfone em uso: pausei o foco. Quando a reunião acabar, eu continuo de onde parou."
 MEETING_OFF = "A reunião acabou. Voltei a contar o foco."
 BREAK_STARTED = "Levanta, estica, olha longe. Se passar do tempo, eu te conto quanto."
+MEAL_STARTED = "Bom apetite! É descanso longo, sem cobrança. Eu espero você voltar."
 LONG_BREAK_STARTED = "Descanso longo! Vale água, alongar e sair um pouco da frente da tela."
 AWAY_NOTICED = "Você ficou parado. Parei de contar o foco no seu último gesto."
 CASUAL_ON = "Modo casual: não conto foco nem te chamo para pausa. Só lembro da água."
@@ -81,20 +63,36 @@ def remind_break(focus_min: int, break_min: int) -> str:
     return f"{focus_min} min de foco. Bora pausar {break_min}?"
 
 
-def nervous_meaning(reason: str | None) -> str:
-    """O que o rosto nervoso quer dizer, dizendo o motivo (aparece sob o rosto)."""
-    what = reason or "hábito"
-    return f"Nervoso: ficaram lembretes de {what} sem resposta. Me conta quando fizer."
+def _times(n: int) -> str:
+    return "1 vez" if n == 1 else f"{n} vezes"
 
 
-def nervous_phrase(reason: str | None) -> str:
-    return f"Tô inquieto... ficou {reason or 'um cuidado'} pendente. Quando fizer, me avisa?"
+def mood_meaning(v: MoodVerdict) -> str:
+    """O que o rosto quer dizer, sempre com o motivo (aparece sob o rosto)."""
+    if v.cause == mood_rules.PENDING:
+        return f"Nervoso: ficaram lembretes de {v.detail} sem resposta. Me conta quando fizer."
+    if v.cause == mood_rules.POSTPONED:
+        return f"Preocupado: você prorrogou a pausa {_times(int(v.detail))} seguidas."
+    if v.cause == mood_rules.SLEEPY:
+        return f"Sonolento: faz {max(int(v.detail), 1)} min sem mexer no computador."
+    if v.cause == mood_rules.ON_TIME_BREAK:
+        return f"Contente: você descansou no horário hoje ({v.detail})."
+    if v.cause == mood_rules.WATER_DONE:
+        return f"Contente: você já bebeu água hoje ({v.detail})."
+    return "Tranquilo: nada pendente por aqui."
 
 
-def mood_phrase(mood: str, rng: random.Random | None = None) -> str:
-    """Uma frase do humor (sorteada, para o Pulso não repetir sempre a mesma)."""
-    options = MOOD_PHRASES[mood]
-    return (rng or random).choice(options)
+def mood_say(v: MoodVerdict, previous: MoodVerdict | None = None) -> str | None:
+    """A fala do balão quando o humor vira (`None` = não precisa falar: a legenda já explica)."""
+    if v.cause == mood_rules.PENDING:
+        return f"Tô inquieto... ficou {v.detail} pendente. Quando fizer, me avisa?"
+    if v.cause == mood_rules.POSTPONED and int(v.detail) >= 2:  # a 1ª prorrogação é normal
+        return f"Você adiou a pausa {_times(int(v.detail))}... estou preocupado com você."
+    if v.cause == mood_rules.SLEEPY:
+        return "Que soninho... você está quietinho há um tempo."
+    if previous is not None and previous.cause == mood_rules.PENDING:
+        return RELAXED
+    return None
 
 
 # ---- jogos ----------------------------------------------------------------------------------
