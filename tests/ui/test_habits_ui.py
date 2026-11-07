@@ -317,3 +317,27 @@ def test_muito_tempo_sem_mexer_deixa_sonolento_com_o_motivo(env):
     window.tick()
     assert window.pet_tab.pet.target == "sonolento"
     assert "8 min" in window.pet_tab.caption.text()
+
+
+def test_agua_sem_resposta_avisa_que_ficou_pendente_e_insiste_em_10_min(env):
+    window, controller, clock, _ = env
+    _casual(window, controller)
+    _tick(window, clock, 60 * MIN)
+    assert window.pet_tab.speech.text() == phrases.ASK_WATER
+    _tick(window, clock, 5 * MIN)  # ninguém respondeu
+    assert window.pet_tab.speech.text() == phrases.WATER_IGNORED
+    assert controller.habits.pending("water") == 1
+    _tick(window, clock, 10 * MIN)
+    assert window.pet_tab.speech.text() == phrases.ASK_WATER
+
+
+def test_rodape_mostra_a_agua_em_ml_e_litros(env):
+    window, controller, clock, _ = env
+    window.tick()
+    assert "0 ml" in window.pet_tab.footer_right.text()
+    for _ in range(3):
+        window.pet_tab.drink.click()
+        clock.advance(10)
+    assert "750 ml" in window.pet_tab.footer_right.text()
+    window.pet_tab.drink.click()
+    assert "1 L" in window.pet_tab.footer_right.text()

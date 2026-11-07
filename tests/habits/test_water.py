@@ -94,8 +94,10 @@ def test_sem_resposta_por_5_min_vira_ignorei(water, clock):
     clock.advance(1 * MIN)
     assert water.tick(Presence.PRESENT) == [kinds.WATER_IGNORED]
     assert not water.asking
-    clock.advance(59 * MIN)
-    assert water.tick(Presence.PRESENT) == []  # rearmou um intervalo inteiro
+    clock.advance(9 * MIN)
+    assert water.tick(Presence.PRESENT) == []
+    clock.advance(1 * MIN)
+    assert water.tick(Presence.PRESENT) == [kinds.SHOW_WATER]  # insiste em 10 min, não em 1 h
 
 
 @pytest.mark.parametrize("presence", [Presence.AWAY, Presence.UNKNOWN])

@@ -217,3 +217,18 @@ def test_refeicao_pelo_botao_nao_grava_ao_comecar_e_a_rede_nao_aprende(coach, cl
     tick = coach.answer("end_break_early")
     assert tick.recorded == (kinds.BREAK_DONE,) and tick.rewarded == ()
     assert _rows(coach)[-1][:2] == (kinds.BREAK_DONE, "meal")
+
+
+def test_bebi_grava_o_tamanho_do_recipiente_e_soma_os_ml_do_dia(clock):
+    coach = HabitCoach(clock, HabitStore(open_db(":memory:")), HabitConfig(water_ml=500))
+    coach.answer("drink")
+    coach.answer("drink")
+    assert coach.water_ml_today() == 1000 and coach.cups_today() == 2
+    coach.apply_config(HabitConfig(water_ml=250))  # trocou de garrafa para copo nos Ajustes
+    coach.answer("drink")
+    assert coach.water_ml_today() == 1250
+
+
+def test_bebi_antigo_sem_ml_vale_250(coach):
+    coach.store.record(kinds.WATER_DRUNK)  # gravado por uma versão sem ml
+    assert coach.water_ml_today() == 250

@@ -26,6 +26,7 @@ _LABELS = {
     "break_min": "Descanso curto",
     "long_break_min": "Descanso longo (a cada 4 focos)",
     "water_interval_min": "Lembrar de beber água a cada",
+    "water_ml": 'Água de cada "Bebi" (seu copo ou garrafa)',
     "away_min": "Parado por mais de (conta como ausente)",
 }
 _MODES = {Mode.PROFESSIONAL: "Profissional", Mode.CASUAL: "Casual (só a água)"}
@@ -46,7 +47,9 @@ class SettingsDialog(QDialog):
         for name, label in _LABELS.items():
             spin = QSpinBox()
             spin.setRange(*RANGES[name])
-            spin.setSuffix(" min")
+            spin.setSuffix(" ml" if name == "water_ml" else " min")
+            if name == "water_ml":
+                spin.setSingleStep(50)
             spin.setValue(getattr(current, name))
             self.spins[name] = spin
             form.addRow(label, spin)

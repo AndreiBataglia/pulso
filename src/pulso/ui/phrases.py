@@ -20,6 +20,7 @@ MEANING_HINT = "O humor segue regras claras: o que você fez, ou deixou de fazer
 
 # Hábitos (F07/F08): tom de quem cuida, sem culpa nem bronca (Design Brief §8).
 ASK_WATER = "Psiu! Um gole d'água? 💧"
+WATER_IGNORED = "Sem resposta... deixei a água como pendente e lembro de novo daqui a pouco."
 ASK_BREAK = "Já faz um bom tempo de foco. Que tal descansar um pouquinho? ☕"
 BACK_TO_WORK = "O descanso acabou! Vamos voltar com calma?"
 DRANK = "Que bom! Obrigado por se cuidar. 💧"
