@@ -156,6 +156,16 @@ class HabitStore:
         ).fetchone()
         return int(row[0])
 
+    def water_ml_today(self, default_ml: int) -> int:
+        """Soma de ml bebidos hoje; `Bebi` sem ml gravado (versões antigas) vale `default_ml`."""
+        start = self._now().replace(hour=0, minute=0, second=0, microsecond=0)
+        row = self._conn.execute(
+            "SELECT COALESCE(SUM(COALESCE(value, ?)), 0) FROM habit_event "
+            "WHERE kind = ? AND ts >= ?",
+            (default_ml, kinds.WATER_DRUNK, start.isoformat(timespec="seconds")),
+        ).fetchone()
+        return int(row[0])
+
     def on_time_breaks_today(self) -> int:
         """Pausas feitas hoje **sem prorrogar** o lembrete (refeição não conta: não é pausa)."""
         start = self._now().replace(hour=0, minute=0, second=0, microsecond=0)

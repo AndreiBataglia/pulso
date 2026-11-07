@@ -19,6 +19,8 @@ from pulso.habits.kinds import HabitConfig, Presence
 from pulso.habits.water import Water
 from pulso.storage.db import HabitStore
 
+DEFAULT_CUP_ML = 250  # o que um "Bebi" antigo (sem ml gravado) vale
+
 # Avisos para a interface: não são gravados.
 _SIGNALS = {kinds.SHOW_WATER, kinds.SHOW_BREAK, kinds.SHOW_BACK, kinds.SHOW_ASK_BACK}
 
@@ -91,8 +93,9 @@ class HabitCoach:
             events = list(result or [])
         return self._handle(events)
 
-    def drink(self) -> str:
-        return self.water.drink()
+    def drink(self) -> list[CycleEvent]:
+        """Bebi: grava o tamanho do recipiente (ml) em `value`."""
+        return [CycleEvent(self.water.drink(), value=self.cfg.water_ml)]
 
     def water_later(self) -> str | None:
         return self.water.later()
@@ -173,6 +176,10 @@ class HabitCoach:
 
     def cups_today(self) -> int:
         return self.store.count_today(kinds.WATER_DRUNK)
+
+    def water_ml_today(self) -> int:
+        """Água de hoje em ml. Copo gravado antes desta versão (sem ml) vale o padrão de 250 ml."""
+        return self.store.water_ml_today(DEFAULT_CUP_ML)
 
     def pomodoros_today(self) -> int:
         """Focos concluídos hoje."""

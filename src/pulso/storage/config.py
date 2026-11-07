@@ -29,6 +29,7 @@ class Settings:
     break_min: int = 10
     long_break_min: int = 20
     water_interval_min: int = 60
+    water_ml: int = 250  # quanto cada "Bebi" soma (copo, garrafa...), em ml
     away_min: int = 5  # parado por mais que isto = ausente: o foco para no último gesto
     mode: str = "profissional"  # "profissional" (conta foco e chama para a pausa) ou "casual"
 
@@ -42,6 +43,7 @@ _SECTIONS = {
     "break_min": "habits",
     "long_break_min": "habits",
     "water_interval_min": "habits",
+    "water_ml": "habits",
     "away_min": "habits",
     "mode": "habits",
 }
@@ -51,6 +53,7 @@ RANGES = {
     "break_min": (1, 60),
     "long_break_min": (1, 120),
     "water_interval_min": (10, 240),
+    "water_ml": (50, 2000),
     "away_min": (1, 30),
 }
 # Campos de texto: só estes valores valem.
@@ -75,6 +78,7 @@ def habit_config(settings: Settings) -> HabitConfig:
         break_min=settings.break_min,
         long_break_min=settings.long_break_min,
         water_interval_min=settings.water_interval_min,
+        water_ml=settings.water_ml,
         away_idle_s=settings.away_min * 60.0,
     )
 

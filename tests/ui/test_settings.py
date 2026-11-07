@@ -163,3 +163,12 @@ def test_dialogo_devolve_modo_e_ausencia(qapp):
     result = dialog.settings()
     assert result.mode == "casual" and result.away_min == 12
     dialog.close()
+
+
+def test_tamanho_do_recipiente_e_guardado_validado_e_chega_aos_habitos(tmp_path):
+    path = tmp_path / "config.toml"
+    save_settings(path, Settings(water_ml=500))
+    assert load_settings(path).water_ml == 500
+    assert habit_config(Settings(water_ml=500)).water_ml == 500
+    path.write_text("[habits]\nwater_ml = 99999\n", encoding="utf-8")
+    assert load_settings(path).water_ml == 250  # fora do intervalo: volta ao padrão

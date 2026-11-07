@@ -1,9 +1,10 @@
-"""Lembrete de água (F08): a cada `interval` o Pulso pede um copo; o dono responde.
+"""Lembrete de água (F08): a cada `interval` o Pulso pede água; o dono responde.
 
-Respostas: **bebi** (zera a pendência, soma um copo), **depois** (adia `snooze`), **não quero**
-(recusei) e o silêncio (**ignorei**). O botão "Bebi" também vale sem lembrete na tela: o Pulso não
-vê o copo, então o dono precisa poder se explicar a qualquer hora. O lembrete é uma **regra**, não
-rede neural: é previsível e testável com relógio falso.
+Respostas: **bebi** (zera a pendência e soma os ml do recipiente do dono), **depois** (adia
+`snooze`), **não quero** (recusei) e o silêncio (**ignorei**: soma pendência e o lembrete volta em
+`snooze`, não em 1 h). O botão "Bebi" também vale sem lembrete na tela: o Pulso não vê o copo,
+então o dono precisa poder se explicar a qualquer hora. O lembrete é uma **regra**, não rede
+neural: é previsível e testável com relógio falso.
 """
 
 from pulso.clock import Clock
@@ -49,7 +50,7 @@ class Water:
         if outcome == "shown":
             return [kinds.SHOW_WATER]
         if outcome == "ignored":
-            self._rearm(self._cfg.water_interval_min)
+            self._rearm(self._cfg.water_snooze_min)  # sem resposta: insiste mais cedo (10 min)
             return [kinds.WATER_IGNORED]
         return []
 

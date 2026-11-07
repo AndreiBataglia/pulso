@@ -59,6 +59,7 @@ class HabitConfig:
     break_snooze_min: float = 5.0
     water_interval_min: float = 60.0
     water_snooze_min: float = 10.0
+    water_ml: int = 250  # quanto cada "Bebi" soma (o copo ou a garrafa do dono)
     ignore_after_min: float = 5.0
     away_idle_s: float = 300.0  # ocioso há tanto tempo = "longe do PC"
     refuse_points: int = 2

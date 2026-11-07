@@ -98,6 +98,13 @@ def _mmss(seconds: float) -> str:
     return f"{total // 60:02d}:{total % 60:02d}"
 
 
+def _volume(ml: int) -> str:
+    """750 ml, 1,5 L, 1,25 L."""
+    if ml < 1000:
+        return f"{ml} ml"
+    return f"{ml / 1000:.2f}".rstrip("0").rstrip(".").replace(".", ",") + " L"
+
+
 def _plural(n: int, one: str, many: str) -> str:
     return f"{n} {one if n == 1 else many}"
 
@@ -570,6 +577,8 @@ class MainWindow(QMainWindow):
             self._say(text, force=True)
             if self._tray is not None:
                 self._tray.notify(text)
+        if kinds.WATER_IGNORED in tick.recorded:
+            self._say(phrases.WATER_IGNORED, force=True)
         if tick.recorded:  # uma omissão pode ter deixado o Pulso nervoso
             self._sync_mood()
             self._refresh_footer()
@@ -628,7 +637,7 @@ class MainWindow(QMainWindow):
         if postponed:
             left += f" · prorrogou {postponed}×"
         self.pet_tab.footer_left.setText(left)
-        cups = _plural(habits.cups_today(), "copo", "copos")
+        cups = _volume(habits.water_ml_today())
         focus = _plural(habits.pomodoros_today(), "foco", "focos")
         self.pet_tab.footer_right.setText(f"{cups} · {focus} hoje")
 
