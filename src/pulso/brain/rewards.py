@@ -5,9 +5,9 @@ Duas fontes, que somam:
 - **Dono:** 💚 Carinho (+1) e 💢 Bronca (−1), multiplicados por `owner_weight`.
 - **Regras automáticas** (o comportamento mínimo desde o primeiro dia, multiplicadas por
   `rules_weight`, menor que o do dono: o dono sempre pesa mais):
-  - ócio longo e o pet está **sonolento** → +;
-  - o dono **volta** do ócio e o pet está **animado** → +;
-  - mais de 90 min **sem pausa** e o pet está **preocupado** → +;
+  - ócio longo e o Pulso está **sonolento** → +;
+  - o dono **volta** do ócio e o Pulso está **animado** → +;
+  - mais de 90 min **sem pausa** e o Pulso está **preocupado** → +;
   - **hábitos:** beber água / fazer a pausa → +; recusar → −; ignorar o lembrete → − (menor).
     Estes vêm do próprio dono, então pesam como ele (`habit_weight`) e valem sempre.
 
@@ -28,7 +28,7 @@ from pulso.clock import Clock
 from pulso.habits import kinds
 from pulso.sensors.base import SensorFrame
 
-# Hábitos (F07/F08): atendido +, dispensado −. "Depois" e os avisos valem 0. Quem ignora o pet
+# Hábitos (F07/F08): atendido +, dispensado −. "Depois" e os avisos valem 0. Quem ignora o Pulso
 # desagrada menos do que quem o recusa de cara, por isso −0,5 contra −1.
 HABIT_VALUES = {
     kinds.WATER_DRUNK: 1.0,

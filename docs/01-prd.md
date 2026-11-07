@@ -8,10 +8,10 @@
 **de forma discreta** como o computador está sendo usado (carga da máquina, tipo de programa em uso, tempo
 ocioso) e reage com estados de humor. O "cérebro" dele é uma **rede neural de pulso** (SNN — *spiking neural
 network*, rede em que os neurônios se comunicam por pulsos elétricos curtos, como os do cérebro) que aprende
-por **reforço**: carinho e bronca do usuário e as respostas aos hábitos (bebi, fiz a pausa, hoje não) funcionam
+por **reforço**: o carinho do usuário e as respostas aos hábitos (bebi, fiz a pausa, hoje não) funcionam
 como "dopamina". As regras automáticas por processo/ócio (palpites sobre o humor) ficam **desligadas por padrão**
 (decidido em 2026-11-06) e podem ser ligadas em Ajustes.
-Ele também cuida de hábitos saudáveis: **pomodoro** (blocos de foco com descanso) e **lembrete de beber água**.
+Ele também cuida de hábitos saudáveis: **foco por presença** (blocos de foco com descanso, sem botão Iniciar) e **lembrete de beber água**.
 É um projeto **público no GitHub** (licença MIT), construído em etapas documentadas para servir de material de
 aprendizado.
 
@@ -25,14 +25,14 @@ aprendizado.
 ## 3. Público e usuários
 | Perfil | Quem é | O que precisa fazer no app |
 |--------|--------|----------------------------|
-| Dono | O usuário, no PC Windows pessoal ou do trabalho | Ver o pet, dar carinho/bronca, pausar a observação, usar pomodoro e lembrete de água, ver o cérebro funcionando |
+| Dono | O usuário, no PC Windows pessoal ou do trabalho | Ver o Pulso, dar carinho, pausar a observação, usar o foco e o lembrete de água, ver o cérebro funcionando |
 | Visitante do GitHub | Quem encontra o repositório | Entender o projeto pelo README e pelo diário das etapas, instalar e rodar |
 
 Uso: um usuário por instalação, roda em segundo plano o dia todo, **100% local** (sem internet, sem servidor).
 
 ## 4. Objetivos e métricas de sucesso
 - Rodar o dia todo usando **menos de 3% de CPU** e **menos de 200 MB de RAM** em média.
-- Depois de ~1 semana de uso, o humor do pet **acompanha o contexto** na maior parte do tempo: sonolento no
+- Depois de ~1 semana de uso, o humor do Pulso **acompanha o contexto** na maior parte do tempo: sonolento no
   ócio longo, animado na volta, preocupado após muito tempo sem pausa. Medido pela fração de recompensas
   positivas no painel de cérebro.
 - O usuário consegue explicar, com o diário das etapas, como um neurônio LIF e o STDP com dopamina funcionam.
@@ -58,7 +58,7 @@ Uso: um usuário por instalação, roda em segundo plano o dia todo, **100% loca
 - **Descrição:** o dono decide que o momento é sensível e manda o Pulso parar de observar, por um botão no
   painel, pelo ícone da bandeja ou por um atalho global de teclado.
 - **Critérios de aceite:**
-  - [ ] Pausado, **os sensores param de verdade** (não leem nada) e o pet mostra o estado "olhos fechados".
+  - [ ] Pausado, **os sensores param de verdade** (não leem nada) e o Pulso mostra o estado "olhos fechados".
   - [ ] Pausado, nada novo é aprendido nem registrado.
   - [ ] Retomar é manual, pelo mesmo controle. *Suposição:* opção de retomar sozinho após N minutos,
         desligada por padrão.
@@ -82,7 +82,7 @@ Uso: um usuário por instalação, roda em segundo plano o dia todo, **100% loca
   que participaram de um disparo (*rastro de elegibilidade*), e a dopamina que chega logo depois decide se elas
   fortalecem (recompensa positiva) ou enfraquecem (negativa).
 - **Fontes de recompensa (as duas juntas):**
-  - **Do dono:** botões 💚 Carinho (+1) e 💢 Bronca (−1).
+  - **Do dono:** botão 💚 Carinho (+1) e as respostas aos lembretes (a Bronca saiu na etapa 7).
   - **Regras automáticas** (comportamento mínimo desde o início), por exemplo: sonolento durante ócio longo
     (+), animado ao voltar do ócio (+), preocupado após mais de 90 min sem pausa (+), lembrete atendido (+),
     lembrete dispensado (−).
@@ -93,13 +93,13 @@ Uso: um usuário por instalação, roda em segundo plano o dia todo, **100% loca
   - [ ] Os pesos aprendidos ficam salvos e sobrevivem ao fechar e reabrir o programa.
 - **Prioridade:** Alta
 
-#### F05 — Pet no painel
-- **Descrição:** a janela principal mostra o pet desenhado, com 5 humores — **animado, contente, entediado,
+#### F05 — O Pulso no painel
+- **Descrição:** a janela principal mostra o Pulso desenhado, com 5 humores — **animado, contente, entediado,
   sonolento, preocupado** — mais "dormindo" (pausa de privacidade). Cada humor tem uma expressão e uma frase
   curta.
 - **Critérios de aceite:**
   - [ ] A troca de humor é animada (transição curta), sem piscar a cada segundo.
-  - [ ] Os botões Carinho e Bronca dão um retorno visual imediato.
+  - [ ] O botão Carinho dá um retorno visual imediato.
 - **Prioridade:** Alta
 
 #### F06 — Painel do cérebro (aprender vendo)
@@ -110,28 +110,28 @@ Uso: um usuário por instalação, roda em segundo plano o dia todo, **100% loca
   - [x] (2026-11-06) Com a aba fechada ou a janela minimizada, os gráficos não consomem CPU (testado: nem a fotografia é pedida).
 - **Prioridade:** Média
 
-#### F07 — Pomodoro (sugestão de descanso)
-- **Descrição:** ciclos de foco e descanso (padrão 50/10, com descanso longo de 20 min a cada 4 ciclos; decidido em 2026-11-06). O pet
+#### F07 — Foco e descanso (ciclo por presença)
+- **Descrição:** ciclos de foco e descanso (padrão 50/10, com descanso longo de 20 min a cada 4 ciclos; decidido em 2026-11-06). O Pulso
   avisa a hora de descansar e a de voltar.
 - **Critérios de aceite:**
-  - [ ] Iniciar, pausar e pular pelo painel e pela bandeja.
-  - [ ] O aviso aparece como notificação do Windows e na fala do pet.
-  - [ ] O pomodoro é **independente** da pausa de privacidade: descansar não desliga a observação.
+  - [ ] O foco abre sozinho quando o dono mexe no PC; Pausar agora e Pular fase pelo painel e pela bandeja.
+  - [ ] O aviso aparece como notificação do Windows e na fala do Pulso.
+  - [ ] O foco congela com a observação pausada (sem leitura não há presença); descansar não desliga a observação.
 - **Prioridade:** Alta
 
 #### F08 — Lembrete de água
-- **Descrição:** a cada X minutos (padrão 60) o pet pede água. O dono responde "Bebi 💧", "Depois" ou "Hoje não" (e "Bebi" / "Fiz a pausa" ficam sempre visíveis na aba Pet).
+- **Descrição:** a cada X minutos (padrão 60) o Pulso pede água. O dono responde "Bebi 💧", "Depois" ou "Hoje não" (e "Bebi" fica sempre visível na aba Pulso).
 - **Critérios de aceite:**
   - [ ] "Bebi" soma um copo no dia; "Depois" adia 10 min.
   - [ ] **Decidido pelo dono (2026-11-06) — pendência cumulativa:** o Pulso registra se o dono **fez**, **adiou**,
         **recusou** ou **ignorou** o lembrete. Recusar e ignorar **acumulam**; só "fiz" (Bebi / Fiz a pausa) zera. Quanto
-        maior a pendência, mais **nervoso** o pet fica, e **ele não muda desse humor até o dono admitir** que fez a pausa
+        maior a pendência, mais **nervoso** o Pulso fica, e **ele não muda desse humor até o dono admitir** que fez a pausa
         ou bebeu água. Os intervalos de água/descanso são revistos com o uso real (ver etapa 6 do plano).
   - [ ] Durante o ócio (dono longe do PC), o lembrete espera a volta.
 - **Prioridade:** Alta
 
 #### F09 — Resumo de saúde
-- **Descrição:** aba com copos de água, pomodoros concluídos e maior sequência sem pausa, do dia e dos últimos
+- **Descrição:** aba com copos de água, focos concluídos e maior sequência sem pausa, do dia e dos últimos
   7 dias.
 - **Critérios de aceite:**
   - [ ] Os dados vêm só dos eventos de hábito (F07/F08), nunca dos sensores.
@@ -139,7 +139,7 @@ Uso: um usuário por instalação, roda em segundo plano o dia todo, **100% loca
 - **Prioridade:** Média
 
 #### F10 — Configurações e bandeja
-- **Descrição:** ícone na bandeja do Windows (abrir, pausar observação, pomodoro, sair) e tela de ajustes:
+- **Descrição:** ícone na bandeja do Windows (abrir, pausar observação, modo casual, foco, sair) e tela de ajustes:
   intervalos, tabela de categorias, atalho de pausa, pesos das recompensas, iniciar com o Windows.
 - **Critérios de aceite:**
   - [ ] Fechar a janela minimiza para a bandeja; "Sair" encerra e salva o cérebro.
@@ -157,15 +157,15 @@ Uso: um usuário por instalação, roda em segundo plano o dia todo, **100% loca
 - **Prioridade:** Alta
 
 ### 5.2 Depois do MVP
-- F15 (feito, 2026-11-06) — **Jogo do dia a dia:** jokenpô e par ou ímpar com o pet (aba Jogo). Ganhou, ele fica contente;
+- F15 (feito, 2026-11-06) — **Jogo do dia a dia:** jokenpô e par ou ímpar com o Pulso (aba Jogo). Ganhou, ele fica contente;
   perdeu, fica bravo. Só mexe no rosto e no placar do dia, nunca na rede (o resultado é sorte e viraria ruído).
-- F16 (feito, 2026-11-06) — **Ajustes:** tempos do pomodoro e da água e o interruptor das regras automáticas.
+- F16 (feito, 2026-11-06) — **Ajustes:** tempos do foco e da água, modo e tolerância de ausência e o interruptor das regras automáticas.
 - F12 — A SNN aprende **quando e como** lembrar (adiar se o dono está focado), em vez de intervalos fixos.
 - F13 — Nível C de observação: ritmo de digitação e cliques (contagem, nunca as teclas).
 - F14 — Outros lembretes de hábito: descanso dos olhos 20-20-20, postura, alongamento.
 - F15 — Motor alternativo com treino offline (snnTorch/Norse, por gradiente), com modo de treino separado.
 - F16 — Motor Brian2 pela mesma interface `Engine`, para comparar.
-- F17 — Pet em pixel art com animações; janela flutuante opcional.
+- F17 — Pulso em pixel art com animações; janela flutuante opcional.
 - F18 — Suporte a Linux/macOS (só a camada de sensores muda).
 - F19 — Fala gerada por IA local (opcional, sem depender do hub).
 
@@ -183,16 +183,16 @@ Uso: um usuário por instalação, roda em segundo plano o dia todo, **100% loca
 - **Didática:** código de alto nível e muito comentado, explicando o "porquê" de cada parte da rede.
 
 ## 7. Suposições
-- Nome público **"Pulso"**: o dono pediu um nome próprio para o pet; trocar é um grep no repositório.
+- Nome público **"Pulso"**: o dono pediu um nome próprio para o Pulso; trocar é um grep no repositório.
 - Escala de ~200 neurônios no MVP (faixa planejada: 100–500).
 - Windows 10/11 primeiro; outros sistemas depois (F18).
 - 5 humores, mais "dormindo".
-- Intervalos padrão (decididos em 2026-11-06): pomodoro 50/10/20, água a cada 60 min.
+- Intervalos padrão (decididos em 2026-11-06): foco 50/10/20, água a cada 60 min.
 
 ## 8. Perguntas em aberto
 - O nome "Pulso" está bom? — responsável: dono
 - Retomar a observação sozinho após N minutos deve existir (desligado por padrão) ou nunca? — responsável: dono
-- A frase do pet em cada humor: fixa (lista de frases) no MVP, IA local só no F19. Confirmar. — responsável: dono
+- A frase do Pulso em cada humor: fixa (lista de frases) no MVP, IA local só no F19. Confirmar. — responsável: dono
 
 ## Histórico de revisões
 | Data | Mudança |

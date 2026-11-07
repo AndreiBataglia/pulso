@@ -10,8 +10,8 @@ Não há servidor nem login: tudo fica em **3 arquivos locais** na pasta de dado
 | Arquivo | O que guarda | Formato | Usado por |
 |---------|--------------|---------|-----------|
 | `config.toml` | Preferências do dono | TOML | F01, F02, F04, F07, F08, F10 |
-| `cerebro.npz` | O que o pet **aprendeu** (pesos e estado da rede) | numpy `.npz` | F03, F04 |
-| `pulso.db` | Eventos de **hábito** (água, pomodoro) | SQLite | F07, F08, F09 |
+| `cerebro.npz` | O que o Pulso **aprendeu** (pesos e estado da rede) | numpy `.npz` | F03, F04 |
+| `pulso.db` | Eventos de **hábito** (água, foco e pausas) | SQLite | F07, F08, F09 |
 | `logs/pulso.log` | Eventos técnicos, sem dados de sensor | texto rotativo | todos |
 
 **O que nunca é gravado:** leituras de sensor (CPU, RAM, processo, categoria, ociosidade), linha do tempo de
@@ -69,7 +69,7 @@ erDiagram
 - **Índice:** `ts` (consultas de "hoje" e "últimos 7 dias").
 - **Feito na etapa 6 (decisão do dono, 2026-11-06):** **fiz / adiei / recusei / ignorei** para água e pausa. "Fiz" =
   `water_drunk` e `pomodoro_break_done`; `pomodoro_skipped` é o dono pulando a fase pelo painel (não é recusa).
-  A **pendência cumulativa** que deixa o pet nervoso não é guardada: é calculada destes eventos (recusas e omissões
+  A **pendência cumulativa** que deixa o Pulso nervoso não é guardada: é calculada destes eventos (recusas e omissões
   depois do último "fiz" **do mesmo hábito**; água e pausa são separadas). `break_streak_end` só é gravado na etapa 7.
 - `CHECK (kind IN (...))` garante os valores permitidos.
 
@@ -87,7 +87,7 @@ Pausa e refeição de "o que foi?" são gravadas como `pomodoro_break_done` (com
 pausa. O tipo `break_extended` do plano não foi criado: o excesso mora em `excess_s`.
 
 ### game_result (migração v2)
-**Para quê:** o placar dos jogos (jokenpô e par ou ímpar), do ponto de vista do pet.
+**Para quê:** o placar dos jogos (jokenpô e par ou ímpar), do ponto de vista do Pulso.
 
 | Coluna | Tipo | Observação |
 |---|---|---|
@@ -108,7 +108,7 @@ Só o resultado: nada de sensor. O placar do dia é um `GROUP BY result` desde a
 > abaixo é o desenho completo previsto.
 
 ```toml
-[pomodoro]
+[pomodoro]  # nome da seção mantido por compatibilidade: são os tempos do foco
 focus_min = 50              # decidido em 2026-11-06 (antes 25/5/15); revisar com o uso real
 break_min = 10
 long_break_min = 20
@@ -124,7 +124,7 @@ ignore_after_min = 5        # sem resposta depois disto, o lembrete vira "ignore
 [habits]
 refuse_points = 2           # pendência: recusei=2, ignorei=1, depois=0; só "fiz" zera
 ignore_points = 1
-nervous_at = 3              # com esta pendência (ou mais) o pet fica nervoso
+nervous_at = 3              # com esta pendência (ou mais) o Pulso fica nervoso
 
 [privacy]
 pause_hotkey = "Ctrl+Alt+P"
@@ -144,7 +144,7 @@ rule_reward_weight = 0.3
 start_with_windows = false   # não é lido do arquivo: o registro do Windows é a fonte da verdade
 
 [window]
-always_on_top = true        # o pet fica sobre as outras janelas (decidido pelo dono em 2026-11-06)
+always_on_top = true        # o Pulso fica sobre as outras janelas (decidido pelo dono em 2026-11-06)
 ```
 - Cada campo tem limites (ex.: `focus_min` entre 5 e 120). Um valor inválido volta ao padrão, com aviso no log.
 

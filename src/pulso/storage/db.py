@@ -32,7 +32,7 @@ MIGRATIONS = (
     );
     CREATE INDEX idx_habit_event_ts ON habit_event (ts);
     """,
-    # v2: placar dos jogos (jokenpô e par ou ímpar), do ponto de vista do pet
+    # v2: placar dos jogos (jokenpô e par ou ímpar), do ponto de vista do Pulso
     """
     CREATE TABLE game_result (
         id     INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -192,7 +192,7 @@ class GameStore:
         )
 
     def totals_today(self) -> dict[str, int]:
-        """Vitórias, derrotas e empates **do pet** hoje (hora local): `{"won", "lost", "draw"}`."""
+        """Vitórias, derrotas e empates **do Pulso** hoje (hora local): `{"won", "lost", ...}`."""
         start = self._now().replace(hour=0, minute=0, second=0, microsecond=0)
         rows = self._conn.execute(
             "SELECT result, COUNT(*) FROM game_result WHERE ts >= ? GROUP BY result",

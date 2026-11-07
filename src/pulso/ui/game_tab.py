@@ -1,6 +1,6 @@
-"""Aba "Jogo": jokenpô e par ou ímpar com o pet. Ganhou, fica contente; perdeu, fica bravo.
+"""Aba "Jogo": jokenpô e par ou ímpar com o Pulso. Ganhou, fica contente; perdeu, fica bravo.
 
-O rosto desta aba é um `PetWidget` próprio (a aba Pet não está à vista enquanto se joga). O
+O rosto desta aba é um `PetWidget` próprio (a aba Pulso não está à vista enquanto se joga). O
 resultado só mexe na **expressão** e no placar do dia, nunca na rede (ver `pulso.game`).
 """
 

@@ -57,14 +57,14 @@ HELP = {
     ),
     "dopamine": (
         "Dopamina: cada barra é uma recompensa entregue à rede (últimos 10 min). Verde-água = "
-        "carinho ou bronca do dono; âmbar = regra automática (ex.: voltou do ócio).\n\n"
+        "carinho ou resposta do dono; âmbar = regra automática (ex.: voltou do ócio).\n\n"
         "Acima de zero reforça o que a rede fez há pouco; abaixo, desfaz. A barra é o "
         "'erro de previsão' (recompensa − o que já se esperava): recompensas repetidas "
         "vão ficando menores, porque deixam de ser surpresa."
     ),
     "mood": (
         "Humor: quantos pulsos cada grupo de saída deu na última janela de decisão (10 s). "
-        "O grupo que mais pulsa vence e vira o humor do pet — por isso é o que mais "
+        "O grupo que mais pulsa vence e vira o humor do Pulso — por isso é o que mais "
         "muda quando a rede aprende."
     ),
     "weights": (
@@ -359,5 +359,5 @@ class BrainTab(QWidget):
         return BRAIN_PREFERRED
 
     def minimumSizeHint(self) -> QSize:  # noqa: N802
-        # Pequeno de propósito: a janela do pet abre no menor tamanho e só cresce ao abrir esta aba.
+        # Pequeno de propósito: a janela abre no menor tamanho e só cresce ao abrir esta aba.
         return QSize(280, 160)

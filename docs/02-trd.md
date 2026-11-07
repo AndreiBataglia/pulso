@@ -11,7 +11,7 @@ Um único programa Python, local, com um **laço de 1 segundo**:
 3. o motor SNN simula 100 ms de rede;
 4. a cada 10 s, o decodificador escolhe o humor;
 5. as regras e o dono enviam recompensas, que viram dopamina;
-6. a interface desenha o pet e os gráficos.
+6. a interface desenha o Pulso e os gráficos.
 
 Os lembretes de hábito (pomodoro e água) são **relógios com regras fixas**, separados do cérebro. Eles só
 mandam eventos (lembrete atendido ou dispensado) que viram recompensa.
@@ -21,7 +21,7 @@ flowchart LR
     S[Sensores<br/>nível B] -->|SensorFrame| E[Codificador<br/>taxas de pulso]
     E --> M[Engine SNN<br/>LIF + R-STDP]
     M -->|contagem por grupo| D[Decodificador<br/>humor]
-    D --> UI[Painel Qt<br/>pet + gráficos]
+    D --> UI[Painel Qt<br/>Pulso + gráficos]
     H[Hábitos<br/>pomodoro, água] -->|eventos| R[Regras de recompensa]
     UI -->|carinho / bronca| R
     D --> R
@@ -111,9 +111,9 @@ projeto_tamagotchi/
 │   └── ui/
 │       ├── app.py          # monta tudo (cérebro novo ou salvo, tema) e abre a janela
 │       ├── theme.py        # paleta clara/escura e conferência de contraste
-│       ├── phrases.py      # falas do pet
+│       ├── phrases.py      # falas do Pulso
 │       ├── main_window.py  # janela com abas e o QTimer de 1 s
-│       ├── pet_widget.py   # desenho e animação do pet (QPainter)
+│       ├── pet_widget.py   # desenho e animação do Pulso (QPainter)
 │       ├── brain_tab.py    # gráficos pyqtgraph
 │       ├── health_tab.py   # resumo de saúde
 │       ├── settings_dialog.py
@@ -244,7 +244,7 @@ class Engine(Protocol):
 
 ## 12. Suposições
 - Uma thread só (laço no `QTimer` do Qt) enquanto a medição couber no orçamento (§5.1).
-- Pet desenhado com QPainter (fundo escuro, olhos, boca e pequenos emojis) no MVP, sem arquivos de imagem; pixel art no F17.
+- Rosto do Pulso desenhado com QPainter (fundo escuro, olhos, boca e pequenos emojis) no MVP, sem arquivos de imagem; pixel art no F17.
 - Identificadores em inglês e comentários em português.
 - Python ≥ 3.12.
 

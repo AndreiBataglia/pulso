@@ -1,7 +1,7 @@
 """Salvar e carregar o cérebro (`cerebro.npz`), do jeito que o esquema (doc 05 §3) descreve.
 
 - **Só o que foi aprendido vai para o disco:** pesos, máscaras de conexão, a média de
-  recompensas r̄ e contadores. Potenciais e rastros não: ao abrir, o pet "acorda" com a rede
+  recompensas r̄ e contadores. Potenciais e rastros não: ao abrir, o Pulso "acorda" com a rede
   zerada.
 - **Versão:** o arquivo carrega `format_version`. Uma versão desconhecida (de um Pulso mais
   novo, por exemplo) é **recusada com aviso**, em vez de ser lida errado e estragar o cérebro.
