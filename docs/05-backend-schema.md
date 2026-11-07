@@ -11,7 +11,7 @@ Não há servidor nem login: tudo fica em **3 arquivos locais** na pasta de dado
 |---------|--------------|---------|-----------|
 | `config.toml` | Preferências do dono | TOML | F01, F02, F04, F07, F08, F10 |
 | `cerebro.npz` | O que o Pulso **aprendeu** (pesos e estado da rede) | numpy `.npz` | F03, F04 |
-| `pulso.db` | Eventos de **hábito** (água, pomodoro) | SQLite | F07, F08, F09 |
+| `pulso.db` | Eventos de **hábito** (água, foco e pausas) | SQLite | F07, F08, F09 |
 | `logs/pulso.log` | Eventos técnicos, sem dados de sensor | texto rotativo | todos |
 
 **O que nunca é gravado:** leituras de sensor (CPU, RAM, processo, categoria, ociosidade), linha do tempo de
@@ -108,7 +108,7 @@ Só o resultado: nada de sensor. O placar do dia é um `GROUP BY result` desde a
 > abaixo é o desenho completo previsto.
 
 ```toml
-[pomodoro]
+[pomodoro]  # nome da seção mantido por compatibilidade: são os tempos do foco
 focus_min = 50              # decidido em 2026-11-06 (antes 25/5/15); revisar com o uso real
 break_min = 10
 long_break_min = 20

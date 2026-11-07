@@ -131,7 +131,7 @@ Uso: um usuário por instalação, roda em segundo plano o dia todo, **100% loca
 - **Prioridade:** Alta
 
 #### F09 — Resumo de saúde
-- **Descrição:** aba com copos de água, pomodoros concluídos e maior sequência sem pausa, do dia e dos últimos
+- **Descrição:** aba com copos de água, focos concluídos e maior sequência sem pausa, do dia e dos últimos
   7 dias.
 - **Critérios de aceite:**
   - [ ] Os dados vêm só dos eventos de hábito (F07/F08), nunca dos sensores.
@@ -139,7 +139,7 @@ Uso: um usuário por instalação, roda em segundo plano o dia todo, **100% loca
 - **Prioridade:** Média
 
 #### F10 — Configurações e bandeja
-- **Descrição:** ícone na bandeja do Windows (abrir, pausar observação, pomodoro, sair) e tela de ajustes:
+- **Descrição:** ícone na bandeja do Windows (abrir, pausar observação, modo casual, foco, sair) e tela de ajustes:
   intervalos, tabela de categorias, atalho de pausa, pesos das recompensas, iniciar com o Windows.
 - **Critérios de aceite:**
   - [ ] Fechar a janela minimiza para a bandeja; "Sair" encerra e salva o cérebro.
@@ -159,7 +159,7 @@ Uso: um usuário por instalação, roda em segundo plano o dia todo, **100% loca
 ### 5.2 Depois do MVP
 - F15 (feito, 2026-11-06) — **Jogo do dia a dia:** jokenpô e par ou ímpar com o Pulso (aba Jogo). Ganhou, ele fica contente;
   perdeu, fica bravo. Só mexe no rosto e no placar do dia, nunca na rede (o resultado é sorte e viraria ruído).
-- F16 (feito, 2026-11-06) — **Ajustes:** tempos do pomodoro e da água e o interruptor das regras automáticas.
+- F16 (feito, 2026-11-06) — **Ajustes:** tempos do foco e da água, modo e tolerância de ausência e o interruptor das regras automáticas.
 - F12 — A SNN aprende **quando e como** lembrar (adiar se o dono está focado), em vez de intervalos fixos.
 - F13 — Nível C de observação: ritmo de digitação e cliques (contagem, nunca as teclas).
 - F14 — Outros lembretes de hábito: descanso dos olhos 20-20-20, postura, alongamento.
@@ -187,7 +187,7 @@ Uso: um usuário por instalação, roda em segundo plano o dia todo, **100% loca
 - Escala de ~200 neurônios no MVP (faixa planejada: 100–500).
 - Windows 10/11 primeiro; outros sistemas depois (F18).
 - 5 humores, mais "dormindo".
-- Intervalos padrão (decididos em 2026-11-06): pomodoro 50/10/20, água a cada 60 min.
+- Intervalos padrão (decididos em 2026-11-06): foco 50/10/20, água a cada 60 min.
 
 ## 8. Perguntas em aberto
 - O nome "Pulso" está bom? — responsável: dono

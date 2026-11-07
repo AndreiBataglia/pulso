@@ -19,7 +19,7 @@
 - **LOOI (TangibleFuture):** robô de mesa que usa o celular como rosto. Não copiamos o robô, só a lição:
   **olhos animados sobre fundo escuro carregam o humor com poucos elementos**. Ver §7.1.
 - **Painéis de neurociência (Brian2, NEST):** raster de pulsos clássico, com pontos pretos sobre fundo claro.
-- **Forest / Pomofocus:** o pomodoro com um contador grande e um único botão.
+- **Forest / Pomofocus:** o foco com um contador grande e um único botão.
 
 ## 3. Paleta de cores
 O tema acompanha o Windows (claro ou escuro).
@@ -51,7 +51,7 @@ O tema acompanha o Windows (claro ou escuro).
 ## 4. Tipografia
 | Uso | Fonte | Tamanho | Peso |
 |-----|-------|---------|------|
-| Título da aba / contador do pomodoro | Segoe UI | 28 px | Semibold |
+| Título da aba / cronômetro do foco | Segoe UI | 28 px | Semibold |
 | Fala do Pulso | Segoe UI | 15 px | Regular |
 | Corpo e botões | Segoe UI | 13 px | Regular |
 | Números do cérebro (ms, contagens) | Cascadia Mono (cai para Consolas) | 12 px | Regular |
@@ -64,7 +64,7 @@ O tema acompanha o Windows (claro ou escuro).
 
 ## 6. Componentes
 - **Botões:**
-  - primário (preenchido): uma ação principal por área, como "Iniciar pomodoro" ou "Salvar";
+  - primário (preenchido): uma ação principal por área, como "Pausar agora" ou "Salvar";
   - secundário (contorno): os demais;
   - perigo (vermelho): só "Recomeçar cérebro", sempre com confirmação.
 - **Balão de fala:** superfície com uma ponta virada para o Pulso; pode trazer até 2 botões (Bebi / Depois).
@@ -84,15 +84,15 @@ O tema acompanha o Windows (claro ou escuro).
   - fundo igual à superfície e eixos no texto secundário;
   - camadas no raster: entrada = cinza, oculta excitatória = azul, inibitória = vermelho,
     saída = a cor do humor de cada grupo.
-- **Diálogo de configurações:** formulário em grupos (Pomodoro, Água, Privacidade, Cérebro, Sistema), com a
+- **Diálogo de configurações:** formulário em grupos (Foco, Água, Privacidade, Cérebro, Sistema), com a
   validação ao lado do campo.
 
 ## 7. Ícones e imagens
 - **Rosto do Pulso desenhado com QPainter**: fundo escuro, olhos e boca, mais pequenos emojis só quando necessário
   (ex.: "z", gota, 💧). Sem corpo. Não usa arquivos de imagem no MVP.
 - **Ícone da bandeja:** o rosto do Pulso em 16/32 px, com três variações (normal, pausado com olhos fechados,
-  descanso com 🍅).
-- Emojis nos botões (💚 💢 💧 🍅; **nunca 👁**, decisão do dono), sempre acompanhados de texto.
+  descanso).
+- Emojis nos botões (💚 💧; **nunca 👁**, decisão do dono), sempre acompanhados de texto.
 
 ### 7.1 Direção visual (inspirada no LOOI)
 **Decisão do dono (2026-11-06):** só o **fundo escuro com olhos, boca e alguns pequenos emojis quando
@@ -102,7 +102,7 @@ necessário**. Outros elementos podem entrar depois, se forem necessários.
 - **Pausa = olhos fechados** (F02): fica óbvio, sem texto, que o Pulso não está observando.
 - **Microanimações que dão vida:** piscar a intervalos irregulares (3–6 s), olhar para o lado de vez em
   quando e inclinar levemente o rosto. Sem elas o Pulso parece uma imagem parada.
-- **Emojis:** pequenos e raros, só para reforçar um estado (💤 sono, 💧 água, 🍅 descanso). Nunca no lugar
+- **Emojis:** pequenos e raros, só para reforçar um estado (💤 sono, 💧 água). Nunca no lugar
   dos olhos.
 - **Sem câmera nem sensores extras:** o LOOI tem rodas, LEDs e câmera; o Pulso não usa nada disso.
 - Referência (marketing e resenhas): [resenha](https://techbuzzireland.com/2026/02/11/looi-robot-review/),
@@ -111,7 +111,7 @@ necessário**. Outros elementos podem entrar depois, se forem necessários.
 ## 8. Mensagens e tom de voz
 O Pulso fala na primeira pessoa, em frases curtas e carinhosas, sem culpa nem bronca.
 - ✅ "Psiu! Um gole d'água? 💧" · ❌ "Você não bebe água há 45 minutos."
-- ✅ "Hora de esticar as pernas 🍅" · ❌ "ALERTA: pausa obrigatória."
+- ✅ "Hora de esticar as pernas" · ❌ "ALERTA: pausa obrigatória."
 - ✅ "Tô de olhos fechados. Me acorda quando quiser." (pausa) · ❌ "Monitoramento desativado."
 
 As mensagens do sistema (erros, ajustes) são neutras e dizem como resolver:
@@ -134,7 +134,7 @@ As mensagens do sistema (erros, ajustes) são neutras e dizem como resolver:
 │                                          │
 │   [ 💚 Carinho ]  [ 💧 Bebi   ]  [ ⏸ ]   │
 ├──────────────────────────────────────────┤
-│  🍅 18:42  [ Pausar ]     💧 4 copos hoje │
+│  18:42 [ Pausar agora ]  💧 4 copos hoje │
 └──────────────────────────────────────────┘
 ```
 
@@ -152,8 +152,8 @@ As mensagens do sistema (erros, ajustes) são neutras e dizem como resolver:
 
 **T03 — Saúde**
 ```
-│ Hoje: 💧 6 copos · 🍅 8 pomodoros · maior sequência sem pausa: 1h40 │
-│ [barras dos últimos 7 dias: copos e pomodoros]                     │
+│ Hoje: 💧 6 copos · 8 focos · maior sequência sem pausa: 1h40 │
+│ [barras dos últimos 7 dias: copos e focos]                     │
 │ Lembretes de hábito, não é orientação médica.                       │
 ```
 
