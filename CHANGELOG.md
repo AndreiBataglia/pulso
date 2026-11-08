@@ -5,6 +5,14 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/).
 
 ## [Não lançado]
 
+## [0.8.0] - 2026-11-07
+
+### Adicionado
+- **Remover o Pulso:** botão em Ajustes e `pulso --remover [--backup-para PASTA]`. Apaga a pasta de dados (só os arquivos que o Pulso cria), o "Iniciar com o Windows" e o atalho do Menu Iniciar; pede para digitar REMOVER, oferece backup em `.zip` e recusa pastas suspeitas.
+
+### Alterado
+- O projeto foi marcado como inacabado e encerrado na v0.8.0; ver `docs/diario/encerramento.md`.
+
 ## [0.7.0] - 2026-11-07
 
 ### Adicionado

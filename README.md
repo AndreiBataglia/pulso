@@ -7,10 +7,11 @@
 
 ![Pulso: o foco, o lembrete da pausa e o descanso](docs/img/capa.png)
 
-**Status: em construção.** Já funcionam: os sensores, a rede que aprende, o Pulso na janela, a aba do cérebro,
-hábitos (foco por presença, pausas e água), bandeja do Windows, ajustes e um jogo. A etapa 7 (*O momento certo*)
-está quase pronta: o ciclo do foco, a janela nova, o humor por regras e a rede decidindo *quando* lembrar já existem.
-Depois vêm a aba de saúde, o atalho global e o instalador.
+**Status: projeto inacabado, encerrado na v0.8.0 (2026-11-07).** O repositório fica aberto para quem quiser
+aproveitar o que existe. Funcionam: os sensores, a rede que aprende, o Pulso na janela, a aba do cérebro, hábitos
+(foco por presença, pausas e água), bandeja do Windows, ajustes, um jogo, a rede decidindo *quando* lembrar da pausa
+e o modo **Remover o Pulso**. Veja [o que ficou por fazer](#o-que-ficou-por-fazer) e a
+[nota de encerramento](docs/diario/encerramento.md).
 
 ## English
 
@@ -19,6 +20,11 @@ Pulso is a Windows desktop companion driven by a small spiking neural network
 It learns your rhythm from coarse signals only (CPU, RAM, time, idle time, foreground process name),
 and helps you build routine: a focus cycle that starts by itself when you are at the PC, break reminders
 and water reminders. It never reads keystrokes or window titles.
+
+**Status: unfinished project, frozen at v0.8.0.** It stays public so anyone can reuse the code (the numpy spiking
+network, the reward-modulated STDP, the focus cycle). Known gap: the network only learns *when* to remind you of a
+break; with only coarse sensors there is little else it can learn. See [the closing note](docs/diario/encerramento.md).
+To wipe everything the app stored: Settings → *Remover o Pulso*, or `pulso --remover`.
 
 ## Português
 
@@ -122,11 +128,27 @@ A microphone in use by another program pauses focus without penalty. Timers, mod
 configurable in Settings, the companion lives in the tray, and a small rock-paper-scissors / odds-and-evens game
 changes only its face, never the network.
 
+## O que ficou por fazer
+
+O projeto parou aqui, de propósito. Ficou de fora (nada disto foi começado, salvo onde indicado):
+- **Etapa 8:** aba de Saúde, atalho global e o resumo dos últimos 7 dias.
+- **Instalador** (PyInstaller, atalho, release com o `.exe`); o modo *Remover o Pulso* já apaga dados, início com o
+  Windows e atalho, mas o programa em si sai com `pip uninstall pulso`.
+- Sensor de interação, horário de almoço opcional, ícone próprio na barra de tarefas.
+- **Medir se a rede aprende no uso real:** hoje só há o teste simulado. Faltaria gravar a decisão da rede em cada
+  lembrete e mostrar a taxa de aceite por dia.
+- **O ponto fraco principal:** com sensores de nível B (CPU, RAM, nome do programa, tempo parado) há pouco para a rede
+  aprender de um dia de trabalho feito lendo código. Ideias que ficaram no papel: sensor dos eventos de um agente (hooks
+  do Claude Code, só metadados), previsão do próprio dia por STDP e descoberta não supervisionada de estados de uso.
+
 ## Atualizações
 
 > Resumo por versão. O detalhe está no [`CHANGELOG.md`](CHANGELOG.md) e, com os conceitos explicados, em [`docs/diario/`](docs/diario/).
 
-### Etapa 7 · O momento certo *(quase pronta; falta a tag v0.7.0)*
+### v0.8.0 · Remover o Pulso e encerramento
+- Modo **Remover o Pulso** (Ajustes e `pulso --remover`) e o projeto marcado como inacabado, com a nota `docs/diario/encerramento.md`.
+
+### Etapa 7 · O momento certo *(v0.7.0)*
 - **Foco por presença:** o ciclo abre sozinho quando você mexe no PC (sem botão *Iniciar*), com anel de andamento no rosto.
 - **Pausar agora · Prorrogar 5 min · Hoje não**, e o placar do dia no rodapé (pausas, prorrogações, copos, focos).
 - **"O que foi?"** na volta de uma ausência: pausa, refeição, necessidade ou foco sem mexer.
@@ -149,6 +171,13 @@ changes only its face, never the network.
 - **v0.5.0:** aba **Cérebro** com raster, potenciais, dopamina, humor e mapa de pesos.
 - **v0.4.0:** o Pulso aparece na janela (rosto em QPainter, balão, carinho).
 - **v0.3.0:** aprendizado R-STDP com dopamina; **v0.2.0:** rede de pulso LIF em numpy; sensores de nível B e CI desde o início.
+
+## Remover o Pulso
+
+Em **Ajustes → Remover o Pulso…** (ou `pulso --remover`, com `--backup-para PASTA` para guardar um `.zip` antes) o
+Pulso apaga tudo o que é dele: a pasta de dados (cérebro, banco, ajustes), o "Iniciar com o Windows" e o atalho do
+Menu Iniciar. Pede para você digitar `REMOVER`, só apaga arquivos com os nomes que ele mesmo cria (nunca a pasta
+inteira às cegas) e recusa pastas suspeitas. Depois, `pip uninstall pulso` tira o programa.
 
 ## Privacidade
 

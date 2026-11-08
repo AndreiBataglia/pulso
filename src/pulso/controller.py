@@ -94,6 +94,7 @@ class PetController:
         self._idle: float | None = None  # segundos sem entrada nesta volta (None = sem leitura)
         self.dopamine_events: deque[DopamineEvent] = deque(maxlen=DOPAMINE_LOG_SIZE)
         self.step_cost_ms = 0.0  # custo medido de 1 volta (100 passos de rede), em ms reais
+        self._discarded = False  # "Remover o Pulso": nada mais é gravado
 
     @property
     def paused(self) -> bool:
@@ -216,11 +217,19 @@ class PetController:
         """Pausa de privacidade: para o sensor e guarda o que a rede aprendeu."""
         if not self.paused:
             self._loop.pause()
-            self._saver.flush()
+            if not self._discarded:
+                self._saver.flush()
 
     def resume(self) -> None:
         self._loop.resume()
 
     def shutdown(self) -> None:
-        """Ao sair: guarda o cérebro."""
-        self._saver.flush()
+        """Ao sair: guarda o cérebro (a não ser que o Pulso esteja sendo removido)."""
+        if not self._discarded:
+            self._saver.flush()
+
+    def discard(self) -> None:
+        """Prepara a remoção: fecha o banco e deixa de gravar o cérebro, para os arquivos poderem
+        ser apagados (no Windows, arquivo aberto não se apaga) e não voltarem ao sair."""
+        self._discarded = True
+        self.habits.store.connection.close()
