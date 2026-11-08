@@ -99,6 +99,34 @@ def _create_shortcut() -> int:
     return 0
 
 
+def _remove_everything(backup_dir: str | None) -> int:
+    """`pulso --remover`: apaga tudo do Pulso (dados, início com o Windows, atalho), confirmando."""
+    from pathlib import Path
+
+    from pulso.storage import uninstall
+    from pulso.storage.autostart import Autostart
+    from pulso.storage.paths import data_dir
+    from pulso.storage.shortcut import start_menu_shortcut
+
+    folder, autostart, shortcut = data_dir(), Autostart(), start_menu_shortcut()
+    try:
+        uninstall.check_folder(folder)
+    except uninstall.UnsafeFolderError as exc:
+        print(f"Não vou apagar nada: {exc}.")
+        return 1
+    print("O Pulso vai ser removido deste computador, SEM VOLTA. Feche o Pulso antes.")
+    print("\n".join(uninstall.describe(folder, autostart, shortcut)))
+    if backup_dir:
+        print(f"Backup guardado em {uninstall.backup(folder, Path(backup_dir))}")
+    typed = input(f"Para confirmar, digite {uninstall.CONFIRMATION}: ")
+    if typed.strip() != uninstall.CONFIRMATION:
+        print("Cancelado. Nada foi apagado.")
+        return 1
+    report = uninstall.remove_all(folder, autostart, shortcut)
+    print(uninstall.summary(report))
+    return 0 if report.ok else 1
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="pulso", description="Pulso, o companheiro de desktop.")
     parser.add_argument("--version", action="version", version=f"pulso {__version__}")
@@ -130,7 +158,20 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="abre só na bandeja, sem mostrar a janela (usado por 'Iniciar com o Windows')",
     )
+    parser.add_argument(
+        "--remover",
+        action="store_true",
+        help="apaga tudo do Pulso neste computador (dados, início com o Windows, atalho)",
+    )
+    parser.add_argument(
+        "--backup-para",
+        metavar="PASTA",
+        default=None,
+        help="com --remover: guarda antes um backup (.zip) nesta pasta",
+    )
     args = parser.parse_args(argv)
+    if args.remover:
+        return _remove_everything(args.backup_para)
     if args.criar_atalho:
         return _create_shortcut()
     if args.print_sensors:

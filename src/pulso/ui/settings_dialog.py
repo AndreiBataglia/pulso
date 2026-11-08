@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (
     QDialogButtonBox,
     QFormLayout,
     QLabel,
+    QPushButton,
     QSpinBox,
     QVBoxLayout,
     QWidget,
@@ -29,6 +30,9 @@ _LABELS = {
     "away_min": "Parado por mais de (conta como ausente)",
 }
 _MODES = {Mode.PROFESSIONAL: "Profissional", Mode.CASUAL: "Casual (só a água)"}
+
+
+REMOVE_CODE = 2  # `exec()` devolve isto quando o dono pede "Remover o Pulso"
 
 
 class SettingsDialog(QDialog):
@@ -66,7 +70,11 @@ class SettingsDialog(QDialog):
         buttons.rejected.connect(self.reject)
         layout = QVBoxLayout(self)
         layout.addLayout(form)
+        self.remove_button = QPushButton("Remover o Pulso…")
+        self.remove_button.setToolTip("Apaga o Pulso e tudo o que ele guardou neste computador.")
+        self.remove_button.clicked.connect(lambda: self.done(REMOVE_CODE))
         layout.addWidget(note)
+        layout.addWidget(self.remove_button)
         layout.addWidget(buttons)
 
     def settings(self) -> Settings:

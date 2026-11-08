@@ -35,6 +35,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QMainWindow,
+    QMessageBox,
     QPushButton,
     QTabWidget,
     QToolButton,
@@ -47,14 +48,18 @@ from pulso.controller import PetController
 from pulso.habits import kinds, mood_rules
 from pulso.habits.focus_cycle import MEAL_FROM, Mode, Phase
 from pulso.habits.mood_rules import MoodVerdict
+from pulso.storage import uninstall
 from pulso.storage.autostart import Autostart
 from pulso.storage.config import Settings, habit_config
 from pulso.storage.db import GameStore
+from pulso.storage.paths import data_dir
+from pulso.storage.shortcut import start_menu_shortcut
 from pulso.ui import phrases
 from pulso.ui.brain_tab import BRAIN_MINIMUM, BRAIN_PREFERRED, BrainTab
 from pulso.ui.game_tab import GameTab
 from pulso.ui.pet_widget import PetWidget
-from pulso.ui.settings_dialog import SettingsDialog
+from pulso.ui.remove_dialog import RemoveDialog
+from pulso.ui.settings_dialog import REMOVE_CODE, SettingsDialog
 from pulso.ui.theme import LIGHT, Palette, phase_colors
 from pulso.ui.tray import Tray
 
@@ -875,8 +880,33 @@ class MainWindow(QMainWindow):
         """Abre a tela de Ajustes; ao salvar, grava e aplica na hora."""
         self.bring_to_front()
         dialog = SettingsDialog(self._settings, self)
-        if dialog.exec():
+        code = dialog.exec()
+        if code == SettingsDialog.DialogCode.Accepted:
             self.apply_settings(dialog.settings())
+        elif code == REMOVE_CODE:
+            self.remove_pulso()
+
+    def _confirm_removal(self, folder, lines) -> bool:
+        dialog = RemoveDialog(folder, lines, self)
+        return bool(dialog.exec())
+
+    def remove_pulso(self) -> None:
+        """ "Remover o Pulso": confirma, apaga tudo o que é dele e encerra o programa."""
+        folder = data_dir()
+        shortcut = start_menu_shortcut()
+        try:
+            uninstall.check_folder(folder)
+        except uninstall.UnsafeFolderError as exc:
+            QMessageBox.warning(self, "Remover o Pulso", f"Não vou apagar nada: {exc}.")
+            return
+        lines = uninstall.describe(folder, self._autostart, shortcut)
+        if not self._confirm_removal(folder, lines):
+            return
+        self._timer.stop()
+        self._controller.discard()  # fecha o banco e para de gravar o cérebro
+        report = uninstall.remove_all(folder, self._autostart, shortcut)
+        QMessageBox.information(self, "Pulso removido", uninstall.summary(report))
+        self.quit_app()
 
     def apply_settings(self, settings: Settings) -> None:
         """Guarda os Ajustes e aplica sem reiniciar: tempos, tolerância, modo e regras."""

@@ -261,7 +261,7 @@ num PR só, ou dois que só entram juntos), para o app em uso nunca ficar meio v
       (sem console, com o ícone do Pulso, que também resolve o nome "Pulso" em vez de "Python" no Gerenciador de Tarefas),
       atalho do Menu Iniciar e "iniciar com o Windows" apontando para o `.exe`, *release* no GitHub com o arquivo. Decidir
       a pasta de dados e a migração do que já existe em `%LOCALAPPDATA%\Pulso`. Testar em máquina sem Python.
-- [ ] **Remover o Pulso (pedido do dono em 2026-11-07, junto do instalador):** modo que apaga tudo que é do Pulso.
+- [x] **Remover o Pulso (feito em 2026-11-07, `storage/uninstall.py`, `ui/remove_dialog.py`, `pulso --remover`):** modo que apaga tudo que é do Pulso.
       Botão "Remover o Pulso" em Ajustes e o comando `pulso --remover`. Apaga: a pasta de dados (`%LOCALAPPDATA%\Pulso`:
       cérebro, banco, config, logs), a chave "Iniciar com o Windows", o atalho do Menu Iniciar com o `pulso.ico` e, com o
       instalador, o app instalado. Cuidados: confirmação digitando "REMOVER" (não tem volta); oferecer antes um backup
